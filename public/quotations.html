@@ -1,0 +1,304 @@
+<div class="pagetitle">
+  <h1>Request For Quotation</h1>
+</div>
+
+<div class="d-flex align-items-center justify-content-between mt-4 w400">
+  <div class="d-flex align-items-center">
+    <span class="pe-2">View Type:</span> 
+    <div class="dropdown ms-3 me-3">
+      <a class="d-flex align-items-center border ps-3 pe-3 pt-1 pb-1 text-secondary" href="#" data-bs-toggle="dropdown">
+        <span id="selected-view" class="dropdown-toggle">Card View</span>
+      </a>
+      <ul class="dropdown-menu dropdown-menu-right dropdown-menu-arrow text-secondary">
+        <li>
+          <a class="dropdown-item d-flex align-items-center view-option" href="#" data-view="card">
+            <i class="bi bi-card-text"></i>
+            <span>Card View</span>
+          </a>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <li>
+          <a class="dropdown-item d-flex align-items-center view-option" href="#" data-view="table">
+            <i class="bi bi-table"></i>
+            <span>Table View</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <a href="/request-for-quotation-form" class="btn btn-primary rounded-pill">
+    <i class="bi bi-plus"></i> Request
+  </a>
+  
+</div>
+
+
+<!-- card view -->
+<section id="card-view" class="section mt-5">
+  <div class="row align-items-top">
+    <div class="col-lg-4">
+      <!-- draft card -->
+      <div id="draftCard" class="card" data-bs-toggle="modal" data-bs-target="#draftCardModal">
+        <div class="card-body card-center-text text-center fs-3" >
+          <h2 class="w800">DRAFTS</h2> 
+          12
+        </div>
+      </div>
+    </div>
+
+    <!-- pending card -->
+    <div class="col-lg-4">
+      <div id="pendingCard" class="card" data-bs-toggle="modal" data-bs-target="#pendingCardModal">
+        <div class="card-body card-center-text text-center fs-3">
+          <h2 class="w800">PENDINGS</h2> 
+          12
+        </div>
+      </div>
+    </div>
+
+    <!-- quotation card -->
+    <div class="col-lg-4">
+      <div id="quoteCard" class="card" data-bs-toggle="modal" data-bs-target="#quoteCardModal">
+        <div class="card-body card-center-text text-center fs-3">
+          <h2 class="w800">QUOTATIONS</h2> 
+          12
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- table view -->
+<section class="section mt-5 d-none" id="table-view">
+  <div class="row">
+    <div class="col-lg-12">
+      <!-- daft table -->
+      <div class="card">
+        <div class="card-body">
+          <h5 class="w700 mt-3">Draft RFQs</h5>
+          <table class="table datatable ">
+            <thead>
+              <tr>
+                <th><input type="checkbox" class="select-checkbox-business me-2" title="select"></th>
+                <th>RFQ Number</th>
+                <th>Approved Budget for the Contract (ABC)</th>
+                <th data-type="date" data-format="YYYY/DD/MM">RFQ Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                <td>Unity Pugh</td>
+                <td>9958</td>
+                <td>Elliott Snyder</td>
+                <td>3925</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- pending table -->
+      <div class="card">
+        <div class="card-body">
+          <h5 class="w700 mt-3">Pending RFQs</h5>
+          <table class="table datatable ">
+            <thead>
+              <tr>
+                <th><input type="checkbox" class="select-checkbox-business me-2" title="select"></th>
+                <th>RFQ Number</th>
+                <th>Approved Budget for the Contract (ABC)</th>
+                <th data-type="date" data-format="YYYY/DD/MM">RFQ Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                <td>Unity Pugh</td>
+                <td>9958</td>
+                <td>Elliott Snyder</td>
+                <td>3925</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- quote table -->
+      <div class="card">
+        <div class="card-body">
+          <h5 class="w700 mt-3">Quotation</h5>
+          <table class="table datatable ">
+            <thead>
+              <tr>
+                <th><input type="checkbox" class="select-checkbox-business me-2" title="select"></th>
+                <th>RFQ Number</th>
+                <th>Approved Budget for the Contract (ABC)</th>
+                <th data-type="date" data-format="YYYY/DD/MM">RFQ Date</th>
+                <th>Quote Number</th>
+                <th>Price</th>
+                <th data-type="date" data-format="YYYY/DD/MM">Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                <td>Unity Pugh</td>
+                <td>9958</td>
+                <td>Elliott Snyder</td>
+                <td>3925</td>
+                <td>Enines</td>
+                <td>2006/03/08</td>
+                <td>57%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</section>
+
+<!-- draft modal -->
+<div class="modal fade" id="draftCardModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg card-modal-dialog">
+    <div class="modal-content card-modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Draft RFQs</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body card-modal-body">
+        <table id="draftModalTable" class="table datatable table-fs">
+          <thead>
+            <tr>
+              <th><input type="checkbox" class="select-checkbox-business me-2" title="select"></th>
+              <th>RFQ Number</th>
+              <th>Approved Budget for the Contract (ABC)</th>
+              <th data-type="date" data-format="YYYY/DD/MM">RFQ Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+              <td>Unity Pugh</td>
+              <td>9958</td>
+              <td>Elliott Snyder</td>
+              <td class="pointer remove-row" data-bs-toggle="modal" data-bs-target="#deleteRowModal"><i class="bi bi-trash3 me-1"></i>Delete</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- pending modl -->
+<div class="modal fade" id="pendingCardModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg card-modal-dialog">
+    <div class="modal-content card-modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Pending RFQs</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body card-modal-body">
+        <table id="pendingtModalTable" class="table datatable table-fs">
+          <thead>
+            <tr>
+              <th><input type="checkbox" class="select-checkbox-business me-2" title="select"></th>
+              <th>RFQ Number</th>
+              <th>Approved Budget for the Contract (ABC)</th>
+              <th data-type="date" data-format="YYYY/DD/MM">RFQ Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+              <td>Unity Pugh</td>
+              <td>9958</td>
+              <td>Elliott Snyder</td>
+              <td>3925</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- quote modal -->
+<div class="modal fade" id="quoteCardModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg card-modal-dialog">
+    <div class="modal-content card-modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Quotations</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body card-modal-body">
+        <table id="quoteModalTable" class="table datatable table-fs">
+          <thead>
+            <tr>
+              <th><input type="checkbox" class="select-checkbox-business me-2" title="select"></th>
+              <th>RFQ Number</th>
+              <th>Approved Budget for the Contract (ABC)</th>
+              <th data-type="date" data-format="YYYY/DD/MM">RFQ Date</th>
+              <th>Quote Number</th>
+              <th>Price</th>
+              <th data-type="date" data-format="YYYY/DD/MM">Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+              <td>Unity Pugh</td>
+              <td>9958</td>
+              <td>Elliott Snyder</td>
+              <td>3925</td>
+              <td>Enines</td>
+              <td>2006/03/08</td>
+              <td><i class="bi bi-eye me-1"></i>View</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- delete row modal -->
+<div class="modal fade" id="deleteRowModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content card-modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete Draft</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body card-modal-body">
+       <p>Are you sure you want to delete this draft?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button id="deleteDraft" type="button" class="btn btn-primary">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
