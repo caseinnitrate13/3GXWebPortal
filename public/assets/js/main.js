@@ -455,7 +455,7 @@ document.addEventListener("DOMContentLoaded", function() {
   // logout
   const logout = document.getElementById("logoutBtn");
   logout.addEventListener('click', function(){
-    window.location.href = "/";
+    window.location.href = "index";
   });
 });
 
