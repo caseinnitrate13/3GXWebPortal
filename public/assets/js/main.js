@@ -324,7 +324,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // ADD SUB-REPRESENTATIVE
   const addSubRepBtn =  document.getElementById('addSubRepBtn');
-  const form = document.getElementById("editSubRepForm");
+  const form = document.getElementById("addSubRepForm");
   addSubRepBtn.addEventListener('click', function () {
 
     // validation
@@ -384,11 +384,21 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   // EDIT SUB-REPRESENTATIVE
-  // remove representative
-  $(document).on("click", ".remove-row", function () {
-    $(this).closest("tr").remove();
+  $(document).ready(function () {
+    $('#editRepTable').on('click', '.bi-pencil-square', function () {
+      let row = $(this).closest('tr');
+  
+      let repName = row.find('td:eq(1)').text().trim();  
+      let repDept = row.find('td:eq(2)').text().trim();  
+  
+      $('#editRepInput').val(repName);
+      $('#editRepDeptInput').val(repDept);
+  
+      // Show the edit modal
+      $('#editRow').modal('show');
+    });
   });
-
+  
   // EDIT MAIN REPRESENTATIVE
   const mainRepNameInput = document.getElementById('mainRepNameInput');
   const mainRepDeptInput = document.getElementById('mainRepDeptInput');
@@ -455,8 +465,110 @@ document.addEventListener("DOMContentLoaded", function() {
   // logout
   const logout = document.getElementById("logoutBtn");
   logout.addEventListener('click', function(){
-    window.location.href = "index";
+    window.location.href = "/";
   });
+
+
+  // EDIT PROFILE
+  const profileUpload = document.getElementById('uploadProfile');
+  const deleteProfile = document.getElementById('deleteProfile');
+  const profileInput = document.getElementById('profileInput');
+  const profileImage = document.querySelector('.profile-img'); 
+  
+  // save changes
+  const saveEdit = document.getElementById('editDetails');
+
+  const usernameEdit = document.getElementById('usernameEdit');
+  const companyNameEdit = document.getElementById('companyNameEdit');
+  const companyAddressEdit = document.getElementById('companyAddressEdit');
+  const emailEdit = document.getElementById('emailEdit');
+  const repNameEdit = document.getElementById('repNameEdit');
+  const phoneNumEdit = document.getElementById('phoneNumEdit');
+
+  const username = document.getElementById('username');
+  const companyName = document.getElementById('companyName');
+  const companyAddress = document.getElementById('companyAddress');
+  const email = document.getElementById('email');
+  const representative = document.getElementById('representative');
+  const phoneNumber = document.getElementById('phoneNumber');
+  
+  const formValidation = document.getElementById('editProfileForm');
+  
+  const headerProfileImg = document.getElementById('headerProfileImg');
+  const ProfileImgDisplay = document.getElementById('profileDisplay');
+  const defaultImage = "/assets/img/default-profile.png"; 
+
+  let isEditing = false;
+  let uploadedImageURL = defaultImage; 
+
+  profileUpload.disabled = true;
+  deleteProfile.disabled = true;
+
+  saveEdit.addEventListener('click', function () {
+    if (!isEditing) {
+        profileUpload.disabled = false;
+        deleteProfile.disabled = false;
+
+        // upload profile
+        profileUpload.addEventListener("click", function (event) {
+          event.preventDefault(); 
+          profileInput.click();
+        });
+        
+        // Handle file selection
+        profileInput.addEventListener("change", function (event) {
+          if (event.target.files.length > 0) {
+            const file = event.target.files[0];
+            uploadedImageURL = URL.createObjectURL(file);
+            profileImage.src = uploadedImageURL;
+          }
+        });
+
+        deleteProfile.addEventListener('click', function(){
+          profileImage.src = defaultImage; 
+          profileInput.value = ""; 
+        });
+
+        usernameEdit.readOnly = false;
+        companyNameEdit.readOnly = false;
+        companyAddressEdit.readOnly = false;
+        emailEdit.readOnly = false;
+        repNameEdit.readOnly = false;
+        phoneNumEdit.readOnly = false;
+
+        usernameEdit.focus();
+        saveEdit.textContent = "Save Changes"; 
+    } else {
+        // Validate form before saving
+        if (!formValidation.checkValidity()) {
+            formValidation.classList.add("was-validated");
+            return;
+        }
+
+        // save values
+        username.textContent = usernameEdit.value.trim();
+        companyName.textContent = companyNameEdit.value.trim();
+        companyAddress.textContent = companyAddressEdit.value.trim();
+        email.textContent = emailEdit.value.trim();
+        representative.textContent = repNameEdit.value.trim();
+        phoneNumber.textContent = phoneNumEdit.value.trim();
+
+        ProfileImgDisplay.src = uploadedImageURL;
+        headerProfileImg.src = uploadedImageURL;
+
+        usernameEdit.readOnly = true;
+        companyNameEdit.readOnly = true;
+        companyAddressEdit.readOnly = true;
+        emailEdit.readOnly = true;
+        repNameEdit.readOnly = true;
+        phoneNumEdit.readOnly = true;
+
+        saveEdit.textContent = "Edit Details";
+    }
+  
+      isEditing = !isEditing;
+  });
+  
 });
 
 // QUOTATION
@@ -484,7 +596,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
 
-  // deleteDraft
+  // delete table
   let selectedRow;
 
   document.querySelectorAll(".remove-row").forEach((btn) => {
@@ -493,19 +605,16 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
 
-  document.getElementById("deleteDraft").addEventListener("click", function () {
+  document.getElementById("deleteRow").addEventListener("click", function () {
     if (selectedRow) {
       selectedRow.remove(); 
       selectedRow = null; 
     }
 
-    // Close the delete modal
-    let deleteModal = bootstrap.Modal.getInstance(document.getElementById("deleteRowModal"));
+    const deleteModal = bootstrap.Modal.getInstance(document.getElementById("deleteRowModal"));
     deleteModal.hide();
   });
-
-
-
+  
 });
 
 

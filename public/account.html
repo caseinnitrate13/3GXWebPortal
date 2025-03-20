@@ -9,7 +9,7 @@
 
       <div class="card">
         <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
-          <img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle">
+          <img src="assets/img/default-profile.png" alt="Profile" class="rounded-profile" id="profileDisplay">
           <h2>Company Name</h2>
           <h3>Company</h3>
         </div>
@@ -53,32 +53,32 @@
               <div class="ms-4">
                 <div class="row">
                   <div class="col-lg-4 col-md-4 label ">Username</div>
-                  <div class="col-lg-8 col-md-8">Username1123</div>
+                  <div class="col-lg-8 col-md-8" id="username">Username1123</div>
                 </div>
   
                 <div class="row">
                   <div class="col-lg-4 col-md-4 label">Company Name</div>
-                  <div class="col-lg-8 col-md-8">Company123</div>
+                  <div class="col-lg-8 col-md-8" id="companyName">Company123</div>
                 </div>
   
                 <div class="row">
                   <div class="col-lg-4 col-md-4 label">Company Address</div>
-                  <div class="col-lg-8 col-md-8">Manila, Philippines</div>
+                  <div class="col-lg-8 col-md-8" id="companyAddress">Manila, Philippines</div>
                 </div>
   
                 <div class="row">
                   <div class="col-lg-4 col-md-4 label">Email</div>
-                  <div class="col-lg-8 col-md-8">companyemail@gmail.com</div>
+                  <div class="col-lg-8 col-md-8" id="email">companyemail@gmail.com</div>
                 </div>
   
                 <div class="row">
                   <div class="col-lg-4 col-md-4 label">Representative Name</div>
-                  <div class="col-lg-8 col-md-8">Main Representative</div>
+                  <div class="col-lg-8 col-md-8" id="representative">Main Representative</div>
                 </div>
   
                 <div class="row">
                   <div class="col-lg-4 col-md-4 label">Phone Number</div>
-                  <div class="col-lg-8 col-md-8">1234-456-7890</div>
+                  <div class="col-lg-8 col-md-8" id="phoneNumber">1234-456-7890</div>
                 </div>
   
               </div>
@@ -161,7 +161,7 @@
                   <button type="button" class="btn-close" data-bs-dismiss="modal" title="addRepClose"></button>
                 </div>
                 <div class="modal-body">
-                  <form id="editSubRepForm" class="needs-validation" novalidate>
+                  <form id="addSubRepForm" class="needs-validation" novalidate>
                     <div class="mb-2">
                       <label for="subRepInput" class="form-label">Name</label>
                       <input type="text" id="subRepInput" class="form-control" placeholder="Enter Name" required>
@@ -207,8 +207,12 @@
                         <td>Representative Name1</td>
                         <td>Department1</td>
                         <td class="d-flex justify-content-center align-items-center">
-                          <i id="deleteRep" class="bi bi-trash me-2 remove-row" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete"></i>
-                          <i id="editRep" class="bi bi-pencil-square" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"></i>
+                          <div data-bs-toggle="modal" data-bs-target="#deleteRowModal">
+                            <i id="deleteRep" class="bi bi-trash me-2 remove-row" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete"></i>
+                          </div>
+                          <div data-bs-toggle="modal" data-bs-target="#editRow">
+                            <i id="editRep" class="bi bi-pencil-square" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"></i>
+                          </div>
                         </td>
                       </tr>
                     </tbody>
@@ -222,10 +226,39 @@
             </div>
           </div>
 
+          <!-- edit selected row -->
+          <div class="modal fade" id="editRow" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h6 class="modal-title">Edit</h6>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" title="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <form id="editSubRepForm" class="needs-validation" novalidate>
+                    <div class="mb-2">
+                      <label for="editRepInput" class="form-label">Name</label>
+                      <input type="text" id="editRepInput" class="form-control" placeholder="Enter Name" required>
+                      <div class="invalid-feedback">Please enter a name.</div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="editRepDeptInput" class="form-label">Department</label>
+                    <input type="text" id="editRepDeptInput" class="form-control" placeholder="Enter Department" required>
+                      <div class="invalid-feedback">Please enter a department.</div>
+                    </div>
+                  </form>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  <button type="button" class="btn btn-success" id="saveRow">Save</button>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <!-- delete confirmation modal -->
-          <div class="modal fade" id="deleteModal" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered modal-md">
+          <div class="modal fade" id="deleteRowModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
               <div class="modal-content">
                 <div class="modal-header">
                   <h6 class="modal-title">Are you sure?</h6>
@@ -236,106 +269,113 @@
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                  <button type="button" class="btn btn-success" id="deleteSubRep">Delete</button>
+                  <button type="button" class="btn btn-success" id="deleteRow">Delete</button>
                 </div>
               </div>
             </div>
           </div>
 
+          <!-- profile edit -->
+          <div class="tab-pane fade profile-edit" id="profile-edit">
+            <h5 class="card-title">Profile Details</h5>
+            <form id="editProfileForm" class="ms-3 me-3 needs-validation" novalidate>
 
-            <!-- profile edit -->
-            <div class="tab-pane fade profile-edit" id="profile-edit">
-              <h5 class="card-title">Profile Details</h5>
-              <form class="ms-3 me-3">
-                <div class="row mb-3">
-                  <label for="profileImage" class="col-md-4 col-lg-4 col-form-label">Profile Image</label>
-                  <div class="col-md-8 col-lg-8">
-                    <img src="assets/img/profile-img.jpg" alt="Profile">
-                    <div class="pt-2">
-                      <a href="#" class="btn btn-primary btn-sm" title="Upload new profile image"><i class="bi bi-upload"></i></a>
-                      <a href="#" class="btn btn-danger btn-sm" title="Remove my profile image"><i class="bi bi-trash"></i></a>
-                    </div>
+              <div class="row mb-3">
+                <label for="profileImage" class="col-md-4 col-lg-4 col-form-label">Profile Image</label>
+                <div class="col-md-8 col-lg-8">
+                  <img src="assets/img/default-profile.png" alt="Profile" class="profile-img">
+                  <input type="file" id="profileInput" accept="image/*" hidden> 
+                  <div class="pt-2">
+                    <a href="#" class="btn btn-primary btn-sm" title="Upload new profile image" id="uploadProfile"><i class="bi bi-upload"></i></a>
+                    <a href="#" class="btn btn-danger btn-sm" title="Remove my profile image" id="deleteProfile"><i class="bi bi-trash"></i></a>
                   </div>
                 </div>
+              </div>
 
-                <div class="row mb-3">
-                  <label for="userName" class="col-md-4 col-lg-4 col-form-label">Username</label>
-                  <div class="col-md-8 col-lg-8">
-                    <input name="userName" type="text" class="form-control" id="userName" value="Kevin Anderson">
-                  </div>
+              <div class="row mb-3">
+                <label for="usernameEdit" class="col-md-4 col-lg-4 col-form-label">Username</label>
+                <div class="col-md-8 col-lg-8">
+                  <input name="username" type="text" class="form-control" id="usernameEdit" value="Kevin Anderson" readonly required>
+                  <div class="invalid-feedback">Please enter a username.</div>
                 </div>
+              </div>
 
-                <div class="row mb-3">
-                  <label for="companyName" class="col-md-4 col-lg-4 col-form-label">Company Name</label>
-                  <div class="col-md-8 col-lg-8">
-                    <input name="companyName" type="text" class="form-control" id="companyName" value="Companyname123">
-                  </div>
+              <div class="row mb-3">
+                <label for="companyNameEdit" class="col-md-4 col-lg-4 col-form-label">Company Name</label>
+                <div class="col-md-8 col-lg-8">
+                  <input name="companyName" type="text" class="form-control" id="companyNameEdit" value="Companyname123" readonly required>
+                  <div class="invalid-feedback">Please enter a company name.</div>
                 </div>
+              </div>
 
-                <div class="row mb-3">
-                  <label for="companyAddress" class="col-md-4 col-lg-4 col-form-label">Company Address</label>
-                  <div class="col-md-8 col-lg-8">
-                    <input name="companyAddress" type="text" class="form-control" id="companyAddress" value="Manila, Philippines">
-                  </div>
+              <div class="row mb-3">
+                <label for="companyAddressEdit" class="col-md-4 col-lg-4 col-form-label">Company Address</label>
+                <div class="col-md-8 col-lg-8">
+                  <input name="companyAddress" type="text" class="form-control" id="companyAddressEdit" value="Manila, Philippines" readonly required>
+                  <div class="invalid-feedback">Please enter a company address.</div>
                 </div>
+              </div>
 
-                <div class="row mb-3">
-                  <label for="Email" class="col-md-4 col-lg-4 col-form-label">Email</label>
-                  <div class="col-md-8 col-lg-8">
-                    <input name="email" type="email" class="form-control" id="Email" value="companyemail@gmail.com">
-                  </div>
+              <div class="row mb-3">
+                <label for="emailEdit" class="col-md-4 col-lg-4 col-form-label">Email</label>
+                <div class="col-md-8 col-lg-8">
+                  <input name="email" type="email" class="form-control" id="emailEdit" value="companyemail@gmail.com" readonly required>
+                  <div class="invalid-feedback">Please enter an email.</div>
                 </div>
+              </div>
 
-                <div class="row mb-3">
-                  <label for="Repname" class="col-md-4 col-lg-4 col-form-label">Representatives Name</label>
-                  <div class="col-md-8 col-lg-8">
-                    <input name="repname" type="text" class="form-control" id="Repname" value="Representative Name">
-                  </div>
+              <div class="row mb-3">
+                <label for="repNameEdit" class="col-md-4 col-lg-4 col-form-label">Representatives Name</label>
+                <div class="col-md-8 col-lg-8">
+                  <input name="repname" type="text" class="form-control" id="repNameEdit" value="Representative Name" readonly required>
+                  <div class="invalid-feedback">Please enter a representative.</div>
                 </div>
+              </div>
 
-                <div class="row mb-3">
-                  <label for="Phonenum" class="col-md-4 col-lg-4 col-form-label">Phone Number</label>
-                  <div class="col-md-8 col-lg-8">
-                    <input name="phonenum" type="text" class="form-control" id="Phonenum" value="(436) 486-3538 x29071">
-                  </div>
+              <div class="row mb-3">
+                <label for="phoneNumEdit" class="col-md-4 col-lg-4 col-form-label">Phone Number</label>
+                <div class="col-md-8 col-lg-8">
+                  <input name="phonenum" type="text" class="form-control" id="phoneNumEdit" value="(436) 486-3538 x29071" readonly required>
+                  <div class="invalid-feedback">Please enter phone number.</div>
                 </div>
+              </div>
 
-              
-                <div class="text-center">
-                  <button type="submit" class="btn btn-primary">Save Changes</button>
-                </div>
-              </form>
-            </div>
+            
+              <div class="text-center">
+                <button type="button" class="btn btn-primary" id="editDetails">Edit Details</button>
+              </div>
+            </form>
+          </div>
 
-            <!-- change password -->
-            <div class="tab-pane fade profile-edit pt-3" id="profile-change-password">
-              <form class="ms-3 me-3">
-                <div class="row mb-3">
-                  <label for="currentPassword" class="col-md-4 col-lg-4 col-form-label">Current Password</label>
-                  <div class="col-md-8 col-lg-8">
-                    <input name="password" type="password" class="form-control" id="currentPassword">
-                  </div>
+          <!-- change password -->
+          <div class="tab-pane fade profile-edit pt-3" id="profile-change-password">
+            <form class="ms-3 me-3">
+              <div class="row mb-3">
+                <label for="currentPassword" class="col-md-4 col-lg-4 col-form-label">Current Password</label>
+                <div class="col-md-8 col-lg-8">
+                  <input name="password" type="password" class="form-control" id="currentPassword">
                 </div>
+              </div>
 
-                <div class="row mb-3">
-                  <label for="newPassword" class="col-md-4 col-lg-4 col-form-label">New Password</label>
-                  <div class="col-md-8 col-lg-8">
-                    <input name="newpassword" type="password" class="form-control" id="newPassword">
-                  </div>
+              <div class="row mb-3">
+                <label for="newPassword" class="col-md-4 col-lg-4 col-form-label">New Password</label>
+                <div class="col-md-8 col-lg-8">
+                  <input name="newpassword" type="password" class="form-control" id="newPassword">
                 </div>
+              </div>
 
-                <div class="row mb-3">
-                  <label for="renewPassword" class="col-md-4 col-lg-4 col-form-label">Repeat New Password</label>
-                  <div class="col-md-8 col-lg-8">
-                    <input name="renewpassword" type="password" class="form-control" id="renewPassword">
-                  </div>
+              <div class="row mb-3">
+                <label for="renewPassword" class="col-md-4 col-lg-4 col-form-label">Repeat New Password</label>
+                <div class="col-md-8 col-lg-8">
+                  <input name="renewpassword" type="password" class="form-control" id="renewPassword">
                 </div>
+              </div>
 
-                <div class="text-center">
-                  <button type="submit" class="btn btn-primary">Change Password</button>
-                </div>
-              </form>
-            </div>
+              <div class="text-center">
+                <button type="submit" class="btn btn-primary">Change Password</button>
+              </div>
+            </form>
+          </div>
 
            
           </div>

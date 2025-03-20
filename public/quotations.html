@@ -127,7 +127,7 @@
         </div>
       </div>
 
-      <!-- quote table -->
+      <!-- quotation table -->
       <div class="card">
         <div class="card-body">
           <h5 class="w700 mt-3">Quotation</h5>
@@ -153,7 +153,7 @@
                 <td>3925</td>
                 <td>Enines</td>
                 <td>2006/03/08</td>
-                <td>57%</td>
+                <td class="text-center"><i class="bi bi-eye me-1" data-bs-toggle="tooltip" data-bs-placement="top" title="View"></i></td>
               </tr>
             </tbody>
           </table>
@@ -190,7 +190,12 @@
               <td>Unity Pugh</td>
               <td>9958</td>
               <td>Elliott Snyder</td>
-              <td class="pointer remove-row" data-bs-toggle="modal" data-bs-target="#deleteRowModal"><i class="bi bi-trash3 me-1"></i>Delete</td>
+               <td class="d-inline-flex align-items-center gap-3">
+                  <div data-bs-toggle="modal" data-bs-target="#deleteRowModal">
+                    <i id="deleteRep" class="bi bi-trash remove-row pointer ms-2"  data-bs-toggle="tooltip" data-bs-placement="top" title="Delete"></i>
+                  </div>
+                  <i id="editRep" class="bi bi-pencil-square pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"></i>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -218,7 +223,6 @@
               <th>RFQ Number</th>
               <th>Approved Budget for the Contract (ABC)</th>
               <th data-type="date" data-format="YYYY/DD/MM">RFQ Date</th>
-              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -227,14 +231,12 @@
               <td>Unity Pugh</td>
               <td>9958</td>
               <td>Elliott Snyder</td>
-              <td>3925</td>
             </tr>
           </tbody>
         </table>
         </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
       </div>
     </div>
   </div>
@@ -271,7 +273,7 @@
               <td>3925</td>
               <td>Enines</td>
               <td>2006/03/08</td>
-              <td><i class="bi bi-eye me-1"></i>View</td>
+              <td class="text-center"><i class="bi bi-eye me-1" data-bs-toggle="tooltip" data-bs-placement="top" title="View"></i></td>
             </tr>
           </tbody>
         </table>
@@ -297,7 +299,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button id="deleteDraft" type="button" class="btn btn-primary">Delete</button>
+        <button id="deleteRow" type="button" class="btn btn-primary">Delete</button>
       </div>
     </div>
   </div>

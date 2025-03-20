@@ -1521,3 +1521,20 @@ border-top-right-radius: 10px;
   max-height: 100%; 
   object-fit: contain; 
 }
+
+/* EDIT PROFILE */
+.profile-img, .rounded-profile{
+  width: 100px;  
+  height: 100px;
+  object-fit: cover;
+}
+
+.rounded-profile, #headerProfileImg{
+  border-radius: 50%; 
+}
+
+#headerProfileImg{
+  width: 30px;  
+  height: 30px;
+  object-fit: cover 
+}
