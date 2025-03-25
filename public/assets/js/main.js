@@ -105,150 +105,12 @@
 
 })();
 
-// LOG IN (INDEX)
-document.getElementById('createAccount').addEventListener('click', function(event) {
-  event.preventDefault(); 
-
-  const form = document.getElementById('registerForm');
-  const regUsername = document.getElementById('regUsername');
-  const regPassword = document.getElementById('regPassword');
-  const confirmPassword = document.getElementById('confirmPassword');
-  const regCompanyName = document.getElementById('regCompanyName');
-  const regCompanyAddress = document.getElementById('regCompanyAddress');
-  const regCompanyEmail = document.getElementById('regCompanyEmail');
-  const busPermit = document.getElementById('busPermit');
-  const regPhoneNum = document.getElementById('regPhoneNum');
-  const regRepName = document.getElementById('regRepName');
-  const validId = document.getElementById('validId');
-  const acceptTerms = document.getElementById('acceptTerms');
-
-  let isValid = true;
-
-  // Check form validity
-  if (!form.checkValidity()) {
-      event.preventDefault(); 
-      event.stopPropagation();
-      form.classList.add("was-validated"); 
-      isValid = false;
-  }
-
-  // Username validation (10-15 alphanumeric characters)
-  if (!/^[a-zA-Z0-9]{10,15}$/.test(regUsername.value)) {
-      regUsername.classList.add('is-invalid');
-      isValid = false;
-  } else {
-      regUsername.classList.remove('is-invalid');
-  }
-
-  // Password validation (10-15 characters, at least one uppercase, one lowercase, one number, one special character)
-  const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,15}$/;
-  if (!passwordPattern.test(regPassword.value)) {
-      regPassword.classList.add('is-invalid');
-      isValid = false;
-  } else {
-      regPassword.classList.remove('is-invalid');
-  }
-
-  // Confirm password validation
-  if (regPassword.value !== confirmPassword.value) {
-      confirmPassword.classList.add('is-invalid');
-      isValid = false;
-  } else {
-      confirmPassword.classList.remove('is-invalid');
-  }
-
-  // Company name validation (only letters and spaces)
-  const namePattern = /^[A-Za-z\s]+$/;
-  if (!namePattern.test(regCompanyName.value)) {
-      regCompanyName.classList.add('is-invalid');
-      isValid = false;
-  } else {
-      regCompanyName.classList.remove('is-invalid');
-  }
-
-  // Representative name validation
-  if (!namePattern.test(regRepName.value)) {
-      regRepName.classList.add('is-invalid');
-      isValid = false;
-  } else {
-      regRepName.classList.remove('is-invalid');
-  }
-
-  // Company address validation (alphanumeric and common punctuation)
-  if (!/^[A-Za-z0-9\s,.-]+$/.test(regCompanyAddress.value)) {
-      regCompanyAddress.classList.add('is-invalid');
-      isValid = false;
-  } else {
-      regCompanyAddress.classList.remove('is-invalid');
-  }
-
-  // Email validation
-  const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  if (!emailPattern.test(regCompanyEmail.value)) {
-      regCompanyEmail.classList.add('is-invalid');
-      isValid = false;
-  } else {
-      regCompanyEmail.classList.remove('is-invalid');
-  }
-
-  // Phone number validation (only digits)
-  if (!/^\d+$/.test(regPhoneNum.value)) {
-      regPhoneNum.classList.add('is-invalid');
-      isValid = false;
-  } else {
-      regPhoneNum.classList.remove('is-invalid');
-  }
-
-  // Business permit validation
-  if (!busPermit.files.length) {
-      busPermit.classList.add('is-invalid');
-      isValid = false;
-  } else {
-      busPermit.classList.remove('is-invalid');
-  }
-
-  // Valid ID validation
-  if (!validId.files.length) {
-      validId.classList.add('is-invalid');
-      isValid = false;
-  } else {
-      validId.classList.remove('is-invalid');
-  }
-
-  // Terms and conditions validation
-  if (!acceptTerms.checked) {
-      acceptTerms.classList.add('is-invalid');
-      isValid = false;
-  } else {
-      acceptTerms.classList.remove('is-invalid');
-  }
-
-  // If all validations pass, navigate to another page
-  if (isValid) {
-      window.location.href = 'quotation';
-  }
-});
-
-// Function to update file input text when a file is selected
-function updateFileName(input) {
-  if (input.files.length > 0) {
-      input.parentNode.innerText = input.files[0].name;
-      input.parentNode.appendChild(input); // Reattach the input field
-  }
-}
-
-// Add event listeners to update text when files are selected
-document.getElementById('busPermit').addEventListener('change', function() {
-  updateFileName(this);
-});
-
-document.getElementById('validId').addEventListener('change', function() {
-  updateFileName(this);
-});
 
 
-// SIDEBAR
 document.addEventListener('DOMContentLoaded', function() {
+
+  
+  // SIDEBAR
   const quotation = document.getElementById('quotation');
   const account = document.getElementById('account');
 
@@ -261,6 +123,132 @@ document.addEventListener('DOMContentLoaded', function() {
     account.classList.remove('collapsed');
     quotation.classList.add('collapsed');
   }
+
+
+  // REGISTER ACCOUNT
+  document.getElementById('createAccount').addEventListener('click', function(event) {
+    event.preventDefault(); // Prevent page refresh
+    
+    const form = document.getElementById('registerForm');
+    const regUsername = document.getElementById('regUsername');
+    const regPassword = document.getElementById('regPassword');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const regCompanyName = document.getElementById('regCompanyName');
+    const regCompanyAddress = document.getElementById('regCompanyAddress');
+    const regCompanyEmail = document.getElementById('regCompanyEmail');
+    const busPermit = document.getElementById('busPermit');
+    const regPhoneNum = document.getElementById('regPhoneNum');
+    const regRepName = document.getElementById('regRepName');
+    const validId = document.getElementById('validId');
+    const acceptTerms = document.getElementById('acceptTerms');
+
+    let isValid = true;
+
+    function validateField(input, regex = null) {
+        if (input.value.trim() === "") {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            isValid = false;
+        } else if (regex && !regex.test(input.value)) {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            isValid = false;
+        } else {
+            input.classList.add('is-valid');
+            input.classList.remove('is-invalid');
+        }
+    }
+
+    // Username (10-15 alphanumeric characters)
+    validateField(regUsername, /^[a-zA-Z0-9\s]{10,15}$/);
+
+    // Password validation (10-15 characters, at least one uppercase, one lowercase, one number, one special character)
+    validateField(regPassword, /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,15}$/);
+
+    // Confirm password validation
+    if (confirmPassword.value.trim() === "" || confirmPassword.value !== regPassword.value) {
+        confirmPassword.classList.add('is-invalid');
+        confirmPassword.classList.remove('is-valid');
+        isValid = false;
+    } else {
+        confirmPassword.classList.add('is-valid');
+        confirmPassword.classList.remove('is-invalid');
+    }
+
+    // Company name validation (letters, numbers, and spaces)
+    validateField(regCompanyName, /^[A-Za-z0-9\s]+$/);
+
+    // Representative name validation (only letters and spaces)
+    validateField(regRepName, /^[A-Za-z\s]+$/);
+
+    // Company address validation (alphanumeric and common punctuation)
+    validateField(regCompanyAddress, /^[A-Za-z0-9\s,.-]+$/);
+
+    // Email validation
+    validateField(regCompanyEmail, /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/);
+
+    // Phone number validation (only digits)
+    validateField(regPhoneNum, /^\d+$/);
+
+    // Business permit validation
+    if (busPermit.files.length === 0) {
+      document.getElementById('busPermitError').style.display = 'block';
+      isValid = false;
+    } else {
+      document.getElementById('busPermitError').style.display = 'none';
+    }
+
+    // Valid ID validation
+    if (validId.files.length === 0) {
+      document.getElementById('validIdError').style.display = 'block';
+      isValid = false;
+    } else {
+      const fileType = validId.files[0].type;
+      if (!fileType.startsWith('image/')) {
+          document.getElementById('validIdError').textContent = "Only image files are allowed.";
+          document.getElementById('validIdError').style.display = 'block';
+          isValid = false;
+      } else {
+          document.getElementById('validIdError').style.display = 'none';
+      }
+    }
+
+    // Terms and conditions validation
+    if (!acceptTerms.checked) {
+        acceptTerms.classList.add('is-invalid');
+        acceptTerms.classList.remove('is-valid');
+        isValid = false;
+    } else {
+        acceptTerms.classList.add('is-valid');
+        acceptTerms.classList.remove('is-invalid');
+    }
+
+    // Only redirect if all fields are valid
+    if (isValid) {
+        window.location.href = '/quotation';
+    }
+  });
+
+  // File input label updates
+  function truncateFileName(fileName, maxLength = 30) {
+    if (fileName.length > maxLength) {
+        return fileName.substring(0, maxLength) + '...';
+    }
+    return fileName;
+  }
+
+  document.getElementById('busPermit').addEventListener('change', function() {
+      let label = document.getElementById('busPermitLabel');
+      label.textContent = this.files.length ? truncateFileName(this.files[0].name) : 'Upload Business Permit';
+  });
+
+  document.getElementById('validId').addEventListener('change', function() {
+      let label = document.getElementById('validIdLabel');
+      label.textContent = this.files.length ? truncateFileName(this.files[0].name) : 'Upload Valid ID';
+  });
+
+
+
 });
 
 
@@ -332,24 +320,24 @@ document.addEventListener("DOMContentLoaded", function() {
   // EDIT SUB-REPRESENTATIVE
   let selectedRow = null;
 
-document.getElementById("editRepTable").addEventListener("click", function (event) {
-    if (event.target.classList.contains("bi-pencil-square")) {
-        selectedRow = event.target.closest("tr");
+  document.getElementById("editRepTable").addEventListener("click", function (event) {
+      if (event.target.classList.contains("bi-pencil-square")) {
+          selectedRow = event.target.closest("tr");
 
-        repName = selectedRow.cells[1].textContent.trim();
-        repDept = selectedRow.cells[2].textContent.trim();
+          repName = selectedRow.cells[1].textContent.trim();
+          repDept = selectedRow.cells[2].textContent.trim();
 
-        document.getElementById("editRepInput").value = repName;
-        document.getElementById("editRepDeptInput").value = repDept;
+          document.getElementById("editRepInput").value = repName;
+          document.getElementById("editRepDeptInput").value = repDept;
 
-        // Show the edit modal
-        let editModal = new bootstrap.Modal(document.getElementById("editRow"));
-        editModal.show();
-    }
-});
+          // Show the edit modal
+          let editModal = new bootstrap.Modal(document.getElementById("editRow"));
+          editModal.show();
+      }
+  });
 
-const saveRow = document.getElementById("saveRow");
-saveRow.addEventListener("click", function () {
+  const saveRow = document.getElementById("saveRow");
+  saveRow.addEventListener("click", function () {
     const editRow = document.getElementById("editRow");
     const editRowModal = bootstrap.Modal.getInstance(editRow);
 
@@ -372,8 +360,8 @@ saveRow.addEventListener("click", function () {
     document.getElementById("editSubRepModal").addEventListener("hidden.bs.modal", function () {
       document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
       document.body.style.overflow = 'auto'; // Prevent body from staying locked
-  }, { once: true });
-});
+    }, { once: true });
+  });
 
   // EDIT MAIN REPRESENTATIVE
   const mainRepNameInput = document.getElementById('mainRepNameInput');

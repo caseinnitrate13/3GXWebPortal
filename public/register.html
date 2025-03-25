@@ -66,13 +66,13 @@
                       <div class="col-md-6">
                         <label for="regUsername" class="form-label">Username</label>
                         <input type="text" name="username" class="form-control table-fs border-secondary" id="regUsername" placeholder="Username" required>
-                        <div class="invalid-feedback">Please choose a Username.</div>
+                        <div class="invalid-feedback">Please enter a username, at least 10-15 characters</div>
                       </div>
 
                       <div class="col-md-6">
                         <label for="regPassword" class="form-label">Password</label>
                         <input type="password" name="password" class="form-control table-fs border-secondary" id="regPassword" placeholder="Password" required>
-                        <div class="invalid-feedback">Must contain at least one uppercase letter, one lowercase letter, one number, and one special character.</div>
+                        <div class="invalid-feedback">Must contain 10-15 characters, and at least one uppercase letter, one lowercase letter, one number, and one special character(@$!%*?&).</div>
                       </div>
                     </div>
                   
@@ -110,10 +110,11 @@
                       
                       <div class="col-md-6">
                         <label class="form-label">Business Permit</label>
-                        <label class="btn btn-outline-secondary form-control text-start table-fs">Upload Business Permit
-                          <input type="file" class="form-control required d-none" id="busPermit" name="file" ng-model="Form.file" required>
+                        <label class="btn btn-outline-secondary form-control text-start table-fs">
+                            <span id="busPermitLabel">Upload Business Permit</span>
+                            <input type="file" class="form-control required d-none" id="busPermit" name="file"accept="image/*, .pdf, .doc, .docx" required>
                         </label>
-                        <div class="invalid-feedback">Please upload your business permit.</div>
+                        <div class="invalid-feedback" id="busPermitError">Please upload your business permit.</div>
                       </div>
                     
                       <div class="col-md-6">
@@ -133,12 +134,13 @@
 
                       <div class="col-md-6">
                         <label class="form-label">Upload Valid ID</label>
-                        <label class="btn btn-outline-secondary form-control text-start table-fs">Upload Valid ID
-                          <input type="file" class="form-control required d-none" id="validId" name="file" ng-model="Form.file" required>
+                        <label class="btn btn-outline-secondary form-control text-start table-fs">
+                            <span id="validIdLabel">Upload Valid ID</span>
+                            <input type="file" class="form-control required d-none" id="validId" name="file" accept="image/*" required>
                         </label>
-                        <div class="invalid-feedback">Please upload a valid ID</div>
+                        <div class="invalid-feedback" id="validIdError">Please upload a valid ID.</div>
                       </div>
-                     
+
                     </div>
 
                     <!-- Terms & Submit -->
