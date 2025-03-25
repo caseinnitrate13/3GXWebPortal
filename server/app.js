@@ -1,9 +1,18 @@
 const express = require('express');
 const fs = require('fs');
+const cors = require('cors');
+const dotenv = require('dotenv');
 const path = require('path');
+dotenv.config();
+
+const dbService = require('./dbService');
 
 const app = express();
-const port = 8080;
+const port = process.env.PORT;
+
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({extended : false}));
 
 // Serve static files from the "public" folder
 app.use(express.static(path.join(__dirname, '..', 'public')));
