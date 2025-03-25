@@ -10,7 +10,7 @@
       <div class="card">
         <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
           <img src="assets/img/default-profile.png" alt="Profile" class="rounded-profile" id="profileDisplay">
-          <h2>Company Name</h2>
+          <h2 id="profilecompanyName">Company Name</h2>
           <h3>Company</h3>
         </div>
       </div>
@@ -207,11 +207,11 @@
                         <td>Representative Name1</td>
                         <td>Department1</td>
                         <td class="d-flex justify-content-center align-items-center">
-                          <div data-bs-toggle="modal" data-bs-target="#deleteRowModal">
-                            <i id="deleteRep" class="bi bi-trash me-2 remove-row" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete"></i>
+                          <div data-bs-toggle="tooltip" data-bs-placement="top" title="Delete">
+                            <i id="deleteRep" class="bi bi-trash me-2 remove-row" data-bs-toggle="modal" data-bs-target="#deleteRowModal"></i>
                           </div>
-                          <div data-bs-toggle="modal" data-bs-target="#editRow">
-                            <i id="editRep" class="bi bi-pencil-square" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"></i>
+                          <div  data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                            <i id="editRep" class="bi bi-pencil-square" data-bs-toggle="modal" data-bs-target="#editRow"></i>
                           </div>
                         </td>
                       </tr>
@@ -219,8 +219,7 @@
                   </table>                  
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                  <button type="button" class="btn btn-success" id="saveSubRep">Save</button>
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
               </div>
             </div>

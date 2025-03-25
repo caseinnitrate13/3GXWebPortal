@@ -1,10 +1,3 @@
-/**
-* Template Name: NiceAdmin
-* Template URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
-* Updated: Apr 20 2024 with Bootstrap v5.3.3
-* Author: BootstrapMade.com
-* License: https://bootstrapmade.com/license/
-*/
 
 (function() {
   "use strict";
@@ -49,51 +42,6 @@
   }
 
   /**
-   * Search bar toggle
-   */
-  if (select('.search-bar-toggle')) {
-    on('click', '.search-bar-toggle', function(e) {
-      select('.search-bar').classList.toggle('search-bar-show')
-    })
-  }
-
-  /**
-   * Navbar links active state on scroll
-   */
-  let navbarlinks = select('#navbar .scrollto', true)
-  const navbarlinksActive = () => {
-    let position = window.scrollY + 200
-    navbarlinks.forEach(navbarlink => {
-      if (!navbarlink.hash) return
-      let section = select(navbarlink.hash)
-      if (!section) return
-      if (position >= section.offsetTop && position <= (section.offsetTop + section.offsetHeight)) {
-        navbarlink.classList.add('active')
-      } else {
-        navbarlink.classList.remove('active')
-      }
-    })
-  }
-  window.addEventListener('load', navbarlinksActive)
-  onscroll(document, navbarlinksActive)
-
-  /**
-   * Toggle .header-scrolled class to #header when page is scrolled
-   */
-  let selectHeader = select('#header')
-  if (selectHeader) {
-    const headerScrolled = () => {
-      if (window.scrollY > 100) {
-        selectHeader.classList.add('header-scrolled')
-      } else {
-        selectHeader.classList.remove('header-scrolled')
-      }
-    }
-    window.addEventListener('load', headerScrolled)
-    onscroll(document, headerScrolled)
-  }
-
-  /**
    * Back to top button
    */
   let backtotop = select('.back-to-top')
@@ -116,167 +64,6 @@
   var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
     return new bootstrap.Tooltip(tooltipTriggerEl)
   })
-
-  /**
-   * Initiate quill editors
-   */
-  if (select('.quill-editor-default')) {
-    new Quill('.quill-editor-default', {
-      theme: 'snow'
-    });
-  }
-
-  if (select('.quill-editor-bubble')) {
-    new Quill('.quill-editor-bubble', {
-      theme: 'bubble'
-    });
-  }
-
-  if (select('.quill-editor-full')) {
-    new Quill(".quill-editor-full", {
-      modules: {
-        toolbar: [
-          [{
-            font: []
-          }, {
-            size: []
-          }],
-          ["bold", "italic", "underline", "strike"],
-          [{
-              color: []
-            },
-            {
-              background: []
-            }
-          ],
-          [{
-              script: "super"
-            },
-            {
-              script: "sub"
-            }
-          ],
-          [{
-              list: "ordered"
-            },
-            {
-              list: "bullet"
-            },
-            {
-              indent: "-1"
-            },
-            {
-              indent: "+1"
-            }
-          ],
-          ["direction", {
-            align: []
-          }],
-          ["link", "image", "video"],
-          ["clean"]
-        ]
-      },
-      theme: "snow"
-    });
-  }
-
-  /**
-   * Initiate TinyMCE Editor
-   */
-
-  const useDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const isSmallScreen = window.matchMedia('(max-width: 1023.5px)').matches;
-
-  tinymce.init({
-    selector: 'textarea.tinymce-editor',
-    plugins: 'preview importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media codesample table charmap pagebreak nonbreaking anchor insertdatetime advlist lists wordcount help charmap quickbars emoticons accordion',
-    editimage_cors_hosts: ['picsum.photos'],
-    menubar: 'file edit view insert format tools table help',
-    toolbar: "undo redo | accordion accordionremove | blocks fontfamily fontsize | bold italic underline strikethrough | align numlist bullist | link image | table media | lineheight outdent indent| forecolor backcolor removeformat | charmap emoticons | code fullscreen preview | save print | pagebreak anchor codesample | ltr rtl",
-    autosave_ask_before_unload: true,
-    autosave_interval: '30s',
-    autosave_prefix: '{path}{query}-{id}-',
-    autosave_restore_when_empty: false,
-    autosave_retention: '2m',
-    image_advtab: true,
-    link_list: [{
-        title: 'My page 1',
-        value: 'https://www.tiny.cloud'
-      },
-      {
-        title: 'My page 2',
-        value: 'http://www.moxiecode.com'
-      }
-    ],
-    image_list: [{
-        title: 'My page 1',
-        value: 'https://www.tiny.cloud'
-      },
-      {
-        title: 'My page 2',
-        value: 'http://www.moxiecode.com'
-      }
-    ],
-    image_class_list: [{
-        title: 'None',
-        value: ''
-      },
-      {
-        title: 'Some class',
-        value: 'class-name'
-      }
-    ],
-    importcss_append: true,
-    file_picker_callback: (callback, value, meta) => {
-      /* Provide file and text for the link dialog */
-      if (meta.filetype === 'file') {
-        callback('https://www.google.com/logos/google.jpg', {
-          text: 'My text'
-        });
-      }
-
-      /* Provide image and alt text for the image dialog */
-      // if (meta.filetype === 'image') {
-      //   callback('https://www.google.com/logos/google.jpg', {
-      //     alt: 'My alt text'
-      //   });
-      // }
-
-      /* Provide alternative source and posted for the media dialog */
-      // if (meta.filetype === 'media') {
-      //   callback('movie.mp4', {
-      //     source2: 'alt.ogg',
-      //     poster: 'https://www.google.com/logos/google.jpg'
-      //   });
-      // }
-    },
-    height: 600,
-    image_caption: true,
-    quickbars_selection_toolbar: 'bold italic | quicklink h2 h3 blockquote quickimage quicktable',
-    noneditable_class: 'mceNonEditable',
-    toolbar_mode: 'sliding',
-    contextmenu: 'link image table',
-    skin: useDarkMode ? 'oxide-dark' : 'oxide',
-    content_css: useDarkMode ? 'dark' : 'default',
-    content_style: 'body { font-family:Helvetica,Montserrat,sans-serif; font-size:14px }'
-  });
-
-  /**
-   * Initiate Bootstrap validation check
-   */
-  // var needsValidation = document.querySelectorAll('.needs-validation')
-
-  // Array.prototype.slice.call(needsValidation)
-  //   .forEach(function(form) {
-  //     form.addEventListener('submit', function(event) {
-  //       if (!form.checkValidity()) {
-  //         event.preventDefault()
-  //         event.stopPropagation()
-  //       }
-
-  //       form.classList.add('was-validated')
-  //     }, false)
-  //   })
 
   /**
    * Initiate Datatables
@@ -317,6 +104,165 @@
   }
 
 })();
+
+// LOG IN (INDEX)
+document.getElementById('createAccount').addEventListener('click', function(event) {
+  event.preventDefault(); 
+
+  const form = document.getElementById('registerForm');
+  const regUsername = document.getElementById('regUsername');
+  const regPassword = document.getElementById('regPassword');
+  const confirmPassword = document.getElementById('confirmPassword');
+  const regCompanyName = document.getElementById('regCompanyName');
+  const regCompanyAddress = document.getElementById('regCompanyAddress');
+  const regCompanyEmail = document.getElementById('regCompanyEmail');
+  const busPermit = document.getElementById('busPermit');
+  const regPhoneNum = document.getElementById('regPhoneNum');
+  const regRepName = document.getElementById('regRepName');
+  const validId = document.getElementById('validId');
+  const acceptTerms = document.getElementById('acceptTerms');
+
+  let isValid = true;
+
+  // Check form validity
+  if (!form.checkValidity()) {
+      event.preventDefault(); 
+      event.stopPropagation();
+      form.classList.add("was-validated"); 
+      isValid = false;
+  }
+
+  // Username validation (10-15 alphanumeric characters)
+  if (!/^[a-zA-Z0-9]{10,15}$/.test(regUsername.value)) {
+      regUsername.classList.add('is-invalid');
+      isValid = false;
+  } else {
+      regUsername.classList.remove('is-invalid');
+  }
+
+  // Password validation (10-15 characters, at least one uppercase, one lowercase, one number, one special character)
+  const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,15}$/;
+  if (!passwordPattern.test(regPassword.value)) {
+      regPassword.classList.add('is-invalid');
+      isValid = false;
+  } else {
+      regPassword.classList.remove('is-invalid');
+  }
+
+  // Confirm password validation
+  if (regPassword.value !== confirmPassword.value) {
+      confirmPassword.classList.add('is-invalid');
+      isValid = false;
+  } else {
+      confirmPassword.classList.remove('is-invalid');
+  }
+
+  // Company name validation (only letters and spaces)
+  const namePattern = /^[A-Za-z\s]+$/;
+  if (!namePattern.test(regCompanyName.value)) {
+      regCompanyName.classList.add('is-invalid');
+      isValid = false;
+  } else {
+      regCompanyName.classList.remove('is-invalid');
+  }
+
+  // Representative name validation
+  if (!namePattern.test(regRepName.value)) {
+      regRepName.classList.add('is-invalid');
+      isValid = false;
+  } else {
+      regRepName.classList.remove('is-invalid');
+  }
+
+  // Company address validation (alphanumeric and common punctuation)
+  if (!/^[A-Za-z0-9\s,.-]+$/.test(regCompanyAddress.value)) {
+      regCompanyAddress.classList.add('is-invalid');
+      isValid = false;
+  } else {
+      regCompanyAddress.classList.remove('is-invalid');
+  }
+
+  // Email validation
+  const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailPattern.test(regCompanyEmail.value)) {
+      regCompanyEmail.classList.add('is-invalid');
+      isValid = false;
+  } else {
+      regCompanyEmail.classList.remove('is-invalid');
+  }
+
+  // Phone number validation (only digits)
+  if (!/^\d+$/.test(regPhoneNum.value)) {
+      regPhoneNum.classList.add('is-invalid');
+      isValid = false;
+  } else {
+      regPhoneNum.classList.remove('is-invalid');
+  }
+
+  // Business permit validation
+  if (!busPermit.files.length) {
+      busPermit.classList.add('is-invalid');
+      isValid = false;
+  } else {
+      busPermit.classList.remove('is-invalid');
+  }
+
+  // Valid ID validation
+  if (!validId.files.length) {
+      validId.classList.add('is-invalid');
+      isValid = false;
+  } else {
+      validId.classList.remove('is-invalid');
+  }
+
+  // Terms and conditions validation
+  if (!acceptTerms.checked) {
+      acceptTerms.classList.add('is-invalid');
+      isValid = false;
+  } else {
+      acceptTerms.classList.remove('is-invalid');
+  }
+
+  // If all validations pass, navigate to another page
+  if (isValid) {
+      window.location.href = 'quotation';
+  }
+});
+
+// Function to update file input text when a file is selected
+function updateFileName(input) {
+  if (input.files.length > 0) {
+      input.parentNode.innerText = input.files[0].name;
+      input.parentNode.appendChild(input); // Reattach the input field
+  }
+}
+
+// Add event listeners to update text when files are selected
+document.getElementById('busPermit').addEventListener('change', function() {
+  updateFileName(this);
+});
+
+document.getElementById('validId').addEventListener('change', function() {
+  updateFileName(this);
+});
+
+
+// SIDEBAR
+document.addEventListener('DOMContentLoaded', function() {
+  const quotation = document.getElementById('quotation');
+  const account = document.getElementById('account');
+
+  const path = window.location.pathname;
+
+  if (path.includes('/quotation')) {
+    quotation.classList.remove('collapsed');
+    account.classList.add('collapsed');
+  } else if (path.includes('/account')) {
+    account.classList.remove('collapsed');
+    quotation.classList.add('collapsed');
+  }
+});
+
 
 // ACCOUNT
 // REPRESENTATIVE
@@ -384,21 +330,51 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   // EDIT SUB-REPRESENTATIVE
-  $(document).ready(function () {
-    $('#editRepTable').on('click', '.bi-pencil-square', function () {
-      let row = $(this).closest('tr');
-  
-      let repName = row.find('td:eq(1)').text().trim();  
-      let repDept = row.find('td:eq(2)').text().trim();  
-  
-      $('#editRepInput').val(repName);
-      $('#editRepDeptInput').val(repDept);
-  
-      // Show the edit modal
-      $('#editRow').modal('show');
-    });
-  });
-  
+  let selectedRow = null;
+
+document.getElementById("editRepTable").addEventListener("click", function (event) {
+    if (event.target.classList.contains("bi-pencil-square")) {
+        selectedRow = event.target.closest("tr");
+
+        repName = selectedRow.cells[1].textContent.trim();
+        repDept = selectedRow.cells[2].textContent.trim();
+
+        document.getElementById("editRepInput").value = repName;
+        document.getElementById("editRepDeptInput").value = repDept;
+
+        // Show the edit modal
+        let editModal = new bootstrap.Modal(document.getElementById("editRow"));
+        editModal.show();
+    }
+});
+
+const saveRow = document.getElementById("saveRow");
+saveRow.addEventListener("click", function () {
+    const editRow = document.getElementById("editRow");
+    const editRowModal = bootstrap.Modal.getInstance(editRow);
+
+    if (editRowModal) {
+        editRowModal.hide(); 
+    }
+
+    if (selectedRow) {
+        const newRepInput = document.getElementById("editRepInput").value.trim();
+        const newRepDeptInput = document.getElementById("editRepDeptInput").value.trim();
+
+        selectedRow.cells[1].textContent = newRepInput;
+        selectedRow.cells[2].textContent = newRepDeptInput;
+    }
+
+    // Show the next modal
+    let editSubRepModal = new bootstrap.Modal(document.getElementById("editSubRepModal"));
+    editSubRepModal.show();
+
+    document.getElementById("editSubRepModal").addEventListener("hidden.bs.modal", function () {
+      document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+      document.body.style.overflow = 'auto'; // Prevent body from staying locked
+  }, { once: true });
+});
+
   // EDIT MAIN REPRESENTATIVE
   const mainRepNameInput = document.getElementById('mainRepNameInput');
   const mainRepDeptInput = document.getElementById('mainRepDeptInput');
@@ -494,6 +470,8 @@ document.addEventListener("DOMContentLoaded", function() {
   
   const formValidation = document.getElementById('editProfileForm');
   
+  const profilecompanyName = document.getElementById('profilecompanyName');
+  const headerCompanyName = document.getElementById('headerCompanyName');
   const headerProfileImg = document.getElementById('headerProfileImg');
   const ProfileImgDisplay = document.getElementById('profileDisplay');
   const defaultImage = "/assets/img/default-profile.png"; 
@@ -553,6 +531,9 @@ document.addEventListener("DOMContentLoaded", function() {
         representative.textContent = repNameEdit.value.trim();
         phoneNumber.textContent = phoneNumEdit.value.trim();
 
+        profilecompanyName.textContent = companyNameEdit.value.trim();
+        headerCompanyName.textContent = companyNameEdit.value.trim();
+
         ProfileImgDisplay.src = uploadedImageURL;
         headerProfileImg.src = uploadedImageURL;
 
@@ -570,6 +551,7 @@ document.addEventListener("DOMContentLoaded", function() {
   });
   
 });
+
 
 // QUOTATION
 document.addEventListener("DOMContentLoaded", function() {
@@ -1008,5 +990,3 @@ document.getElementById('sendBtn').addEventListener('click', () => {
 document.getElementById('saveDraftBtn').addEventListener('click', () => {
   window.location.href = "quotation";
 });
-
-

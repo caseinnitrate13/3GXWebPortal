@@ -61,51 +61,49 @@
                     <p class="text-center small">Enter your personal details to create account</p>
                   </div>
 
-                  <form class="row g-3 needs-validation d-flex justify-content-center w600">
+                  <form id="registerForm" class="row g-3 needs-validation d-flex justify-content-center w600" novalidate>
                     <div class="row gy-1 gx-5">
                       <div class="col-md-6">
-                        <label for="yourUsername" class="form-label">Username</label>
-                        <input type="text" name="username" class="form-control table-fs border-secondary" id="yourUsername" placeholder="Username" required>
+                        <label for="regUsername" class="form-label">Username</label>
+                        <input type="text" name="username" class="form-control table-fs border-secondary" id="regUsername" placeholder="Username" required>
                         <div class="invalid-feedback">Please choose a Username.</div>
                       </div>
 
                       <div class="col-md-6">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" name="password" class="form-control table-fs border-secondary" id="password" placeholder="Password" required>
-                        <div class="invalid-feedback">Please enter your password!</div>
+                        <label for="regPassword" class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control table-fs border-secondary" id="regPassword" placeholder="Password" required>
+                        <div class="invalid-feedback">Must contain at least one uppercase letter, one lowercase letter, one number, and one special character.</div>
                       </div>
                     </div>
                   
                     <div class="row gy-1 gx-5">
                       
                       <div class="col-md-6">
-                        <label for="repeatPassword" class="form-label">Repeat Password</label>
-                        <input type="password" name="repeatPassword" class="form-control table-fs border-secondary" id="repeatPassword" placeholder="Repeat Password" required>
-                        <div class="invalid-feedback">Please repeat ypur password!</div>
+                        <label for="confirmPassword" class="form-label">Confirm Password</label>
+                        <input type="password" name="confirmPassword" class="form-control table-fs border-secondary" id="confirmPassword" placeholder="Confirm Password" required>
+                        <div class="invalid-feedback">Password doesn't match.</div>
                       </div>
 
                       <div class="col-md-6">
-                        <label for="companyName" class="form-label">Company Name</label>
-                        <input type="text" name="companyName" class="form-control table-fs border-secondary" id="companyName" placeholder="Company Name" required>
-                        <div class="invalid-feedback">Please enter your Company Name!</div>
+                        <label for="regCompanyName" class="form-label">Company Name</label>
+                        <input type="text" name="regCompanyName" class="form-control table-fs border-secondary" id="regCompanyName" placeholder="Company Name" required>
+                        <div class="invalid-feedback">Please enter your company name.</div>
                       </div>
                     </div>
 
                     <div class="row gy-1 gx-5">
                       
                       <div class="col-md-6">
-                        <label for="companyAddress" class="form-label">Company Address</label>
-                        <input type="text" name="companyaddress" class="form-control table-fs border-secondary" id="companyAddress" placeholder="Company Address" required>
-                        <div class="invalid-feedback">Please enter your Company Address!</div>
+                        <label for="regCompanyAddress" class="form-label">Company Address</label>
+                        <input type="text" name="regCompanyaddress" class="form-control table-fs border-secondary" id="regCompanyAddress" placeholder="Company Address" required>
+                        <div class="invalid-feedback">Please enter your company address.</div>
                       </div>
 
                       <div class="col-md-6">
-                        <label for="companyEmail" class="form-label">Company Email</label>
-                        <input type="email" name="companyEmail" class="form-control table-fs border-secondary" id="companyEmail" placeholder="Company Email" required>
-                        <div class="invalid-feedback">Please enter a valid email address!</div>
+                        <label for="regCompanyEmail" class="form-label">Company Email</label>
+                        <input type="email" name="regCompanyEmail" class="form-control table-fs border-secondary" id="regCompanyEmail" placeholder="Company Email" required>
+                        <div class="invalid-feedback">Please enter a valid email address</div>
                       </div>
-
-                      
                     </div>
                   
                     <div class="row gy-1 gx-5">
@@ -115,23 +113,22 @@
                         <label class="btn btn-outline-secondary form-control text-start table-fs">Upload Business Permit
                           <input type="file" class="form-control required d-none" id="busPermit" name="file" ng-model="Form.file" required>
                         </label>
-                        <div class="invalid-feedback">Please upload Business Permit!</div>
+                        <div class="invalid-feedback">Please upload your business permit.</div>
                       </div>
                     
                       <div class="col-md-6">
-                        <label for="phoneNum" class="form-label">Phone Number</label>
-                        <input type="text" name="phone" class="form-control table-fs border-secondary" id="phoneNum" placeholder="Phone Number" required>
-                        <div class="invalid-feedback">Please enter your phone number!</div>
+                        <label for="regPhoneNum" class="form-label">Phone Number</label>
+                        <input type="text" name="phone" class="form-control table-fs border-secondary" id="regPhoneNum" placeholder="Phone Number" required>
+                        <div class="invalid-feedback">Please enter a valid phone number.</div>
                       </div>
 
                     </div>
 
-
                     <div class="row gy-1 gx-5">
                       <div class="col-md-6">
-                        <label for="repName" class="form-label">Representative Name</label>
-                        <input type="text" name="repName" class="form-control table-fs border-secondary" id="repName" placeholder="Representative Name" required>
-                        <div class="invalid-feedback">Please enter the Representative's Name</div>
+                        <label for="regRepName" class="form-label">Representative Name</label>
+                        <input type="text" name="repName" class="form-control table-fs border-secondary" id="regRepName" placeholder="Representative Name" required>
+                        <div class="invalid-feedback">Please enter the representative's name</div>
                       </div>
 
                       <div class="col-md-6">
@@ -139,7 +136,7 @@
                         <label class="btn btn-outline-secondary form-control text-start table-fs">Upload Valid ID
                           <input type="file" class="form-control required d-none" id="validId" name="file" ng-model="Form.file" required>
                         </label>
-                        <div class="invalid-feedback">Please upload a Valid ID!</div>
+                        <div class="invalid-feedback">Please upload a valid ID</div>
                       </div>
                      
                     </div>
@@ -156,7 +153,7 @@
                     </div>
                   
                     <div class="col-6">
-                      <button class="btn btn-primary w-100" type="submit">Create Account</button>
+                      <button id="createAccount" class="btn btn-primary w-100" type="submit">Create Account</button>
                     </div>
                   
                     <div class="col-12 text-center w500">
@@ -168,13 +165,13 @@
                 </div>
               </div>
 
-              <div class="credits">
-                <!-- All the links in the footer should remain intact. -->
-                <!-- You can delete the links only if you purchased the pro version. -->
-                <!-- Licensing information: https://bootstrapmade.com/license/ -->
-                <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/ -->
-                Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
-              </div>
+              <div class="copyright small">
+                  &copy; Copyright <strong><span>3GX Solutions</span></strong>. All Rights Reserved
+                </div>
+                <!-- <div class="credits">
+                  Powered by 3GX Solutions and IT Computers Technoshop
+                </div> -->
+
 
             </div>
           </div>
