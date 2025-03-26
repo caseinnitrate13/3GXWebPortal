@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const multer = require('multer');
 const path = require('path');
 dotenv.config();
 
@@ -26,9 +27,60 @@ app.get('/', (req, res) => {
 const template = fs.readFileSync(path.join(__dirname, '..', 'public', 'template.html'), 'utf-8');
 
 // route for html pages
+
+// REGISTER
+
+// Multer Storage for Business Permit & Valid ID
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/'); // Make sure 'uploads/' exists
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
+});
+
+const upload = multer({ storage: storage });
+
 app.get('/register', (req,res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'register.html'));
 });
+
+// Registration API
+app.post('/register', upload.fields([{ name: 'busPermit' }, { name: 'validId' }]), (req, res) => {
+    const { regUsername, regPassword, regCompanyName, regCompanyAddress, regCompanyEmail, regPhoneNum } = req.body;
+    const busPermitPath = req.files['busPermit'] ? req.files['busPermit'][0].filename : null;
+    const validIdPath = req.files['validId'] ? req.files['validId'][0].filename : null;
+    
+    let regRepName = req.body.repNames;
+
+    if (!Array.isArray(regRepName)) {
+        regRepName = [{ name: regRepName }];
+    }
+    
+    const userData = [
+        regUsername,
+        regPassword,
+        regCompanyName,
+        regCompanyAddress,
+        regCompanyEmail,
+        JSON.stringify(regRepName),
+        regPhoneNum,
+        busPermitPath,
+        validIdPath,
+        "Client", // Default Role
+        "Pending" // Default Account Status
+    ];
+    dbService.registerUser(userData, (err, result) => {
+        if (err) {
+            console.error("Error inserting user:", err);
+            return res.status(500).json({ success: false, message: "Error registering user" });
+        }
+        res.json({ success: true, message: "Registration successful!" });
+    });
+});
+
+
 
 app.get('/quotation', (req, res) => {
     const quotationContent = fs.readFileSync(path.join(__dirname, '..', 'public', 'quotations.html'), 'utf-8');

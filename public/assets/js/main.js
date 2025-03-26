@@ -142,6 +142,35 @@ document.addEventListener('DOMContentLoaded', function() {
     const validId = document.getElementById('validId');
     const acceptTerms = document.getElementById('acceptTerms');
 
+    const formData = new FormData();
+    formData.append('regUsername', document.getElementById('regUsername').value);
+    formData.append('regPassword', document.getElementById('regPassword').value);
+    formData.append('regCompanyName', document.getElementById('regCompanyName').value);
+    formData.append('regCompanyAddress', document.getElementById('regCompanyAddress').value);
+    formData.append('regCompanyEmail', document.getElementById('regCompanyEmail').value);
+    formData.append('regRepName', document.getElementById('regRepName').value);
+    formData.append('regPhoneNum', document.getElementById('regPhoneNum').value);
+    formData.append('busPermit', document.getElementById('busPermit').files[0]);
+    formData.append('validId', document.getElementById('validId').files[0]);
+
+
+    // DB CRUD
+    fetch('/register', {
+      method: 'POST',
+      body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+      if (data.success) {
+          alert("Registration Successful!");
+          window.location.href = "/quotation";
+      } else {
+          alert("Error registering. Please try again.");
+      }
+  })
+  .catch(error => console.error('Error:', error));
+
+
     let isValid = true;
 
     function validateField(input, regex = null) {
