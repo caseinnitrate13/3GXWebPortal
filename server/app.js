@@ -13,7 +13,7 @@ const port = process.env.PORT;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({extended : false}));
+app.use(express.urlencoded({extended : true}));
 
 // Serve static files from the "public" folder
 app.use(express.static(path.join(__dirname, '..', 'public')));
@@ -33,7 +33,7 @@ const template = fs.readFileSync(path.join(__dirname, '..', 'public', 'template.
 // Multer Storage for Business Permit & Valid ID
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/'); // Make sure 'uploads/' exists
+        cb(null, 'uploads/');
     },
     filename: function (req, file, cb) {
         cb(null, Date.now() + '-' + file.originalname);
@@ -42,35 +42,48 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// Registration API
+
 app.get('/register', (req,res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'register.html'));
 });
 
-// Registration API
-app.post('/register', upload.fields([{ name: 'busPermit' }, { name: 'validId' }]), (req, res) => {
-    const { regUsername, regPassword, regCompanyName, regCompanyAddress, regCompanyEmail, regPhoneNum } = req.body;
+app.post('/register', upload.fields([
+    { name: 'busPermit', maxCount: 1 },
+    { name: 'validId', maxCount: 1 }
+]), (req, res) => {
+    const { regUsername, regPassword, regCompanyName, regCompanyAddress, regCompanyEmail, regPhoneNum, repNames } = req.body;
+
     const busPermitPath = req.files['busPermit'] ? req.files['busPermit'][0].filename : null;
     const validIdPath = req.files['validId'] ? req.files['validId'][0].filename : null;
-    
-    let regRepName = req.body.repNames;
 
-    if (!Array.isArray(regRepName)) {
-        regRepName = [{ name: regRepName }];
+    // console.log("Bus Permit Path:", busPermitPath);
+    // console.log("Valid ID Path:", validIdPath);
+
+    const accCreated = new Date().toLocaleString('en-CA', { hour12: false }).replace(",", "");
+
+    let parsedRepNames;
+    try {
+        parsedRepNames = JSON.parse(repNames);
+    } catch (error) {
+        return res.status(400).json({ success: false, message: "Invalid representative data" });
     }
-    
+
     const userData = [
         regUsername,
         regPassword,
         regCompanyName,
         regCompanyAddress,
         regCompanyEmail,
-        JSON.stringify(regRepName),
+        JSON.stringify(parsedRepNames),
         regPhoneNum,
         busPermitPath,
         validIdPath,
-        "Client", // Default Role
-        "Pending" // Default Account Status
+        "Client",
+        "Pending",
+        accCreated
     ];
+
     dbService.registerUser(userData, (err, result) => {
         if (err) {
             console.error("Error inserting user:", err);
@@ -79,7 +92,6 @@ app.post('/register', upload.fields([{ name: 'busPermit' }, { name: 'validId' }]
         res.json({ success: true, message: "Registration successful!" });
     });
 });
-
 
 
 app.get('/quotation', (req, res) => {

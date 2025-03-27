@@ -18,8 +18,8 @@ connection.connect((err) => {
 })
 
 const registerUser = (userData, callback) => {
-    const sql = `INSERT INTO users (username, password, companyName, companyAddress, companyEmail, repNames, repNum, businessPermit, validID, userRole, accountStatus)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO users (username, password, companyName, companyAddress, companyEmail, repNames, repNum, businessPermit, validID, userRole, accountStatus, accCreated)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`; // Added accCreated
 
     connection.query(sql, userData, (err, result) => {
         if (err) return callback(err, null);
