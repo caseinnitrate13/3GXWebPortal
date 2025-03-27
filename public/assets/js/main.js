@@ -254,7 +254,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert("Registration Successful!");
             return window.location.href = "/quotation";
           } else {
-            alert("Error registering. Please try again.");
+            alert(data.message);
           }
       })
       .catch(error => console.error('Error:', error));

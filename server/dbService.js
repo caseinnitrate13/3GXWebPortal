@@ -17,6 +17,7 @@ connection.connect((err) => {
     console.log('db is ' + connection.state);
 });
 
+// Function to register a user
 function registerUser(userData, callback) {
     const sql = `INSERT INTO users (userID, username, password, companyName, companyAddress, companyEmail, repNames, repNum, businessPermit, validID, userRole, accountStatus, accCreated)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
@@ -27,4 +28,16 @@ function registerUser(userData, callback) {
     });
 }
 
-module.exports = { registerUser };
+// Function to check for duplicate username or email
+function checkDuplicateUser(username, companyEmail, callback) {
+    const query = "SELECT * FROM users WHERE username = ? OR companyEmail = ?";
+    connection.query(query, [username, companyEmail], (err, result) => {
+        if (err) return callback(err, null);
+        if (result.length > 0) return callback(null, true);
+        return callback(null, false); 
+    });
+}
+
+module.exports = { registerUser, checkDuplicateUser };
+
+
