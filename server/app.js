@@ -71,7 +71,7 @@ app.post('/register', async (req, res, next) => {
         }
 
         const { regUsername, regCompanyEmail } = req.body;
-        
+
         dbService.checkDuplicateUser(regUsername, regCompanyEmail, async (err, existingUser) => {
             if (err) {
                 console.error("Error checking duplicate user:", err);
@@ -131,6 +131,12 @@ app.post('/register', async (req, res, next) => {
                     console.error("Error inserting user:", err);
                     return res.status(500).json({ success: false, message: "Error registering user" });
                 }
+                const accountStatus = "Pending";
+
+                if (accountStatus === "Pending") {
+                    return res.json({ success: true, message: "Registration successful! Your account is pending approval.", redirect: "/" });
+                }
+
                 res.json({ success: true, message: "Registration successful!", userID });
             });
         });

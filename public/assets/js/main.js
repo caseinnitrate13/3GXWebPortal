@@ -1,5 +1,5 @@
 
-(function() {
+(function () {
   "use strict";
 
   /**
@@ -36,7 +36,7 @@
    * Sidebar toggle
    */
   if (select('.toggle-sidebar-btn')) {
-    on('click', '.toggle-sidebar-btn', function(e) {
+    on('click', '.toggle-sidebar-btn', function (e) {
       select('body').classList.toggle('toggle-sidebar')
     })
   }
@@ -61,7 +61,7 @@
    * Initiate tooltips
    */
   var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-  var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
     return new bootstrap.Tooltip(tooltipTriggerEl)
   })
 
@@ -73,18 +73,18 @@
     new simpleDatatables.DataTable(datatable, {
       perPageSelect: [5, 10, 15, ["All", -1]],
       columns: [{
-          select: 2,
-          sortSequence: ["desc", "asc"]
-        },
-        {
-          select: 3,
-          sortSequence: ["desc"]
-        },
-        {
-          select: 4,
-          cellClass: "green",
-          headerClass: "red"
-        }
+        select: 2,
+        sortSequence: ["desc", "asc"]
+      },
+      {
+        select: 3,
+        sortSequence: ["desc"]
+      },
+      {
+        select: 4,
+        cellClass: "green",
+        headerClass: "red"
+      }
       ]
     });
   })
@@ -95,7 +95,7 @@
   const mainContainer = select('#main');
   if (mainContainer) {
     setTimeout(() => {
-      new ResizeObserver(function() {
+      new ResizeObserver(function () {
         select('.echart', true).forEach(getEchart => {
           echarts.getInstanceByDom(getEchart).resize();
         })
@@ -107,9 +107,9 @@
 
 
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
 
-  
+
   // SIDEBAR
   const quotation = document.getElementById('quotation');
   const account = document.getElementById('account');
@@ -126,9 +126,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
   // REGISTER ACCOUNT
-  document.getElementById('createAccount').addEventListener('click', function(event) {
+  document.getElementById('createAccount').addEventListener('click', function (event) {
     event.preventDefault(); // Prevent page refresh
-    
+
     const form = document.getElementById('registerForm');
     const regUsername = document.getElementById('regUsername');
     const regPassword = document.getElementById('regPassword');
@@ -146,18 +146,18 @@ document.addEventListener('DOMContentLoaded', function() {
     let isValid = true;
 
     function validateField(input, regex = null) {
-        if (input.value.trim() === "") {
-            input.classList.add('is-invalid');
-            input.classList.remove('is-valid');
-            isValid = false;
-        } else if (regex && !regex.test(input.value)) {
-            input.classList.add('is-invalid');
-            input.classList.remove('is-valid');
-            isValid = false;
-        } else {
-            input.classList.add('is-valid');
-            input.classList.remove('is-invalid');
-        }
+      if (input.value.trim() === "") {
+        input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
+        isValid = false;
+      } else if (regex && !regex.test(input.value)) {
+        input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
+        isValid = false;
+      } else {
+        input.classList.add('is-valid');
+        input.classList.remove('is-invalid');
+      }
     }
 
     // Username (10-15 alphanumeric characters)
@@ -168,12 +168,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Confirm password validation
     if (confirmPassword.value.trim() === "" || confirmPassword.value !== regPassword.value) {
-        confirmPassword.classList.add('is-invalid');
-        confirmPassword.classList.remove('is-valid');
-        isValid = false;
+      confirmPassword.classList.add('is-invalid');
+      confirmPassword.classList.remove('is-valid');
+      isValid = false;
     } else {
-        confirmPassword.classList.add('is-valid');
-        confirmPassword.classList.remove('is-invalid');
+      confirmPassword.classList.add('is-valid');
+      confirmPassword.classList.remove('is-invalid');
     }
 
     // Company name validation (letters, numbers, and spaces)
@@ -206,22 +206,22 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       const fileType = validId.files[0].type;
       if (!fileType.startsWith('image/')) {
-          document.getElementById('validIdError').textContent = "Only image files are allowed.";
-          document.getElementById('validIdError').style.display = 'block';
-          isValid = false;
+        document.getElementById('validIdError').textContent = "Only image files are allowed.";
+        document.getElementById('validIdError').style.display = 'block';
+        isValid = false;
       } else {
-          document.getElementById('validIdError').style.display = 'none';
+        document.getElementById('validIdError').style.display = 'none';
       }
     }
 
     // Terms and conditions validation
     if (!acceptTerms.checked) {
-        acceptTerms.classList.add('is-invalid');
-        acceptTerms.classList.remove('is-valid');
-        isValid = false;
+      acceptTerms.classList.add('is-invalid');
+      acceptTerms.classList.remove('is-valid');
+      isValid = false;
     } else {
-        acceptTerms.classList.add('is-valid');
-        acceptTerms.classList.remove('is-invalid');
+      acceptTerms.classList.add('is-valid');
+      acceptTerms.classList.remove('is-invalid');
     }
 
     // Only redirect if all fields are valid
@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const repNamesArray = [
         { name: document.getElementById('regRepName').value, position: "Main Representative" }
       ];
-    
+
       formData.append('regUsername', document.getElementById('regUsername').value);
       formData.append('regPassword', document.getElementById('regPassword').value);
       formData.append('regCompanyName', document.getElementById('regCompanyName').value);
@@ -243,41 +243,43 @@ document.addEventListener('DOMContentLoaded', function() {
       formData.append('regPhoneNum', document.getElementById('regPhoneNum').value);
       formData.append('busPermit', document.getElementById('busPermit').files[0]);
       formData.append('validId', document.getElementById('validId').files[0]);
-    
+
       fetch('/register', {
         method: 'POST',
         body: formData
       })
-      .then(response => response.json())
-      .then(data => {
+        .then(response => response.json())
+        .then(data => {
           if (data.success) {
-            alert("Registration Successful!");
-            return window.location.href = "/quotation";
+            alert(data.message); // Show success message
+
+            // Redirect based on response
+            window.location.href = data.redirect || "/quotation"; // Redirect to index ("/") if pending, otherwise to "/quotation"
           } else {
-            alert(data.message);
+            alert(data.message); // Show the actual error message from the backend
           }
-      })
-      .catch(error => console.error('Error:', error));
+        })
+        .catch(error => console.error('Error:', error));
     }
   });
 
-  
+
   // File input label updates
   function truncateFileName(fileName, maxLength = 30) {
     if (fileName.length > maxLength) {
-        return fileName.substring(0, maxLength) + '...';
+      return fileName.substring(0, maxLength) + '...';
     }
     return fileName;
   }
 
-  document.getElementById('busPermit').addEventListener('change', function() {
-      let label = document.getElementById('busPermitLabel');
-      label.textContent = this.files.length ? truncateFileName(this.files[0].name) : 'Upload Business Permit';
+  document.getElementById('busPermit').addEventListener('change', function () {
+    let label = document.getElementById('busPermitLabel');
+    label.textContent = this.files.length ? truncateFileName(this.files[0].name) : 'Upload Business Permit';
   });
 
-  document.getElementById('validId').addEventListener('change', function() {
-      let label = document.getElementById('validIdLabel');
-      label.textContent = this.files.length ? truncateFileName(this.files[0].name) : 'Upload Valid ID';
+  document.getElementById('validId').addEventListener('change', function () {
+    let label = document.getElementById('validIdLabel');
+    label.textContent = this.files.length ? truncateFileName(this.files[0].name) : 'Upload Valid ID';
   });
 
 });
@@ -285,10 +287,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ACCOUNT
 // REPRESENTATIVE
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
 
   // ADD SUB-REPRESENTATIVE
-  const addSubRepBtn =  document.getElementById('addSubRepBtn');
+  const addSubRepBtn = document.getElementById('addSubRepBtn');
   const form = document.getElementById("addSubRepForm");
   addSubRepBtn.addEventListener('click', function () {
 
@@ -308,14 +310,14 @@ document.addEventListener("DOMContentLoaded", function() {
     const subRepEntry = document.createElement("div");
     subRepEntry.classList.add("sub-rep-entry", "mb-2");
     subRepEntry.innerHTML = `<strong>${RepName}</strong><br><span class="text-muted">${RepDept}</span>`
-          ;
+      ;
 
     document.getElementById("subRepList").appendChild(subRepEntry);
 
     // close modal 
     const addSubRepModal = document.getElementById('addSubRepModal');
     const addRepModal = bootstrap.Modal.getInstance(addSubRepModal);
-    
+
     if (addRepModal) {
       // Clear input fields
       subRepName.value = "";
@@ -352,19 +354,19 @@ document.addEventListener("DOMContentLoaded", function() {
   let selectedRow = null;
 
   document.getElementById("editRepTable").addEventListener("click", function (event) {
-      if (event.target.classList.contains("bi-pencil-square")) {
-          selectedRow = event.target.closest("tr");
+    if (event.target.classList.contains("bi-pencil-square")) {
+      selectedRow = event.target.closest("tr");
 
-          repName = selectedRow.cells[1].textContent.trim();
-          repDept = selectedRow.cells[2].textContent.trim();
+      repName = selectedRow.cells[1].textContent.trim();
+      repDept = selectedRow.cells[2].textContent.trim();
 
-          document.getElementById("editRepInput").value = repName;
-          document.getElementById("editRepDeptInput").value = repDept;
+      document.getElementById("editRepInput").value = repName;
+      document.getElementById("editRepDeptInput").value = repDept;
 
-          // Show the edit modal
-          let editModal = new bootstrap.Modal(document.getElementById("editRow"));
-          editModal.show();
-      }
+      // Show the edit modal
+      let editModal = new bootstrap.Modal(document.getElementById("editRow"));
+      editModal.show();
+    }
   });
 
   const saveRow = document.getElementById("saveRow");
@@ -373,15 +375,15 @@ document.addEventListener("DOMContentLoaded", function() {
     const editRowModal = bootstrap.Modal.getInstance(editRow);
 
     if (editRowModal) {
-        editRowModal.hide(); 
+      editRowModal.hide();
     }
 
     if (selectedRow) {
-        const newRepInput = document.getElementById("editRepInput").value.trim();
-        const newRepDeptInput = document.getElementById("editRepDeptInput").value.trim();
+      const newRepInput = document.getElementById("editRepInput").value.trim();
+      const newRepDeptInput = document.getElementById("editRepDeptInput").value.trim();
 
-        selectedRow.cells[1].textContent = newRepInput;
-        selectedRow.cells[2].textContent = newRepDeptInput;
+      selectedRow.cells[1].textContent = newRepInput;
+      selectedRow.cells[2].textContent = newRepDeptInput;
     }
 
     // Show the next modal
@@ -403,7 +405,7 @@ document.addEventListener("DOMContentLoaded", function() {
   const mainForm = document.getElementById("editMainRepForm");
 
   const saveMainRep = document.getElementById('saveMainRep');
-  saveMainRep.addEventListener('click', function(){
+  saveMainRep.addEventListener('click', function () {
 
     // validation
     if (!mainForm.checkValidity()) {
@@ -414,14 +416,14 @@ document.addEventListener("DOMContentLoaded", function() {
     const newMainName = mainRepNameInput.value.trim();
     const newMainDept = mainRepDeptInput.value.trim();
 
-    if (mainRepNameInput && mainRepDeptInput){
+    if (mainRepNameInput && mainRepDeptInput) {
       mainRepName.textContent = newMainName;
       mainRepDept.textContent = newMainDept;
-    } 
+    }
 
     const editMainRepModal = document.getElementById('editMainRepModal');
     const editMainModal = bootstrap.Modal.getInstance(editMainRepModal);
-    
+
     if (editMainModal) {
       mainRepNameInput.value = "";
       mainRepDeptInput.value = "";
@@ -459,7 +461,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // logout
   const logout = document.getElementById("logoutBtn");
-  logout.addEventListener('click', function(){
+  logout.addEventListener('click', function () {
     window.location.href = "/";
   });
 
@@ -468,8 +470,8 @@ document.addEventListener("DOMContentLoaded", function() {
   const profileUpload = document.getElementById('uploadProfile');
   const deleteProfile = document.getElementById('deleteProfile');
   const profileInput = document.getElementById('profileInput');
-  const profileImage = document.querySelector('.profile-img'); 
-  
+  const profileImage = document.querySelector('.profile-img');
+
   // save changes
   const saveEdit = document.getElementById('editDetails');
 
@@ -486,94 +488,94 @@ document.addEventListener("DOMContentLoaded", function() {
   const email = document.getElementById('email');
   const representative = document.getElementById('representative');
   const phoneNumber = document.getElementById('phoneNumber');
-  
+
   const formValidation = document.getElementById('editProfileForm');
-  
+
   const profilecompanyName = document.getElementById('profilecompanyName');
   const headerCompanyName = document.getElementById('headerCompanyName');
   const headerProfileImg = document.getElementById('headerProfileImg');
   const ProfileImgDisplay = document.getElementById('profileDisplay');
-  const defaultImage = "/assets/img/default-profile.png"; 
+  const defaultImage = "/assets/img/default-profile.png";
 
   let isEditing = false;
-  let uploadedImageURL = defaultImage; 
+  let uploadedImageURL = defaultImage;
 
   profileUpload.disabled = true;
   deleteProfile.disabled = true;
 
   saveEdit.addEventListener('click', function () {
     if (!isEditing) {
-        profileUpload.disabled = false;
-        deleteProfile.disabled = false;
+      profileUpload.disabled = false;
+      deleteProfile.disabled = false;
 
-        // upload profile
-        profileUpload.addEventListener("click", function (event) {
-          event.preventDefault(); 
-          profileInput.click();
-        });
-        
-        // Handle file selection
-        profileInput.addEventListener("change", function (event) {
-          if (event.target.files.length > 0) {
-            const file = event.target.files[0];
-            uploadedImageURL = URL.createObjectURL(file);
-            profileImage.src = uploadedImageURL;
-          }
-        });
+      // upload profile
+      profileUpload.addEventListener("click", function (event) {
+        event.preventDefault();
+        profileInput.click();
+      });
 
-        deleteProfile.addEventListener('click', function(){
-          profileImage.src = defaultImage; 
-          profileInput.value = ""; 
-        });
-
-        usernameEdit.readOnly = false;
-        companyNameEdit.readOnly = false;
-        companyAddressEdit.readOnly = false;
-        emailEdit.readOnly = false;
-        repNameEdit.readOnly = false;
-        phoneNumEdit.readOnly = false;
-
-        usernameEdit.focus();
-        saveEdit.textContent = "Save Changes"; 
-    } else {
-        // Validate form before saving
-        if (!formValidation.checkValidity()) {
-            formValidation.classList.add("was-validated");
-            return;
+      // Handle file selection
+      profileInput.addEventListener("change", function (event) {
+        if (event.target.files.length > 0) {
+          const file = event.target.files[0];
+          uploadedImageURL = URL.createObjectURL(file);
+          profileImage.src = uploadedImageURL;
         }
+      });
 
-        // save values
-        username.textContent = usernameEdit.value.trim();
-        companyName.textContent = companyNameEdit.value.trim();
-        companyAddress.textContent = companyAddressEdit.value.trim();
-        email.textContent = emailEdit.value.trim();
-        representative.textContent = repNameEdit.value.trim();
-        phoneNumber.textContent = phoneNumEdit.value.trim();
+      deleteProfile.addEventListener('click', function () {
+        profileImage.src = defaultImage;
+        profileInput.value = "";
+      });
 
-        profilecompanyName.textContent = companyNameEdit.value.trim();
-        headerCompanyName.textContent = companyNameEdit.value.trim();
+      usernameEdit.readOnly = false;
+      companyNameEdit.readOnly = false;
+      companyAddressEdit.readOnly = false;
+      emailEdit.readOnly = false;
+      repNameEdit.readOnly = false;
+      phoneNumEdit.readOnly = false;
 
-        ProfileImgDisplay.src = uploadedImageURL;
-        headerProfileImg.src = uploadedImageURL;
+      usernameEdit.focus();
+      saveEdit.textContent = "Save Changes";
+    } else {
+      // Validate form before saving
+      if (!formValidation.checkValidity()) {
+        formValidation.classList.add("was-validated");
+        return;
+      }
 
-        usernameEdit.readOnly = true;
-        companyNameEdit.readOnly = true;
-        companyAddressEdit.readOnly = true;
-        emailEdit.readOnly = true;
-        repNameEdit.readOnly = true;
-        phoneNumEdit.readOnly = true;
+      // save values
+      username.textContent = usernameEdit.value.trim();
+      companyName.textContent = companyNameEdit.value.trim();
+      companyAddress.textContent = companyAddressEdit.value.trim();
+      email.textContent = emailEdit.value.trim();
+      representative.textContent = repNameEdit.value.trim();
+      phoneNumber.textContent = phoneNumEdit.value.trim();
 
-        saveEdit.textContent = "Edit Details";
+      profilecompanyName.textContent = companyNameEdit.value.trim();
+      headerCompanyName.textContent = companyNameEdit.value.trim();
+
+      ProfileImgDisplay.src = uploadedImageURL;
+      headerProfileImg.src = uploadedImageURL;
+
+      usernameEdit.readOnly = true;
+      companyNameEdit.readOnly = true;
+      companyAddressEdit.readOnly = true;
+      emailEdit.readOnly = true;
+      repNameEdit.readOnly = true;
+      phoneNumEdit.readOnly = true;
+
+      saveEdit.textContent = "Edit Details";
     }
-  
-      isEditing = !isEditing;
+
+    isEditing = !isEditing;
   });
-  
+
 });
 
 
 // QUOTATION
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   // card/table dropdown
   const cardView = document.getElementById("card-view");
   const tableView = document.getElementById("table-view");
@@ -581,7 +583,7 @@ document.addEventListener("DOMContentLoaded", function() {
   const viewOptions = document.querySelectorAll(".view-option");
 
   viewOptions.forEach(option => {
-    option.addEventListener("click", function(e) {
+    option.addEventListener("click", function (e) {
       e.preventDefault();
       const view = this.getAttribute("data-view");
 
@@ -602,26 +604,26 @@ document.addEventListener("DOMContentLoaded", function() {
 
   document.querySelectorAll(".remove-row").forEach((btn) => {
     btn.addEventListener("click", function () {
-      selectedRow = this.closest("tr"); 
+      selectedRow = this.closest("tr");
     });
   });
 
   document.getElementById("deleteRow").addEventListener("click", function () {
     if (selectedRow) {
-      selectedRow.remove(); 
-      selectedRow = null; 
+      selectedRow.remove();
+      selectedRow = null;
     }
 
     const deleteModal = bootstrap.Modal.getInstance(document.getElementById("deleteRowModal"));
     deleteModal.hide();
   });
-  
+
 });
 
 
 // RFQ
 // T&C textarea
-const quill = new Quill('#editor',{
+const quill = new Quill('#editor', {
   modules: {
     toolbar: [
       ['bold', 'italic'],
@@ -629,11 +631,11 @@ const quill = new Quill('#editor',{
       [{ list: 'ordered' }, { list: 'bullet' }],
     ],
   },
-  theme: 'snow', 
+  theme: 'snow',
 });
 
 // note textares
-const quill2 = new Quill('#editor2',{
+const quill2 = new Quill('#editor2', {
   modules: {
     toolbar: [
       ['bold', 'italic'],
@@ -641,16 +643,16 @@ const quill2 = new Quill('#editor2',{
       [{ list: 'ordered' }, { list: 'bullet' }],
     ],
   },
-  theme: 'snow', 
+  theme: 'snow',
 });
 
 
 // RFQ table
 $(document).ready(function () {
   $("#addRowBtn").on("click", function (e) {
-      e.preventDefault(); // Prevents page refresh
+    e.preventDefault(); // Prevents page refresh
 
-      let newRow = `
+    let newRow = `
           <tr>
             <td><input type="text" class="form-control-plaintext border-bottom-custom" name="item_name"></td>
             <td><input type="text" class="form-control-plaintext border-bottom-custom" name="description"></td>
@@ -664,12 +666,12 @@ $(document).ready(function () {
         </tr>
       `;
 
-      $("#tableBody").append(newRow);
+    $("#tableBody").append(newRow);
   });
 
   // remove row
   $(document).on("click", ".remove-row", function () {
-      $(this).closest("tr").remove();
+    $(this).closest("tr").remove();
   });
 });
 
@@ -683,45 +685,45 @@ document.addEventListener("DOMContentLoaded", function () {
   let uploadedFileName = null;
 
   fileUploadBtn.addEventListener("click", function () {
-      fileUpload.click();
+    fileUpload.click();
   });
 
   // Handle file selection
   fileUpload.addEventListener("change", function (event) {
-      if (event.target.files.length > 0) {
-          handleFile(event.target.files[0]);
-      }
+    if (event.target.files.length > 0) {
+      handleFile(event.target.files[0]);
+    }
   });
 
   // Drag & Drop functionality
   fileUploadPreview.addEventListener("dragover", function (event) {
-      event.preventDefault();
-      fileUploadPreview.classList.add("drag-over");
+    event.preventDefault();
+    fileUploadPreview.classList.add("drag-over");
   });
 
   fileUploadPreview.addEventListener("dragleave", function () {
-      fileUploadPreview.classList.remove("drag-over");
+    fileUploadPreview.classList.remove("drag-over");
   });
 
   fileUploadPreview.addEventListener("drop", function (event) {
-      event.preventDefault();
-      fileUploadPreview.classList.remove("drag-over");
-      if (event.dataTransfer.files.length > 0) {
-          handleFile(event.dataTransfer.files[0]);
-      }
+    event.preventDefault();
+    fileUploadPreview.classList.remove("drag-over");
+    if (event.dataTransfer.files.length > 0) {
+      handleFile(event.dataTransfer.files[0]);
+    }
   });
 
   // Function to handle the file display
   function handleFile(file) {
-      if (file) {
-          uploadedFileName = file.name;
-          fileUploadPreview.innerHTML = `
+    if (file) {
+      uploadedFileName = file.name;
+      fileUploadPreview.innerHTML = `
               <div class="file-preview">
                   <i class="bi bi-file-earmark-text"></i>
                   <p>${uploadedFileName}</p>
               </div>
           `;
-      }
+    }
   }
 
   // save uploaded file
@@ -729,34 +731,34 @@ document.addEventListener("DOMContentLoaded", function () {
     if (uploadedFileName) {
       const attachmentModalElement = document.getElementById('attachmentModal');
       const signatureModal = bootstrap.Modal.getInstance(attachmentModalElement);
-      
+
       if (signatureModal) {
         signatureModal.hide();
       }
-    
+
       attachmentModalElement.addEventListener('hidden.bs.modal', () => {
         document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
         document.body.style.overflow = 'auto';
-    
+
         canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
       }, { once: true });
 
 
-        // Truncate long file names for the button
-        let displayFileName = uploadedFileName.length > 20 
-            ? uploadedFileName.substring(0, 17) + "..." 
-            : uploadedFileName;
+      // Truncate long file names for the button
+      let displayFileName = uploadedFileName.length > 20
+        ? uploadedFileName.substring(0, 17) + "..."
+        : uploadedFileName;
 
-        attachBtn.innerHTML = `<i class="bi bi-paperclip me-1"></i> ${displayFileName}`;
+      attachBtn.innerHTML = `<i class="bi bi-paperclip me-1"></i> ${displayFileName}`;
     }
-});
+  });
 
   // Reset modal content when closed
   document.getElementById("attachmentModal").addEventListener("hidden.bs.modal", function () {
-      fileUploadPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
+    fileUploadPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
 
-      uploadedFileName = null;
-      fileUpload.value = ""; 
+    uploadedFileName = null;
+    fileUpload.value = "";
   });
 
   // Ensure clicking the attach button always reopens the file chooser
@@ -782,93 +784,93 @@ document.addEventListener("DOMContentLoaded", function () {
   let uploadedImage = null;
 
   uploadImgBtn.addEventListener("click", function () {
-      fileInput.click(); 
+    fileInput.click();
   });
 
   // Handle file selection
   fileInput.addEventListener("change", function (event) {
-      if (event.target.files.length > 0) {
-          handleFile(event.target.files[0]);
-      }
+    if (event.target.files.length > 0) {
+      handleFile(event.target.files[0]);
+    }
   });
 
   // Handle drag & drop
   uploadSignPreview.addEventListener("dragover", function (event) {
-      event.preventDefault();
-      uploadSignPreview.classList.add("drag-over");
+    event.preventDefault();
+    uploadSignPreview.classList.add("drag-over");
   });
 
   uploadSignPreview.addEventListener("dragleave", function () {
-      uploadSignPreview.classList.remove("drag-over");
+    uploadSignPreview.classList.remove("drag-over");
   });
 
   uploadSignPreview.addEventListener("drop", function (event) {
-      event.preventDefault();
-      uploadSignPreview.classList.remove("drag-over");
-      if (event.dataTransfer.files.length > 0) {
-          handleFile(event.dataTransfer.files[0]);
-      }
+    event.preventDefault();
+    uploadSignPreview.classList.remove("drag-over");
+    if (event.dataTransfer.files.length > 0) {
+      handleFile(event.dataTransfer.files[0]);
+    }
   });
 
   // Handle image display
   function handleFile(file) {
-      if (file && file.type.startsWith("image/")) {
-          const reader = new FileReader();
-          reader.onload = function (e) {
-              uploadedImage = e.target.result;
-              uploadSignPreview.innerHTML = `<img src="${uploadedImage}" class="img-fluid">`;
-          };
-          reader.readAsDataURL(file);
-      }
+    if (file && file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        uploadedImage = e.target.result;
+        uploadSignPreview.innerHTML = `<img src="${uploadedImage}" class="img-fluid">`;
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   // Save uploaded image to previewContainer
   saveButton.addEventListener("click", function () {
 
-      if (uploadedImage) {
-          const signatureModalElement = document.getElementById('signatureModal');
-          const signatureModal = bootstrap.Modal.getInstance(signatureModalElement);
-          
-          if (signatureModal) {
-            signatureModal.hide();
-          }
-        
-          signatureModalElement.addEventListener('hidden.bs.modal', () => {
-            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-            document.body.style.overflow = 'auto';
-        
-            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-          }, { once: true });
-      
-          const uploadSignBtn = document.getElementById('uploadSignBtn');
-          const previewContainer = document.getElementById('previewContainer');
-        
-          uploadSignBtn.style.display = 'none';
-          signPadBtn.style.display = 'none';
+    if (uploadedImage) {
+      const signatureModalElement = document.getElementById('signatureModal');
+      const signatureModal = bootstrap.Modal.getInstance(signatureModalElement);
 
-          signaturePreview.innerHTML = `<img src="${uploadedImage}" class="img-fluid">`;
-          previewContainer.style.display = "block";
-          document.getElementById("signatureModal").classList.remove("show");
-          document.body.classList.remove("modal-open");
+      if (signatureModal) {
+        signatureModal.hide();
       }
+
+      signatureModalElement.addEventListener('hidden.bs.modal', () => {
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+        document.body.style.overflow = 'auto';
+
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+      }, { once: true });
+
+      const uploadSignBtn = document.getElementById('uploadSignBtn');
+      const previewContainer = document.getElementById('previewContainer');
+
+      uploadSignBtn.style.display = 'none';
+      signPadBtn.style.display = 'none';
+
+      signaturePreview.innerHTML = `<img src="${uploadedImage}" class="img-fluid">`;
+      previewContainer.style.display = "block";
+      document.getElementById("signatureModal").classList.remove("show");
+      document.body.classList.remove("modal-open");
+    }
   });
 
   // Reset modal content when closed
   document.getElementById("signatureModal").addEventListener("hidden.bs.modal", function () {
-      uploadSignPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
-      uploadedImage = null;
+    uploadSignPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
+    uploadedImage = null;
   });
 
   // Ensure modal resets properly when reopening
-document.getElementById('uploadSignBtn').addEventListener('click', () => {
-  const signatureModalElement = document.getElementById('signatureModal');
+  document.getElementById('uploadSignBtn').addEventListener('click', () => {
+    const signatureModalElement = document.getElementById('signatureModal');
 
-  // Remove lingering backdrops (if any)
-  document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+    // Remove lingering backdrops (if any)
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
 
-  const signatureModal = new bootstrap.Modal(signatureModalElement);
-  signatureModal.show();
-});
+    const signatureModal = new bootstrap.Modal(signatureModalElement);
+    signatureModal.show();
+  });
 
 });
 
@@ -881,11 +883,11 @@ const submitButton = document.getElementById('submit');
 
 let writingMode = false;
 
-canvas.width = 420;  
-canvas.height = 200; 
+canvas.width = 420;
+canvas.height = 200;
 
 // Initialize the drawing context properties
-ctx.lineWidth = 2; 
+ctx.lineWidth = 2;
 ctx.lineJoin = ctx.lineCap = 'round';
 
 let lastX, lastY, lastMidX, lastMidY;
@@ -929,8 +931,8 @@ canvas.addEventListener('pointerout', () => {
 // Function to get canvas offset relative to the canvas itself
 function getCanvasOffset(event) {
   const rect = canvas.getBoundingClientRect();
-  const offsetX = event.clientX - rect.left;   
-  const offsetY = event.clientY - rect.top;   
+  const offsetX = event.clientX - rect.left;
+  const offsetY = event.clientY - rect.top;
   return { offsetX, offsetY };
 }
 
@@ -949,7 +951,7 @@ submitButton.addEventListener('click', () => {
 
   const signatureModalElement = document.getElementById('signaturePadModal');
   const signatureModal = bootstrap.Modal.getInstance(signatureModalElement);
-  
+
   if (signatureModal) {
     signatureModal.hide();
   }
@@ -971,7 +973,7 @@ submitButton.addEventListener('click', () => {
   signPadBtn.style.display = 'none';
   previewContainer.style.display = 'block';
 
-  previewArea.innerHTML = ''; 
+  previewArea.innerHTML = '';
   previewArea.appendChild(imgElement);
 });
 
@@ -1003,7 +1005,7 @@ document.getElementById('signPadBtn').addEventListener('click', () => {
 
 // save/send form
 document.getElementById('sendBtn').addEventListener('click', () => {
-  window.location.href = "quotation"; 
+  window.location.href = "quotation";
 });
 
 document.getElementById('saveDraftBtn').addEventListener('click', () => {
