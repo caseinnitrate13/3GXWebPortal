@@ -14,17 +14,17 @@ connection.connect((err) => {
     if (err) {
         console.log(err.message);
     }
-    console.log('db is ' + connection.state)
-})
+    console.log('db is ' + connection.state);
+});
 
-const registerUser = (userData, callback) => {
-    const sql = `INSERT INTO users (username, password, companyName, companyAddress, companyEmail, repNames, repNum, businessPermit, validID, userRole, accountStatus, accCreated)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`; // Added accCreated
+function registerUser(userData, callback) {
+    const sql = `INSERT INTO users (userID, username, password, companyName, companyAddress, companyEmail, repNames, repNum, businessPermit, validID, userRole, accountStatus, accCreated)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     connection.query(sql, userData, (err, result) => {
         if (err) return callback(err, null);
-        callback(null, result);
+        callback(null, { result, userID: userData[0] });
     });
-};
+}
 
 module.exports = { registerUser };

@@ -4,19 +4,28 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const multer = require('multer');
 const path = require('path');
+const bcrypt = require('bcryptjs');
 dotenv.config();
 
 const dbService = require('./dbService');
+
+const nanoid = async () => {
+    const { customAlphabet } = await import('nanoid');
+    return customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', 12)();
+};
+
 
 const app = express();
 const port = process.env.PORT;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({extended : true}));
+app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from the "public" folder
 app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 
 app.get('/', (req, res) => {
@@ -31,67 +40,98 @@ const template = fs.readFileSync(path.join(__dirname, '..', 'public', 'template.
 // REGISTER
 
 // Multer Storage for Business Permit & Valid ID
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/');
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname);
-    }
-});
-
+const storage = multer.memoryStorage(); // Store files in memory first
 const upload = multer({ storage: storage });
 
-// Registration API
-
-app.get('/register', (req,res) => {
+app.get('/register', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'register.html'));
 });
 
-app.post('/register', upload.fields([
+app.post('/register', async (req, res, next) => {
+    try {
+        res.locals.userID = await nanoid();
+        next();
+    } catch (error) {
+        console.error("Error generating userID:", error);
+        return res.status(500).json({ success: false, message: "Server error" });
+    }
+}, upload.fields([
     { name: 'busPermit', maxCount: 1 },
     { name: 'validId', maxCount: 1 }
-]), (req, res) => {
-    const { regUsername, regPassword, regCompanyName, regCompanyAddress, regCompanyEmail, regPhoneNum, repNames } = req.body;
-
-    const busPermitPath = req.files['busPermit'] ? req.files['busPermit'][0].filename : null;
-    const validIdPath = req.files['validId'] ? req.files['validId'][0].filename : null;
-
-    // console.log("Bus Permit Path:", busPermitPath);
-    // console.log("Valid ID Path:", validIdPath);
-
-    const accCreated = new Date().toLocaleString('en-CA', { hour12: false }).replace(",", "");
-
-    let parsedRepNames;
+]), async (req, res) => {
     try {
-        parsedRepNames = JSON.parse(repNames);
-    } catch (error) {
-        return res.status(400).json({ success: false, message: "Invalid representative data" });
-    }
-
-    const userData = [
-        regUsername,
-        regPassword,
-        regCompanyName,
-        regCompanyAddress,
-        regCompanyEmail,
-        JSON.stringify(parsedRepNames),
-        regPhoneNum,
-        busPermitPath,
-        validIdPath,
-        "Client",
-        "Pending",
-        accCreated
-    ];
-
-    dbService.registerUser(userData, (err, result) => {
-        if (err) {
-            console.error("Error inserting user:", err);
-            return res.status(500).json({ success: false, message: "Error registering user" });
+        const userID = res.locals.userID;
+        if (!userID || typeof userID !== "string") {
+            return res.status(500).json({ success: false, message: "Invalid userID" });
         }
-        res.json({ success: true, message: "Registration successful!" });
-    });
+
+        if (!req.files || !req.files['busPermit'] || !req.files['validId']) {
+            console.error("File upload failed, req.files:", req.files);
+            return res.status(400).json({ success: false, message: "Missing required files" });
+        }
+
+        const basePath = path.join(__dirname, "uploads", "users", userID);
+        fs.mkdirSync(basePath, { recursive: true });
+
+        const businessPermitDir = path.join(basePath, "business_permit");
+        const validIdDir = path.join(basePath, "valid_id");
+        fs.mkdirSync(businessPermitDir, { recursive: true });
+        fs.mkdirSync(validIdDir, { recursive: true });
+
+        const busPermitFilename = `${Date.now()}-${req.files['busPermit'][0].originalname}`;
+        const validIdFilename = `${Date.now()}-${req.files['validId'][0].originalname}`;
+
+        const busPermitPath = path.join(businessPermitDir, busPermitFilename);
+        const validIdPath = path.join(validIdDir, validIdFilename);
+
+        await fs.promises.writeFile(busPermitPath, req.files['busPermit'][0].buffer);
+        await fs.promises.writeFile(validIdPath, req.files['validId'][0].buffer);
+
+        // Store public-accessible paths
+        const busPermitPublicPath = `/uploads/users/${userID}/business_permit/${busPermitFilename}`;
+        const validIdPublicPath = `/uploads/users/${userID}/valid_id/${validIdFilename}`;
+
+        let hashedPassword;
+        try {
+            hashedPassword = await bcrypt.hash(req.body.regPassword, 10);
+        } catch (error) {
+            console.error("Error hashing password:", error);
+            return res.status(500).json({ success: false, message: "Error processing password" });
+        }
+
+        let parsedRepNames = [];
+        if (req.body.repNames) {
+            try {
+                parsedRepNames = JSON.parse(req.body.repNames);
+            } catch (error) {
+                console.error("Invalid JSON for repNames:", req.body.repNames);
+                return res.status(400).json({ success: false, message: "Invalid representative data format" });
+            }
+        }
+
+        const accCreated = new Date().toLocaleString('en-CA', { hour12: false }).replace(",", "");
+
+        const userData = [
+            userID, req.body.regUsername, hashedPassword, req.body.regCompanyName,
+            req.body.regCompanyAddress, req.body.regCompanyEmail, JSON.stringify(parsedRepNames),
+            req.body.regPhoneNum, busPermitPublicPath, validIdPublicPath, "Client", "Pending", accCreated
+        ];
+
+        dbService.registerUser(userData, (err, result) => {
+            if (err) {
+                console.error("Error inserting user:", err);
+                return res.status(500).json({ success: false, message: "Error registering user" });
+            }
+            res.json({ success: true, message: "Registration successful!", userID });
+        });
+
+    } catch (error) {
+        console.error("Error in registration:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
 });
+
+
 
 
 app.get('/quotation', (req, res) => {
