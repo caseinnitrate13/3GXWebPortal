@@ -431,7 +431,7 @@ h6 {
 
 @media (min-width: 1200px) {
   .logo {
-    width: 280px;
+    width: 230px;
   }
 }
 
@@ -1561,4 +1561,10 @@ border-top-right-radius: 10px;
 .invalid-feedback{
   font-size: 12px;
   font-weight: 300;
+}
+
+.d-flex span {
+  flex-grow: 1; 
+  overflow: hidden; 
+  text-overflow: ellipsis;
 }

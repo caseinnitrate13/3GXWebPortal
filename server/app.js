@@ -32,6 +32,10 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
+app.get('/register', (req,res) => {
+    res.sendFile(path.join(__dirname, '..', 'public', 'register.html'));
+});
+
 
 const template = fs.readFileSync(path.join(__dirname, '..', 'public', 'template.html'), 'utf-8');
 
@@ -46,6 +50,108 @@ const upload = multer({ storage: storage });
 app.get('/register', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'register.html'));
 });
+
+app.post('/register', async (req, res, next) => {
+    try {
+        res.locals.userID = await nanoid();
+        next();
+    } catch (error) {
+        console.error("Error generating userID:", error);
+        return res.status(500).json({ success: false, message: "Server error" });
+    }
+}, upload.fields([
+    { name: 'busPermit', maxCount: 1 },
+    { name: 'validId', maxCount: 1 }
+]), async (req, res) => {
+    try {
+        const userID = res.locals.userID;
+        if (!userID || typeof userID !== "string") {
+            return res.status(500).json({ success: false, message: "Invalid userID" });
+        }
+
+        if (!req.files || !req.files['busPermit'] || !req.files['validId']) {
+            console.error("File upload failed, req.files:", req.files);
+            return res.status(400).json({ success: false, message: "Missing required files" });
+        }
+
+        const { regUsername, regCompanyEmail } = req.body;
+
+        dbService.checkDuplicateUser(regUsername, regCompanyEmail, async (err, existingUser) => {
+            if (err) {
+                console.error("Error checking duplicate user:", err);
+                return res.status(500).json({ success: false, message: "Server error" });
+            }
+
+            if (existingUser) {
+                return res.status(400).json({ success: false, message: "Username or company email already exists" });
+            }
+
+            // Continue with registration process
+            const basePath = path.join(__dirname, "uploads", "users", userID);
+            fs.mkdirSync(basePath, { recursive: true });
+
+            const businessPermitDir = path.join(basePath, "business_permit");
+            const validIdDir = path.join(basePath, "valid_id");
+            fs.mkdirSync(businessPermitDir, { recursive: true });
+            fs.mkdirSync(validIdDir, { recursive: true });
+
+            const busPermitFilename = `${Date.now()}-${req.files['busPermit'][0].originalname}`;
+            const validIdFilename = `${Date.now()}-${req.files['validId'][0].originalname}`;
+
+            const busPermitPath = `uploads/users/${userID}/business_permit/${busPermitFilename}`;
+            const validIdPath = `uploads/users/${userID}/valid_id/${validIdFilename}`;
+
+            await fs.promises.writeFile(path.join(__dirname, busPermitPath), req.files['busPermit'][0].buffer);
+            await fs.promises.writeFile(path.join(__dirname, validIdPath), req.files['validId'][0].buffer);
+
+            let hashedPassword;
+            try {
+                hashedPassword = await bcrypt.hash(req.body.regPassword, 10);
+            } catch (error) {
+                console.error("Error hashing password:", error);
+                return res.status(500).json({ success: false, message: "Error processing password" });
+            }
+
+            let parsedRepNames = [];
+            if (req.body.repNames) {
+                try {
+                    parsedRepNames = JSON.parse(req.body.repNames);
+                } catch (error) {
+                    console.error("Invalid JSON for repNames:", req.body.repNames);
+                    return res.status(400).json({ success: false, message: "Invalid representative data format" });
+                }
+            }
+
+            const accCreated = new Date().toLocaleString('en-CA', { hour12: false }).replace(",", "");
+
+            const userData = [
+                userID, regUsername, hashedPassword, req.body.regCompanyName,
+                req.body.regCompanyAddress, regCompanyEmail, JSON.stringify(parsedRepNames),
+                req.body.regPhoneNum, busPermitPath, validIdPath, "Client", "Pending", accCreated
+            ];
+
+            dbService.registerUser(userData, (err, result) => {
+                if (err) {
+                    console.error("Error inserting user:", err);
+                    return res.status(500).json({ success: false, message: "Error registering user" });
+                }
+                const accountStatus = "Pending";
+
+                if (accountStatus === "Pending") {
+                    return res.json({ success: true, message: "Registration successful! Your account is pending approval.", redirect: "/" });
+                }
+
+                res.json({ success: true, message: "Registration successful!", userID });
+            });
+        });
+
+    } catch (error) {
+        console.error("Error in registration:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
+
 
 app.post('/register', async (req, res, next) => {
     try {
@@ -164,10 +270,10 @@ app.get('/account', (req, res) => {
     res.send(template.replace('{{content}}', accountContent));
 });
 
-// app.get('/view-quotation', (req, res) => {
-//     const viewQuotation =fs.readFileSync(path.join(__dirname, '..', 'public', 'view-quotation.html'), 'utf-8');
-//     res.send(template.replace('{{content}}', viewQuotation));
-// });
+app.get('/view-quotation', (req, res) => {
+    const viewQuotation =fs.readFileSync(path.join(__dirname, '..', 'public', 'view-quotation.html'), 'utf-8');
+    res.send(template.replace('{{content}}', viewQuotation));
+});
 
 
 app.use((req, res) => {
