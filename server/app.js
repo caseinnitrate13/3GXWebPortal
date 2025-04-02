@@ -34,7 +34,7 @@ app.get('/', (req, res) => {
 
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
-    
+
     if (!username || !password) {
         return res.status(400).json({ success: false, message: "Username and password are required" });
     }
@@ -48,7 +48,21 @@ app.post('/login', (req, res) => {
             return res.status(401).json({ success: false, message: result.message });
         }
 
-        res.status(200).json({ success: true, user: result });
+ 
+        let redirectUrl = "/quotation"; 
+
+        if (result.accountStatus === "Pending") {
+            redirectUrl = "/initial-registration"; 
+        } else if (result.accountStatus === "Rejected") {
+            redirectUrl = "/";
+        }
+
+        res.status(200).json({ 
+            success: true, 
+            message: "Login successful!", 
+            user: result, 
+            redirect: redirectUrl 
+        });
     });
 });
 
@@ -187,6 +201,10 @@ app.get('/account', (req, res) => {
 app.get('/view-quotation', (req, res) => {
     const viewQuotation =fs.readFileSync(path.join(__dirname, '..', 'public', 'view-quotation.html'), 'utf-8');
     res.send(template.replace('{{content}}', viewQuotation));
+});
+
+app.get('/initial-registration', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'public', 'initial-registration.html'));
 });
 
 

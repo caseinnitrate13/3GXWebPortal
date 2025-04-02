@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 //LOGIN
 document.getElementById('loginBtn').addEventListener('click', async function (event) {
-  event.preventDefault(); // Prevent page refresh
+  event.preventDefault();
 
   const loginUsername = document.getElementById('loginUsername');
   const loginPassword = document.getElementById('loginPassword');
@@ -328,10 +328,11 @@ document.getElementById('loginBtn').addEventListener('click', async function (ev
 
           if (data.success) {
               localStorage.setItem('user', JSON.stringify(data.user));
-              alert(data.message); // Show backend message
-              window.location.href = '/quotation';
+              // alert(data.message);
+
+              window.location.href = data.redirect || "/quotation"; 
           } else {
-              alert(data.message); // Show error message from backend
+              alert(data.message); 
           }
       } catch (error) {
           console.error('Login failed:', error);
@@ -339,6 +340,7 @@ document.getElementById('loginBtn').addEventListener('click', async function (ev
       }
   }
 });
+
 
 
 
