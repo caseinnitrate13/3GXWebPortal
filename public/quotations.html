@@ -1,36 +1,36 @@
 <div class="pagetitle">
   <h1>Request For Quotation</h1>
 </div>
-
-<div class="d-flex align-items-center justify-content-between mt-4 w400">
-  <div class="d-flex align-items-center">
-    <span class="pe-2">View Type:</span> 
-    <div class="dropdown ms-3 me-3">
-      <a class="d-flex align-items-center border ps-3 pe-3 pt-1 pb-1 text-secondary" href="#" data-bs-toggle="dropdown">
+<div class="d-flex align-items-center justify-content-between mt-4 w400 flex-wrap">
+  <div class="d-flex align-items-center viewtype-container flex-nowrap">
+    <span class="pe-2 viewtype-text">View Type:</span> 
+    <div class="dropdown ms-2">
+      <a class="d-flex align-items-center border px-2 py-1 text-secondary viewtype-dropdown" href="#" data-bs-toggle="dropdown">
         <span id="selected-view" class="dropdown-toggle">Card View</span>
       </a>
       <ul class="dropdown-menu dropdown-menu-right dropdown-menu-arrow text-secondary">
         <li>
           <a class="dropdown-item d-flex align-items-center view-option" href="#" data-view="card">
-            <i class="bi bi-card-text"></i>
+            <i class="bi bi-card-text me-1"></i>
             <span>Card View</span>
           </a>
         </li>
         <li><hr class="dropdown-divider"></li>
         <li>
           <a class="dropdown-item d-flex align-items-center view-option" href="#" data-view="table">
-            <i class="bi bi-table"></i>
+            <i class="bi bi-table me-1"></i>
             <span>Table View</span>
           </a>
         </li>
       </ul>
     </div>
   </div>
-  <a href="/request-for-quotation-form" class="btn btn-primary rounded-pill">
-    <i class="bi bi-plus"></i> Request
-  </a>
   
+  <a href="/request-for-quotation-form" class="btn btn-primary rounded-pill request-btn">
+    <i class="bi bi-plus"></i> <span>Request</span>
+  </a>
 </div>
+
 
 
 <!-- card view -->
@@ -77,26 +77,28 @@
       <div class="card">
         <div class="card-body">
           <h5 class="w700 mt-3">Draft RFQs</h5>
-          <table class="table datatable ">
-            <thead>
-              <tr>
-                <th><input type="checkbox" class="select-checkbox-business me-2" title="select"></th>
-                <th>RFQ Number</th>
-                <th>Approved Budget for the Contract (ABC)</th>
-                <th data-type="date" data-format="YYYY/DD/MM">RFQ Date</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="table-responsive">
+            <table class="table datatable overflow-hidden">
+              <thead>
+                <tr>
+                  <th><input type="checkbox" class="select-checkbox-business me-2" title="select"></th>
+                  <th>RFQ Number</th>
+                  <th>Approved Budget for the Contract (ABC)</th>
+                  <th data-type="date" data-format="YYYY/DD/MM">RFQ Date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -104,190 +106,192 @@
       <div class="card">
         <div class="card-body">
           <h5 class="w700 mt-3">Pending RFQs</h5>
-          <table class="table datatable ">
-            <thead>
-              <tr>
-                <th><input type="checkbox" class="select-checkbox-business me-2" title="select"></th>
-                <th>RFQ Number</th>
-                <th>Approved Budget for the Contract (ABC)</th>
-                <th data-type="date" data-format="YYYY/DD/MM">RFQ Date</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>1Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>2Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>3Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>4Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>5Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>6Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>7Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
+          <div class="table-responsive">
+            <table class="table datatable overflow-hidden">
+              <thead>
+                <tr>
+                  <th><input type="checkbox" class="select-checkbox-business me-2" title="select"></th>
+                  <th>RFQ Number</th>
+                  <th>Approved Budget for the Contract (ABC)</th>
+                  <th data-type="date" data-format="YYYY/DD/MM">RFQ Date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>1Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>2Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>3Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>4Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>5Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>6Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>7Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
 
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
 
-              <tr>
-                <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
-                <td>24Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-              </tr>
-              
-            </tbody>
-          </table>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>24Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                </tr>
+                
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -295,34 +299,36 @@
       <div class="card">
         <div class="card-body">
           <h5 class="w700 mt-3">Quotation</h5>
-          <table class="table datatable ">
-            <thead>
-              <tr>
-                <th>RFQ Number</th>
-                <th>Approved Budget for the Contract (ABC)</th>
-                <th data-type="date" data-format="YYYY/DD/MM">RFQ Date</th>
-                <th>Quote Number</th>
-                <th>Price</th>
-                <th data-type="date" data-format="YYYY/DD/MM">Date</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Unity Pugh</td>
-                <td>9958</td>
-                <td>Elliott Snyder</td>
-                <td>3925</td>
-                <td>Enines</td>
-                <td>2006/03/08</td>
-                <td class="text-center">
-                  <a href="/view-quotation">
-                    <i class="bi bi-eye me-1 text-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="View"></i>
-                  </a>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="table-responsive">
+            <table class="table datatable overflow-hidden">
+              <thead>
+                <tr>
+                  <th>RFQ Number</th>
+                  <th>Approved Budget for the Contract (ABC)</th>
+                  <th data-type="date" data-format="YYYY/DD/MM">RFQ Date</th>
+                  <th>Quote Number</th>
+                  <th>Price</th>
+                  <th data-type="date" data-format="YYYY/DD/MM">Date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>Elliott Snyder</td>
+                  <td>3925</td>
+                  <td>Enines</td>
+                  <td>2006/03/08</td>
+                  <td class="text-center">
+                    <a href="/view-quotation">
+                      <i class="bi bi-eye me-1 text-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="View"></i>
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 

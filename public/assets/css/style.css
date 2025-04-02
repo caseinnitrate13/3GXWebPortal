@@ -164,9 +164,6 @@ h6 {
   box-shadow: 0 5px 30px 0 rgba(82, 63, 105, 0.2);
 }
 
-
-
-
 .dropdown-menu .dropdown-header,
 .dropdown-menu .dropdown-footer {
   text-align: center;
@@ -1312,6 +1309,8 @@ h6 {
 
 /* CUSTOMS */
 
+/* QUOTATION */
+
 .table-fs{
   font-size: 14px;
 }
@@ -1329,35 +1328,11 @@ h6 {
   overflow-y: auto; 
 }
 
-
 #editRepTable{
   display: block;
   max-height: 250px;
   overflow-y: auto;
 }
-
-
-
-/* #draftModalTable, #pendingModalTable, #quoteModalTable {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-#draftModalTable thead, #draftModalTable tbody tr, 
-#pendingModalTable thead, #pendingModalTable tbody tr,
-#quoteModalTable thead, #quoteModalTable tbody tr{
-  display: table;
-  width: 100%;
-  table-layout: fixed;
-}
-
-#draftModalTable tbody,
-#pendingModalTable tbody,
-#quoteModalTable tbody {
-  display: block;
-  max-height: 250px;
-  overflow-y: auto;
-} */
 
 #draftCard, #pendingCard, #quoteCard{
   transform: translateY(0);
@@ -1370,10 +1345,28 @@ h6 {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
-
 .pointer{
   cursor: pointer;
 }
+
+.request-btn {
+  display: inline-flex; 
+  align-items: center;  
+  gap: 5px; 
+  white-space: nowrap; 
+  font-size: 1rem;
+  padding: 8px 15px;
+}
+
+.viewtype-text {
+  font-size: 1rem; 
+}
+
+.viewtype-dropdown {
+  font-size: 1rem;
+  padding: 8px 12px;
+}
+
 
 /* REQUEST FORM */
 .border-bottom-custom {
@@ -1578,6 +1571,7 @@ border-top-right-radius: 10px;
 
 /* font size responsive */
 @media (max-width: 768px) {
+  /* VIEW QUOTATION */
   .pagetitle h1 {
       font-size: 1.5rem;
   }
@@ -1608,8 +1602,17 @@ border-top-right-radius: 10px;
       font-size: 0.9rem;
       text-align: center;
   }
+  /* QUOTATION */
+  .view-label,
+  .dropdown-toggle-btn,
+  .request-btn {
+    font-size: 0.9rem;
+  }
 }
+
+
 @media (max-width: 576px) {
+/* VIEW QUOTATION / RFQ */
   .pagetitle h1 {
       font-size: 1.2rem;
   }
@@ -1637,10 +1640,64 @@ border-top-right-radius: 10px;
     align-items: center; 
     max-width: 100%; 
   }
-
   .repName-container p {
     font-size: 0.8rem;
     text-align: center;
+  }
+
+  /* QUOTATION */
+
+  .view-container {
+    flex-direction: column; /* Stack elements vertically */
+    align-items: center; /* Center elements */
+    text-align: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .view-type {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .view-label,
+  .dropdown-toggle-btn,
+  .request-btn {
+    font-size: 0.875rem; /* Smaller for mobile */
+  }
+  .dropdown-toggle-btn {
+    font-size: 1rem;
+    padding: 8px 12px;
+  }
+  .request-btn {
+    font-size: 0.85rem; /* Smaller text */
+    padding: 5px 10px; /* Adjust padding */
+    min-width: auto; /* Allow button to shrink */
+  }
+
+  .viewtype-text {
+    font-size: 0.85rem;
+  }
+
+  .viewtype-dropdown {
+    font-size: 0.85rem;
+    padding: 4px 8px;
+  }
+
+  .view-option {
+    font-size: 0.85rem;
+  }
+  .card-modal-dialog {
+    max-width: 95%;
+  }
+
+  .table-fs {
+    font-size: 0.8rem;
+  }
+
+  .dataTables_wrapper .dataTables_filter input,
+  .dataTables_wrapper .dataTables_length select {
+    font-size: 0.8rem;
+    padding: 4px 6px;
+    max-width: 100px;
   }
 }
 
