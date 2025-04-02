@@ -284,8 +284,60 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
+//LOGIN
+document.getElementById('loginBtn').addEventListener('click', async function (event) {
+  event.preventDefault(); // Prevent page refresh
 
+  const loginUsername = document.getElementById('loginUsername');
+  const loginPassword = document.getElementById('loginPassword');
 
+  if (!loginUsername || !loginPassword) {
+      console.error('Input elements not found');
+      return;
+  }
+
+  let isValid = true;
+
+  function validateField(input) {
+      if (input.value.trim() === "") {
+          input.classList.add('is-invalid');
+          input.classList.remove('is-valid');
+          isValid = false;
+      } else {
+          input.classList.add('is-valid');
+          input.classList.remove('is-invalid');
+      }
+  }
+
+  validateField(loginUsername);
+  validateField(loginPassword);
+
+  if (isValid) {
+      try {
+          const response = await fetch('/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  username: loginUsername.value,
+                  password: loginPassword.value
+              }),
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+              localStorage.setItem('user', JSON.stringify(data.user));
+              // alert(data.message); 
+              window.location.href = '/quotation';
+          } else {
+              alert(data.message); 
+          }
+      } catch (error) {
+          console.error('Login failed:', error);
+          alert('An error occurred during login');
+      }
+  }
+});
 
 // ACCOUNT
 // REPRESENTATIVE
@@ -1086,62 +1138,4 @@ document.getElementById('sendBtn').addEventListener('click', () => {
 
 document.getElementById('saveDraftBtn').addEventListener('click', () => {
   window.location.href = "quotation";
-});
-
-
-
-
-//LOGIN
-document.getElementById('loginBtn').addEventListener('click', async function (event) {
-  event.preventDefault(); // Prevent page refresh
-
-  const loginUsername = document.getElementById('loginUsername');
-  const loginPassword = document.getElementById('loginPassword');
-
-  if (!loginUsername || !loginPassword) {
-      console.error('Input elements not found');
-      return;
-  }
-
-  let isValid = true;
-
-  function validateField(input) {
-      if (input.value.trim() === "") {
-          input.classList.add('is-invalid');
-          input.classList.remove('is-valid');
-          isValid = false;
-      } else {
-          input.classList.add('is-valid');
-          input.classList.remove('is-invalid');
-      }
-  }
-
-  validateField(loginUsername);
-  validateField(loginPassword);
-
-  if (isValid) {
-      try {
-          const response = await fetch('/login', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                  username: loginUsername.value,
-                  password: loginPassword.value
-              }),
-          });
-
-          const data = await response.json();
-
-          if (data.success) {
-              localStorage.setItem('user', JSON.stringify(data.user));
-              // alert(data.message); 
-              window.location.href = '/quotation';
-          } else {
-              alert(data.message); 
-          }
-      } catch (error) {
-          console.error('Login failed:', error);
-          alert('An error occurred during login');
-      }
-  }
 });
