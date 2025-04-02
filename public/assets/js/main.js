@@ -1134,10 +1134,10 @@ document.getElementById('loginBtn').addEventListener('click', async function (ev
 
           if (data.success) {
               localStorage.setItem('user', JSON.stringify(data.user));
-              alert(data.message); // Show backend message
+              // alert(data.message); 
               window.location.href = '/quotation';
           } else {
-              alert(data.message); // Show error message from backend
+              alert(data.message); 
           }
       } catch (error) {
           console.error('Login failed:', error);
