@@ -33,13 +33,9 @@ app.get('/', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, userID } = req.body;
 
-    if (!username || !password) {
-        return res.status(400).json({ success: false, message: "Username and password are required" });
-    }
-
-    dbService.loginUser(username, password, (err, result) => { 
+    dbService.loginUser({ username, password, userID }, (err, result) => {
         if (err) {
             return res.status(500).json({ success: false, message: "Internal server error" });
         }
@@ -48,9 +44,8 @@ app.post('/login', (req, res) => {
             return res.status(401).json({ success: false, message: result.message });
         }
 
- 
+        // Redirect logic
         let redirectUrl = "/quotation"; 
-
         if (result.accountStatus === "Pending") {
             redirectUrl = "/initial-registration"; 
         } else if (result.accountStatus === "Rejected") {
@@ -59,7 +54,6 @@ app.post('/login', (req, res) => {
 
         res.status(200).json({ 
             success: true, 
-            message: "Login successful!", 
             user: result, 
             redirect: redirectUrl 
         });

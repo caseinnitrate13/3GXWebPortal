@@ -40,22 +40,40 @@ function checkDuplicateUser(username, companyEmail, callback) {
 }
 
 // Function to authenticate user login
-function loginUser(username, password, callback) {
-    const query = "SELECT userID, username, password, userRole, accountStatus FROM users WHERE username = ? LIMIT 1";
+function loginUser({ username, password, userID }, callback) {
+    let query;
+    let params;
 
-    connection.query(query, [username], (err, results) => {
+    if (userID) {
+        // Check account status if userID is provided (for reload)
+        query = "SELECT userID, accountStatus FROM users WHERE userID = ? LIMIT 1";
+        params = [userID];
+    } else if (username && password) {
+        // Normal login process (username & password)
+        query = "SELECT userID, username, password, userRole, accountStatus FROM users WHERE username = ? LIMIT 1";
+        params = [username];
+    } else {
+        return callback(null, { success: false, message: "Invalid request" });
+    }
+
+    connection.query(query, params, (err, results) => {
         if (err) {
             console.error("Database error:", err);
             return callback(err, null);
         }
-        
+
         if (results.length === 0) {
-            console.log("No user found for username:", username);
-            return callback(null, { success: false, message: "Invalid username or password" });
+            return callback(null, { success: false, message: "User not found" });
         }
 
         const user = results[0];
 
+        if (userID) {
+            // If checking by userID, just return account status
+            return callback(null, { success: true, userID: user.userID, accountStatus: user.accountStatus });
+        }
+
+        // Normal login: Verify password
         bcrypt.compare(password, user.password, (err, isMatch) => {
             if (err) {
                 console.error("bcrypt error:", err);
@@ -63,7 +81,6 @@ function loginUser(username, password, callback) {
             }
 
             if (!isMatch) {
-                console.log("Password mismatch:", password, "vs", user.password);
                 return callback(null, { success: false, message: "Invalid username or password" });
             }
 

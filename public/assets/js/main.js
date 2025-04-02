@@ -251,12 +251,11 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            alert(data.message); // Show success message
+            // alert(data.message); 
 
-            // Redirect based on response
-            window.location.href = data.redirect || "/quotation"; // Redirect to index ("/") if pending, otherwise to "/quotation"
+            window.location.href = data.redirect || "/quotation"; 
           } else {
-            alert(data.message); // Show the actual error message from the backend
+            alert(data.message);
           }
         })
         .catch(error => console.error('Error:', error));
@@ -284,65 +283,89 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
-
-//LOGIN
-document.getElementById('loginBtn').addEventListener('click', async function (event) {
-  event.preventDefault();
-
-  const loginUsername = document.getElementById('loginUsername');
-  const loginPassword = document.getElementById('loginPassword');
-
-  if (!loginUsername || !loginPassword) {
-      console.error('Input elements not found');
-      return;
-  }
-
-  let isValid = true;
-
-  function validateField(input) {
-      if (input.value.trim() === "") {
-          input.classList.add('is-invalid');
-          input.classList.remove('is-valid');
-          isValid = false;
-      } else {
-          input.classList.add('is-valid');
-          input.classList.remove('is-invalid');
-      }
-  }
-
-  validateField(loginUsername);
-  validateField(loginPassword);
-
-  if (isValid) {
+document.addEventListener("DOMContentLoaded", function () {
+  // INITIAL REGISTRATION
+  document.getElementById('reloadBtn')?.addEventListener('click', async function () {
       try {
+          const storedUser = localStorage.getItem('user');
+
+          if (!storedUser) {
+              alert('No user found. Please log in again.');
+              window.location.href = "/";
+              return;
+          }
+
+          const user = JSON.parse(storedUser);
           const response = await fetch('/login', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                  username: loginUsername.value,
-                  password: loginPassword.value
-              }),
+              body: JSON.stringify({ userID: user.userID }) 
           });
 
           const data = await response.json();
 
           if (data.success) {
-              localStorage.setItem('user', JSON.stringify(data.user));
-              // alert(data.message);
-
-              window.location.href = data.redirect || "/quotation"; 
+              window.location.href = data.redirect;
           } else {
-              alert(data.message); 
+              alert(data.message);
           }
       } catch (error) {
-          console.error('Login failed:', error);
-          alert('An error occurred during login');
+          console.error('Error checking account status:', error);
+          alert('An error occurred while checking your account status.');
       }
-  }
+  });
+
+  // LOGIN
+  document.getElementById('loginBtn')?.addEventListener('click', async function (event) {
+      event.preventDefault();
+
+      const loginUsername = document.getElementById('loginUsername');
+      const loginPassword = document.getElementById('loginPassword');
+
+      if (!loginUsername || !loginPassword) return;
+
+      let isValid = true;
+
+      function validateField(input) {
+          if (input.value.trim() === "") {
+              input.classList.add('is-invalid');
+              input.classList.remove('is-valid');
+              isValid = false;
+          } else {
+              input.classList.add('is-valid');
+              input.classList.remove('is-invalid');
+          }
+      }
+
+      validateField(loginUsername);
+      validateField(loginPassword);
+
+      if (isValid) {
+          try {
+              const response = await fetch('/login', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                      username: loginUsername.value,
+                      password: loginPassword.value
+                  }),
+              });
+
+              const data = await response.json();
+
+              if (data.success) {
+                  localStorage.setItem('user', JSON.stringify(data.user));
+                  window.location.href = data.redirect || "/quotation";
+              } else {
+                  alert(data.message);
+              }
+          } catch (error) {
+              console.error('Login failed:', error);
+              alert('An error occurred during login');
+          }
+      }
+  });
 });
-
-
-
 
 // ACCOUNT
 // REPRESENTATIVE
