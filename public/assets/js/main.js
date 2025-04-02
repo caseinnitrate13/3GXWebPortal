@@ -284,9 +284,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
+
 //LOGIN
 document.getElementById('loginBtn').addEventListener('click', async function (event) {
-  event.preventDefault(); // Prevent page refresh
+  event.preventDefault();
 
   const loginUsername = document.getElementById('loginUsername');
   const loginPassword = document.getElementById('loginPassword');
@@ -327,8 +328,9 @@ document.getElementById('loginBtn').addEventListener('click', async function (ev
 
           if (data.success) {
               localStorage.setItem('user', JSON.stringify(data.user));
-              // alert(data.message); 
-              window.location.href = '/quotation';
+              // alert(data.message);
+
+              window.location.href = data.redirect || "/quotation"; 
           } else {
               alert(data.message); 
           }
@@ -338,6 +340,9 @@ document.getElementById('loginBtn').addEventListener('click', async function (ev
       }
   }
 });
+
+
+
 
 // ACCOUNT
 // REPRESENTATIVE
