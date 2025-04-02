@@ -32,9 +32,26 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
-app.get('/register', (req,res) => {
-    res.sendFile(path.join(__dirname, '..', 'public', 'register.html'));
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    
+    if (!username || !password) {
+        return res.status(400).json({ success: false, message: "Username and password are required" });
+    }
+
+    dbService.loginUser(username, password, (err, result) => { 
+        if (err) {
+            return res.status(500).json({ success: false, message: "Internal server error" });
+        }
+
+        if (!result.success) {
+            return res.status(401).json({ success: false, message: result.message });
+        }
+
+        res.status(200).json({ success: true, user: result });
+    });
 });
+
 
 
 const template = fs.readFileSync(path.join(__dirname, '..', 'public', 'template.html'), 'utf-8');
@@ -150,6 +167,7 @@ app.post('/register', async (req, res, next) => {
         res.status(500).json({ success: false, message: "Server error" });
     }
 });
+
 
 app.get('/quotation', (req, res) => {
     const quotationContent = fs.readFileSync(path.join(__dirname, '..', 'public', 'quotations.html'), 'utf-8');

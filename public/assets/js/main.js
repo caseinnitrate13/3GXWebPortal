@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
       acceptTerms.classList.remove('is-invalid');
     }
 
-    // Only redirect if all fields are valid
+
     if (isValid) {
 
       // DB CRUD - Inserting users
@@ -285,6 +285,63 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
+//LOGIN
+document.getElementById('loginBtn').addEventListener('click', async function (event) {
+  event.preventDefault(); // Prevent page refresh
+
+  const loginUsername = document.getElementById('loginUsername');
+  const loginPassword = document.getElementById('loginPassword');
+
+  if (!loginUsername || !loginPassword) {
+      console.error('Input elements not found');
+      return;
+  }
+
+  let isValid = true;
+
+  function validateField(input) {
+      if (input.value.trim() === "") {
+          input.classList.add('is-invalid');
+          input.classList.remove('is-valid');
+          isValid = false;
+      } else {
+          input.classList.add('is-valid');
+          input.classList.remove('is-invalid');
+      }
+  }
+
+  validateField(loginUsername);
+  validateField(loginPassword);
+
+  if (isValid) {
+      try {
+          const response = await fetch('/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  username: loginUsername.value,
+                  password: loginPassword.value
+              }),
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+              localStorage.setItem('user', JSON.stringify(data.user));
+              alert(data.message); // Show backend message
+              window.location.href = '/quotation';
+          } else {
+              alert(data.message); // Show error message from backend
+          }
+      } catch (error) {
+          console.error('Login failed:', error);
+          alert('An error occurred during login');
+      }
+  }
+});
+
+
+
 // ACCOUNT
 // REPRESENTATIVE
 document.addEventListener("DOMContentLoaded", function () {
@@ -301,18 +358,18 @@ document.addEventListener("DOMContentLoaded", function () {
     let isValid = true;
 
     function validateField(input, regex = null) {
-        if (input.value.trim() === "") {
-            input.classList.add('is-invalid');
-            input.classList.remove('is-valid');
-            isValid = false;
-        } else if (regex && !regex.test(input.value)) {
-            input.classList.add('is-invalid');
-            input.classList.remove('is-valid');
-            isValid = false;
-        } else {
-            input.classList.add('is-valid');
-            input.classList.remove('is-invalid');
-        }
+      if (input.value.trim() === "") {
+        input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
+        isValid = false;
+      } else if (regex && !regex.test(input.value)) {
+        input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
+        isValid = false;
+      } else {
+        input.classList.add('is-valid');
+        input.classList.remove('is-invalid');
+      }
     }
 
     validateField(subRepName, /^[A-Za-z\s]+$/);
@@ -321,35 +378,35 @@ document.addEventListener("DOMContentLoaded", function () {
     if (isValid) {
       const RepName = subRepName.value.trim();
       const RepDept = subRepDept.value.trim();
-  
+
       // Create a new sub-representative entry
       const subRepEntry = document.createElement("div");
       subRepEntry.classList.add("sub-rep-entry", "mb-2");
       subRepEntry.innerHTML = `<strong>${RepName}</strong><br><span class="text-muted">${RepDept}</span>`
-            ;
-  
+        ;
+
       document.getElementById("subRepList").appendChild(subRepEntry);
-  
+
       // close modal 
       const addSubRepModal = document.getElementById('addSubRepModal');
       const addRepModal = bootstrap.Modal.getInstance(addSubRepModal);
-      
+
       if (addRepModal) {
         // Clear input fields
         subRepName.value = "";
         subRepDept.value = "";
-  
+
         addRepModal.hide();
       }
-  
+
       addSubRepModal.addEventListener('hidden.bs.modal', () => {
         document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
         document.body.style.overflow = 'auto';
       }, { once: true });
-  
+
     }
 
-    
+
   });
 
   // Reset modal content when closed
@@ -399,35 +456,35 @@ document.addEventListener("DOMContentLoaded", function () {
     let isValid = true;
 
     function validateField(input, regex = null) {
-        if (input.value.trim() === "") {
-            input.classList.add('is-invalid');
-            input.classList.remove('is-valid');
-            isValid = false;
-        } else if (regex && !regex.test(input.value)) {
-            input.classList.add('is-invalid');
-            input.classList.remove('is-valid');
-            isValid = false;
-        } else {
-            input.classList.add('is-valid');
-            input.classList.remove('is-invalid');
-        }
+      if (input.value.trim() === "") {
+        input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
+        isValid = false;
+      } else if (regex && !regex.test(input.value)) {
+        input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
+        isValid = false;
+      } else {
+        input.classList.add('is-valid');
+        input.classList.remove('is-invalid');
+      }
     }
 
     validateField(newRepInput, /^[A-Za-z\s]+$/);
     validateField(newRepDeptInput, /^[A-Za-z0-9\s]+$/);
 
-    if (isValid){
+    if (isValid) {
 
       if (editRowModal) {
-        editRowModal.hide(); 
+        editRowModal.hide();
       }
 
       if (selectedRow) {
-          const newRepname = document.getElementById("editRepInput").value.trim();
-          const newRepDept = document.getElementById("editRepDeptInput").value.trim();
+        const newRepname = document.getElementById("editRepInput").value.trim();
+        const newRepDept = document.getElementById("editRepDeptInput").value.trim();
 
-          selectedRow.cells[1].textContent = newRepname;
-          selectedRow.cells[2].textContent = newRepDept;
+        selectedRow.cells[1].textContent = newRepname;
+        selectedRow.cells[2].textContent = newRepDept;
       }
 
       // Show the next modal
@@ -436,14 +493,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
       document.getElementById("editSubRepModal").addEventListener("hidden.bs.modal", function () {
         document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-        document.body.style.overflow = 'auto'; 
+        document.body.style.overflow = 'auto';
       }, { once: true });
     }
   });
 
   // close button (x)
   const xBtn = document.getElementById('xBtn');
-  xBtn.addEventListener('click', function(){
+  xBtn.addEventListener('click', function () {
     document.getElementById("editRow").addEventListener("hidden.bs.modal", function () {
       selectedRow.cells[1].textContent = newRepInput;
       selectedRow.cells[2].textContent = newRepDeptInput;
@@ -455,17 +512,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.getElementById("editSubRepModal").addEventListener("hidden.bs.modal", function () {
       document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-      document.body.style.overflow = 'auto'; 
+      document.body.style.overflow = 'auto';
     }, { once: true });
   });
 
 
   // cancel butto
   const cancelBtn = document.getElementById('cancelBtn');
-  cancelBtn.addEventListener('click', function(){
+  cancelBtn.addEventListener('click', function () {
     document.getElementById("editRow").addEventListener("hidden.bs.modal", function () {
       document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-      document.body.style.overflow = 'auto'; 
+      document.body.style.overflow = 'auto';
     }, { once: true });
   });
 

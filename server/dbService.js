@@ -1,4 +1,5 @@
 const mysql = require('mysql');
+const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -38,6 +39,43 @@ function checkDuplicateUser(username, companyEmail, callback) {
     });
 }
 
-module.exports = { registerUser, checkDuplicateUser };
+// Function to authenticate user login
+function loginUser(username, password, callback) {
+    const query = "SELECT userID, username, password, userRole, accountStatus FROM users WHERE username = ? LIMIT 1";
 
+    connection.query(query, [username], (err, results) => {
+        if (err) {
+            console.error("Database error:", err);
+            return callback(err, null);
+        }
+        
+        if (results.length === 0) {
+            console.log("No user found for username:", username);
+            return callback(null, { success: false, message: "Invalid username or password" });
+        }
 
+        const user = results[0];
+
+        bcrypt.compare(password, user.password, (err, isMatch) => {
+            if (err) {
+                console.error("bcrypt error:", err);
+                return callback(err, null);
+            }
+
+            if (!isMatch) {
+                console.log("Password mismatch:", password, "vs", user.password);
+                return callback(null, { success: false, message: "Invalid username or password" });
+            }
+
+            callback(null, {
+                success: true,
+                userID: user.userID,
+                username: user.username,
+                userRole: user.userRole,
+                accountStatus: user.accountStatus
+            });
+        });
+    });
+}
+
+module.exports = { registerUser, checkDuplicateUser, loginUser };
