@@ -33,13 +33,9 @@ app.get('/', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-    const { username, password } = req.body;
-    
-    if (!username || !password) {
-        return res.status(400).json({ success: false, message: "Username and password are required" });
-    }
+    const { username, password, userID } = req.body;
 
-    dbService.loginUser(username, password, (err, result) => { 
+    dbService.loginUser({ username, password, userID }, (err, result) => {
         if (err) {
             return res.status(500).json({ success: false, message: "Internal server error" });
         }
@@ -48,7 +44,19 @@ app.post('/login', (req, res) => {
             return res.status(401).json({ success: false, message: result.message });
         }
 
-        res.status(200).json({ success: true, user: result });
+        // Redirect logic
+        let redirectUrl = "/quotation"; 
+        if (result.accountStatus === "Pending") {
+            redirectUrl = "/initial-registration"; 
+        } else if (result.accountStatus === "Rejected") {
+            redirectUrl = "/";
+        }
+
+        res.status(200).json({ 
+            success: true, 
+            user: result, 
+            redirect: redirectUrl 
+        });
     });
 });
 
@@ -155,7 +163,7 @@ app.post('/register', async (req, res, next) => {
                 const accountStatus = "Pending";
 
                 if (accountStatus === "Pending") {
-                    return res.json({ success: true, message: "Registration successful! Your account is pending approval.", redirect: "/" });
+                    return res.json({ success: true, message: "Registration successful! Your account is pending approval.", redirect: "/initial-registration" });
                 }
 
                 res.json({ success: true, message: "Registration successful!", userID });
@@ -187,6 +195,10 @@ app.get('/account', (req, res) => {
 app.get('/view-quotation', (req, res) => {
     const viewQuotation =fs.readFileSync(path.join(__dirname, '..', 'public', 'view-quotation.html'), 'utf-8');
     res.send(template.replace('{{content}}', viewQuotation));
+});
+
+app.get('/initial-registration', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'public', 'initial-registration.html'));
 });
 
 
