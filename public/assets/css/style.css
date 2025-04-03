@@ -1481,7 +1481,7 @@ border-top-right-radius: 10px;
   margin: 0;
   width: 100%;
   text-align: center;
-  white-space: nowrap; /* Prevent breaking into multiple lines */
+  white-space: nowrap; 
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -1580,21 +1580,21 @@ border-top-right-radius: 10px;
 
 @media (max-width: 576px) {
   body {
-    font-size: 14px;
+    font-size: 15px;
   }
 /* VIEW QUOTATION / RFQ */
   .pagetitle h1 {
       font-size: 20px;
   }
   .vq-label, span.border-bottom-custom, table th, table td, .btn,
-  .viewtype-text, .view-option {
-      font-size: 14px;
+  .viewtype-text, .view-option,  .form-control {
+      font-size: 15px;
   }
   .btn {
     padding: 5px 8px;
   }
   .btn i {
-      font-size: 14px;
+      font-size: 13px;
   }
   #previewContainer, #adminSignContainer {
       width: 120px;
@@ -1612,8 +1612,8 @@ border-top-right-radius: 10px;
   /* QUOTATION */
 
   .view-container {
-    flex-direction: column; /* Stack elements vertically */
-    align-items: center; /* Center elements */
+    flex-direction: column; 
+    align-items: center;
     text-align: center;
     flex-wrap: wrap;
     gap: 10px;
@@ -1633,7 +1633,7 @@ border-top-right-radius: 10px;
   }
 
   .viewtype-dropdown {
-    font-size: 14px;
+    font-size: 15px;
     padding: 4px 8px;
   }
 
@@ -1642,9 +1642,21 @@ border-top-right-radius: 10px;
   }
 
   .table-fs {
-    font-size: 10px;
+    font-size: 12px;
   }
 
+  /* ACCOUNT */
+
+  #profilecompanyName{
+    font-size: 18px;
+  }
+
+  .nav-tabs .nav-link {
+    font-size: 16px;
+  }
+
+
+  /* FOOTER */
   .footer {
     padding: 10px;
     font-size: 12px;
