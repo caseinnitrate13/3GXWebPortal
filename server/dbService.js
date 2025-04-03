@@ -94,4 +94,15 @@ function loginUser({ username, password, userID }, callback) {
     });
 }
 
-module.exports = { registerUser, checkDuplicateUser, loginUser };
+function getUserDetails(userID, callback) {
+    const sql = `SELECT username, companyName, companyAddress, companyEmail, repNames, repNum FROM users WHERE userID = ?`;
+    connection.query(sql, [userID], (err, result) => {
+        if (err) return callback(err, null);
+        if (result.length === 0) {
+            return callback(null, { success: false, message: "User not found" });
+        }
+        callback(null, { success: true, user: result[0] });
+    });
+}
+
+module.exports = { registerUser, checkDuplicateUser, loginUser, getUserDetails };

@@ -45,17 +45,17 @@ app.post('/login', (req, res) => {
         }
 
         // Redirect logic
-        let redirectUrl = "/quotation"; 
+        let redirectUrl = "/quotation";
         if (result.accountStatus === "Pending") {
-            redirectUrl = "/initial-registration"; 
+            redirectUrl = "/initial-registration";
         } else if (result.accountStatus === "Rejected") {
             redirectUrl = "/";
         }
 
-        res.status(200).json({ 
-            success: true, 
-            user: result, 
-            redirect: redirectUrl 
+        res.status(200).json({
+            success: true,
+            user: result,
+            redirect: redirectUrl
         });
     });
 });
@@ -187,13 +187,37 @@ app.get('/request-for-quotation-form', (req, res) => {
     res.send(template.replace('{{content}}', requestForm));
 });
 
+
+//ACCOUNT
+
 app.get('/account', (req, res) => {
     const accountContent = fs.readFileSync(path.join(__dirname, '..', 'public', 'account.html'), 'utf-8');
     res.send(template.replace('{{content}}', accountContent));
 });
+//Profile Preiew
+app.get('/user-details', (req, res) => {
+    const { userID } = req.query;  // Retrieve userID from the query string
+
+    if (!userID) {
+        return res.status(400).json({ success: false, message: "Missing user ID" });
+    }
+
+    // Assuming dbService.getUserDetails is a function that retrieves user details based on userID
+    dbService.getUserDetails(userID, (err, result) => {
+        if (err) {
+            return res.status(500).json({ success: false, message: "Internal server error" });
+        }
+        if (!result.success) {
+            return res.status(404).json({ success: false, message: result.message });
+        }
+        res.json(result);  // Send back the user details as a JSON response
+    });
+});
+
+
 
 app.get('/view-quotation', (req, res) => {
-    const viewQuotation =fs.readFileSync(path.join(__dirname, '..', 'public', 'view-quotation.html'), 'utf-8');
+    const viewQuotation = fs.readFileSync(path.join(__dirname, '..', 'public', 'view-quotation.html'), 'utf-8');
     res.send(template.replace('{{content}}', viewQuotation));
 });
 
