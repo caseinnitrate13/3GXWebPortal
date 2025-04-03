@@ -1371,6 +1371,7 @@ h6 {
 /* REQUEST FORM */
 .border-bottom-custom {
   border-bottom: 1px solid #000000;
+  padding: 0 0 0;
 }
 
 .table-container {
@@ -1535,6 +1536,12 @@ border-top-right-radius: 10px;
   object-fit: contain; 
 }
 
+
+#editor, #editor2 {
+  max-height: 250px; 
+  overflow-y: auto;  
+}
+
 /* EDIT PROFILE */
 .profile-img, .rounded-profile{
   width: 100px;  
@@ -1569,68 +1576,25 @@ border-top-right-radius: 10px;
 }
 
 
-/* font size responsive */
-@media (max-width: 768px) {
-  /* VIEW QUOTATION */
-  .pagetitle h1 {
-      font-size: 1.5rem;
-  }
-  .vq-label {
-      font-size: 0.9rem;
-  }
-  span.border-bottom-custom {
-      font-size: 0.9rem;
-  }
-  table th, table td {
-      font-size: 0.8rem;
-  }
-  .btn {
-    font-size: 0.9rem;
-    padding: 6px 10px;
-  }
-  .btn i {
-      font-size: 1rem;
-  }
-  #previewContainer, #adminSignContainer {
-      width: 150px;
-      height: 100px;
-  }
-  .repName-container {
-      align-items: center;
-  }
-  .repName-container p {
-      font-size: 0.9rem;
-      text-align: center;
-  }
-  /* QUOTATION */
-  .view-label,
-  .dropdown-toggle-btn,
-  .request-btn {
-    font-size: 0.9rem;
-  }
-}
 
 
 @media (max-width: 576px) {
+  body {
+    font-size: 14px;
+  }
 /* VIEW QUOTATION / RFQ */
   .pagetitle h1 {
-      font-size: 1.2rem;
+      font-size: 20px;
   }
-  .vq-label {
-      font-size: 0.8rem;
-  }
-  span.border-bottom-custom {
-      font-size: 0.8rem;
-  }
-  table th, table td {
-      font-size: 0.7rem;
+  .vq-label, span.border-bottom-custom, table th, table td, .btn,
+  .viewtype-text, .view-option {
+      font-size: 14px;
   }
   .btn {
-    font-size: 0.8rem;
     padding: 5px 8px;
   }
   .btn i {
-      font-size: 0.9rem;
+      font-size: 14px;
   }
   #previewContainer, #adminSignContainer {
       width: 120px;
@@ -1640,7 +1604,7 @@ border-top-right-radius: 10px;
     align-items: center; 
     max-width: 100%; 
   }
-  .repName-container p {
+  .repName-container p, .repName-container input {
     font-size: 0.8rem;
     text-align: center;
   }
@@ -1658,46 +1622,32 @@ border-top-right-radius: 10px;
     justify-content: center;
     flex-wrap: wrap;
   }
-  .view-label,
-  .dropdown-toggle-btn,
-  .request-btn {
-    font-size: 0.875rem; /* Smaller for mobile */
-  }
-  .dropdown-toggle-btn {
-    font-size: 1rem;
-    padding: 8px 12px;
-  }
-  .request-btn {
-    font-size: 0.85rem; /* Smaller text */
-    padding: 5px 10px; /* Adjust padding */
-    min-width: auto; /* Allow button to shrink */
-  }
 
-  .viewtype-text {
-    font-size: 0.85rem;
+  .dropdown-toggle-btn {
+    padding: 8px 14px;
+  }
+  .request-btn {
+    font-size: 14px;
+    padding: 5px 10px; 
+    min-width: auto;
   }
 
   .viewtype-dropdown {
-    font-size: 0.85rem;
+    font-size: 14px;
     padding: 4px 8px;
   }
 
-  .view-option {
-    font-size: 0.85rem;
-  }
   .card-modal-dialog {
     max-width: 95%;
   }
 
   .table-fs {
-    font-size: 0.8rem;
+    font-size: 10px;
   }
 
-  .dataTables_wrapper .dataTables_filter input,
-  .dataTables_wrapper .dataTables_length select {
-    font-size: 0.8rem;
-    padding: 4px 6px;
-    max-width: 100px;
+  .footer {
+    padding: 10px;
+    font-size: 12px;
   }
 }
 
