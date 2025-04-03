@@ -316,8 +316,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById('reloadBtn')?.addEventListener('click', async function () {
       try {
           const storedUser = localStorage.getItem('user');
-          console.log(storedUser);
-
+        
           if (!storedUser) {
               alert('No user found. Please log in again.');
               window.location.href = "/";
@@ -397,6 +396,39 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // ACCOUNT
+
+// PROFILE PREVIEW
+document.addEventListener("DOMContentLoaded", () => {
+  const userID = JSON.parse(localStorage.getItem("userID"));
+
+  if (!userID) {
+      console.error("User not logged in");
+      return;
+  }
+
+  fetch(`/user-details?userID=${userID}`)
+      .then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              
+              document.getElementById("username").textContent = data.user.username;
+              document.getElementById("companyName").textContent = data.user.companyName;
+              document.getElementById("companyAddress").textContent = data.user.companyAddress;
+              document.getElementById("email").textContent = data.user.companyEmail;
+              document.getElementById("representative").textContent = data.user.repNames;
+              document.getElementById("phoneNumber").textContent = data.user.repNum;
+              document.getElementById("profilecompanyName").textContent = data.user.companyName;
+              document.getElementById("headerCompanyName").textContent = data.user.companyName;
+              document.getElementById("toggleCompanyName").textContent = data.user.companyName;
+          } else {
+              console.error("Error fetching user details:", data.message);
+          }
+      })
+      .catch(error => console.error("Fetch error:", error));
+});
+
+
+
 // REPRESENTATIVE
 document.addEventListener("DOMContentLoaded", function () {
 
