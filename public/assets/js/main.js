@@ -457,34 +457,39 @@ document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
         document.body.style.overflow = 'auto';
       }, { once: true });
-
     }
-
-
   });
 
   // Reset modal content when closed
   document.getElementById("addSubRepModal").addEventListener("hidden.bs.modal", function () {
+    let subRepName = document.getElementById('subRepInput');
+    let subRepDept = document.getElementById('subRepDeptInput');
+
     subRepName.value = "";
     subRepDept.value = "";
 
-  });
+    subRepName.classList.remove("is-valid", "is-invalid");
+    subRepDept.classList.remove("is-valid", "is-invalid");
 
-  // ensure proper display
-  const addSubRep = document.getElementById('addSubRep');
-  addSubRep.addEventListener("click", function () {
-    form.classList.remove("was-validated");
-    const addRepModalElement = document.getElementById('addSubRepModal')
-    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-    const representativeModal = new bootstrap.Modal(addRepModalElement);
-    representativeModal.show();
-  });
+    document.body.style.overflow = 'auto';
+    document.body.style.paddingRight = '0px';
+});
 
-  // EDIT SUB-REPRESENTATIVE
-  let selectedRow = null;
+// ensure proper display
+const addSubRep = document.getElementById('addSubRep');
+addSubRep.addEventListener("click", function () {
+  form.classList.remove("was-validated");
+  const addRepModalElement = document.getElementById('addSubRepModal')
+  document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+  const representativeModal = new bootstrap.Modal(addRepModalElement);
+  representativeModal.show();
+});
 
-  document.getElementById("editRepTable").addEventListener("click", function (event) {
-    if (event.target.classList.contains("bi-pencil-square")) {
+// EDIT SUB-REPRESENTATIVE
+let selectedRow = null;
+
+document.getElementById("editRepTable").addEventListener("click", function (event) {
+  if (event.target.classList.contains("bi-pencil-square")) {
       selectedRow = event.target.closest("tr");
 
       repName = selectedRow.cells[1].textContent.trim();
@@ -493,142 +498,143 @@ document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("editRepInput").value = repName;
       document.getElementById("editRepDeptInput").value = repDept;
 
-      // Show the edit modal
+      // remove any existing backdrops before opening modal
+      document.querySelectorAll(".modal-backdrop").forEach(backdrop => backdrop.remove());
+
       let editModal = new bootstrap.Modal(document.getElementById("editRow"));
       editModal.show();
-    }
-  });
+  }
+});
 
 
-  const saveRow = document.getElementById("saveRow");
-  saveRow.addEventListener("click", function () {
-    const editRow = document.getElementById("editRow");
-    const editRowModal = bootstrap.Modal.getInstance(editRow);
-    const newRepInput = document.getElementById("editRepInput");
-    const newRepDeptInput = document.getElementById("editRepDeptInput");
+const saveRow = document.getElementById("saveRow");
+saveRow.addEventListener("click", function () {
+  const editRow = document.getElementById("editRow");
+  const editRowModal = bootstrap.Modal.getInstance(editRow);
+  const newRepInput = document.getElementById("editRepInput");
+  const newRepDeptInput = document.getElementById("editRepDeptInput");
 
-    let isValid = true;
+  let isValid = true;
 
-    function validateField(input, regex = null) {
+  function validateField(input, regex = null) {
       if (input.value.trim() === "") {
-        input.classList.add('is-invalid');
-        input.classList.remove('is-valid');
-        isValid = false;
+          input.classList.add('is-invalid');
+          input.classList.remove('is-valid');
+          isValid = false;
       } else if (regex && !regex.test(input.value)) {
-        input.classList.add('is-invalid');
-        input.classList.remove('is-valid');
-        isValid = false;
+          input.classList.add('is-invalid');
+          input.classList.remove('is-valid');
+          isValid = false;
       } else {
-        input.classList.add('is-valid');
-        input.classList.remove('is-invalid');
+          input.classList.add('is-valid');
+          input.classList.remove('is-invalid');
       }
-    }
+  }
 
-    validateField(newRepInput, /^[A-Za-z\s]+$/);
-    validateField(newRepDeptInput, /^[A-Za-z0-9\s]+$/);
+  validateField(newRepInput, /^[A-Za-z\s]+$/);
+  validateField(newRepDeptInput, /^[A-Za-z0-9\s]+$/);
 
-    if (isValid) {
-
+  if (isValid) {
       if (editRowModal) {
-        editRowModal.hide();
+          newRepInput.classList.remove('is-valid');
+          newRepDeptInput.classList.remove('is-valid');
+          editRowModal.hide();
       }
 
       if (selectedRow) {
-        const newRepname = document.getElementById("editRepInput").value.trim();
-        const newRepDept = document.getElementById("editRepDeptInput").value.trim();
-
-        selectedRow.cells[1].textContent = newRepname;
-        selectedRow.cells[2].textContent = newRepDept;
+          const newRepname = newRepInput.value.trim();
+          const newRepDept = newRepDeptInput.value.trim();
+          selectedRow.cells[1].textContent = newRepname;
+          selectedRow.cells[2].textContent = newRepDept;
       }
+  }
+});
 
-      // Show the next modal
-      let editSubRepModal = new bootstrap.Modal(document.getElementById("editSubRepModal"));
-      editSubRepModal.show();
+// editSubRepModal close backdrop 
+document.getElementById("editSubRepModal").addEventListener("hidden.bs.modal", function () {
+  document.body.classList.remove("modal-open");
+  document.body.style.overflow = 'auto';
+});
 
-      document.getElementById("editSubRepModal").addEventListener("hidden.bs.modal", function () {
-        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-        document.body.style.overflow = 'auto';
-      }, { once: true });
-    }
-  });
+// editRow close backdrop 
+document.getElementById("editRow").addEventListener("hidden.bs.modal", function () {
+  document.body.classList.remove("modal-open");
+  document.body.style.overflow = 'auto';
+  document.body.style.paddingRight = '0px';
 
-  // close button (x)
-  const xBtn = document.getElementById('xBtn');
-  xBtn.addEventListener('click', function () {
-    document.getElementById("editRow").addEventListener("hidden.bs.modal", function () {
-      selectedRow.cells[1].textContent = newRepInput;
-      selectedRow.cells[2].textContent = newRepDeptInput;
-    });
-
-    // Show the next modal
-    let editSubRepModal = new bootstrap.Modal(document.getElementById("editSubRepModal"));
-    editSubRepModal.show();
-
-    document.getElementById("editSubRepModal").addEventListener("hidden.bs.modal", function () {
-      document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-      document.body.style.overflow = 'auto';
-    }, { once: true });
-  });
-
-
-  // cancel butto
-  const cancelBtn = document.getElementById('cancelBtn');
-  cancelBtn.addEventListener('click', function () {
-    document.getElementById("editRow").addEventListener("hidden.bs.modal", function () {
-      document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-      document.body.style.overflow = 'auto';
-    }, { once: true });
-  });
-
+  let editSubRepModal = new bootstrap.Modal(document.getElementById("editSubRepModal"));
+  editSubRepModal.show();
+});
 
   // EDIT MAIN REPRESENTATIVE
-  const mainRepNameInput = document.getElementById('mainRepNameInput');
-  const mainRepDeptInput = document.getElementById('mainRepDeptInput');
-  const mainRepName = document.getElementById('mainRepName');
-  const mainRepDept = document.getElementById('mainRepDept');
+  // EDIT MAIN REPRESENTATIVE
+const mainRepNameInput = document.getElementById('mainRepNameInput');
+const mainRepDeptInput = document.getElementById('mainRepDeptInput');
+const mainRepName = document.getElementById('mainRepName');
+const mainRepDept = document.getElementById('mainRepDept');
 
-  const mainForm = document.getElementById("editMainRepForm");
+const mainForm = document.getElementById("editMainRepForm");
+const saveMainRep = document.getElementById('saveMainRep');
 
-  const saveMainRep = document.getElementById('saveMainRep');
-  saveMainRep.addEventListener('click', function () {
+saveMainRep.addEventListener('click', function () {
+    let isValid = true;
 
-    // validation
-    if (!mainForm.checkValidity()) {
-      mainForm.classList.add("was-validated");
-      return;
+    // Validation function
+    function validateField(input, regex = null) {
+        if (input.value.trim() === "") {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            isValid = false;
+        } else if (regex && !regex.test(input.value)) {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            isValid = false;
+        } else {
+            input.classList.add('is-valid');
+            input.classList.remove('is-invalid');
+        }
     }
 
-    const newMainName = mainRepNameInput.value.trim();
-    const newMainDept = mainRepDeptInput.value.trim();
+    validateField(mainRepNameInput, /^[A-Za-z\s]+$/); // Only letters and spaces
+    validateField(mainRepDeptInput, /^[A-Za-z0-9\s]+$/); // Letters, numbers, and spaces
 
-    if (mainRepNameInput && mainRepDeptInput) {
-      mainRepName.textContent = newMainName;
-      mainRepDept.textContent = newMainDept;
+    // If valid, proceed
+    if (isValid) {
+        // If valid, update the values
+        const newMainName = mainRepNameInput.value.trim();
+        const newMainDept = mainRepDeptInput.value.trim();
+
+        mainRepName.textContent = newMainName;
+        mainRepDept.textContent = newMainDept;
+
+        const editMainRepModal = document.getElementById('editMainRepModal');
+        const editMainModal = bootstrap.Modal.getInstance(editMainRepModal);
+
+        if (editMainModal) {
+            editMainModal.hide();
+        }
+
+        // reset inputs and remove backdrop
+        editMainRepModal.addEventListener('hidden.bs.modal', () => {
+            mainRepNameInput.value = "";
+            mainRepDeptInput.value = "";
+
+            mainRepNameInput.classList.remove('is-valid', 'is-invalid');
+            mainRepDeptInput.classList.remove('is-valid', 'is-invalid');
+
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+            document.body.style.overflow = 'auto';
+            document.body.style.paddingRight = '0px';
+        }, { once: true });
     }
+});
 
-    const editMainRepModal = document.getElementById('editMainRepModal');
-    const editMainModal = bootstrap.Modal.getInstance(editMainRepModal);
-
-    if (editMainModal) {
-      mainRepNameInput.value = "";
-      mainRepDeptInput.value = "";
-
-      editMainModal.hide();
-    }
-
-    editMainModal.addEventListener('hidden.bs.modal', () => {
-      document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-      document.body.style.overflow = 'auto';
-    }, { once: true });
-
-  });
-
-  // Reset modal content when closed
-  document.getElementById("editMainRepModal").addEventListener("hidden.bs.modal", function () {
-    mainRepNameInput.value = "";
-    mainRepDeptInput.value = "";
-
-  });
+// editSubRepModal close backdrop 
+document.getElementById("editMainRepModal").addEventListener("hidden.bs.modal", function () {
+  document.body.classList.remove("modal-open");
+  document.body.style.overflow = 'auto';
+  document.body.style.paddingRight = '0px';
+});
 
   // ensure proper display
   const editMainRep = document.getElementById('editMainRep');
@@ -940,11 +946,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Reset modal content when closed
   document.getElementById("attachmentModal").addEventListener("hidden.bs.modal", function () {
+    document.body.style.overflow = "auto"; 
+    document.body.style.paddingRight = "0px";
+
     fileUploadPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
 
     uploadedFileName = null;
     fileUpload.value = "";
   });
+
 
   // Ensure clicking the attach button always reopens the file chooser
   attachBtn.addEventListener("click", function () {
@@ -1023,8 +1033,6 @@ document.addEventListener("DOMContentLoaded", function () {
       signatureModalElement.addEventListener('hidden.bs.modal', () => {
         document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
         document.body.style.overflow = 'auto';
-
-        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
       }, { once: true });
 
       const uploadSignBtn = document.getElementById('uploadSignBtn');
@@ -1042,6 +1050,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Reset modal content when closed
   document.getElementById("signatureModal").addEventListener("hidden.bs.modal", function () {
+    document.body.style.overflow = "auto"; 
+    document.body.style.paddingRight = "0px";
     uploadSignPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
     uploadedImage = null;
   });
@@ -1162,8 +1172,14 @@ submitButton.addEventListener('click', () => {
   previewArea.appendChild(imgElement);
 });
 
-const closePreview = document.getElementById('closePreview');
+  // restore scrolling 
+  document.getElementById("signaturePadModal").addEventListener("hidden.bs.modal", function () {
+    document.body.style.overflow = "auto"; 
+    document.body.style.paddingRight = "0px";
+  });
 
+
+const closePreview = document.getElementById('closePreview');
 closePreview.addEventListener('click', () => {
   const previewContainer = document.getElementById('previewContainer');
   const uploadSignBtn = document.getElementById('uploadSignBtn');
