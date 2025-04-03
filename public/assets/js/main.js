@@ -252,8 +252,9 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(data => {
           if (data.success) {
             // alert(data.message); 
+            localStorage.setItem('user', JSON.stringify({ userID: data.userID }));
 
-            window.location.href = data.redirect || "/quotation"; 
+            window.location.href = data.redirect; 
           } else {
             alert(data.message);
           }
@@ -288,6 +289,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById('reloadBtn')?.addEventListener('click', async function () {
       try {
           const storedUser = localStorage.getItem('user');
+          console.log(storedUser);
 
           if (!storedUser) {
               alert('No user found. Please log in again.');

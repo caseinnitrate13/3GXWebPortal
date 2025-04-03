@@ -45,11 +45,11 @@ function loginUser({ username, password, userID }, callback) {
     let params;
 
     if (userID) {
-        // Check account status if userID is provided (for reload)
+
         query = "SELECT userID, accountStatus FROM users WHERE userID = ? LIMIT 1";
         params = [userID];
     } else if (username && password) {
-        // Normal login process (username & password)
+
         query = "SELECT userID, username, password, userRole, accountStatus FROM users WHERE username = ? LIMIT 1";
         params = [username];
     } else {
@@ -69,11 +69,10 @@ function loginUser({ username, password, userID }, callback) {
         const user = results[0];
 
         if (userID) {
-            // If checking by userID, just return account status
+
             return callback(null, { success: true, userID: user.userID, accountStatus: user.accountStatus });
         }
 
-        // Normal login: Verify password
         bcrypt.compare(password, user.password, (err, isMatch) => {
             if (err) {
                 console.error("bcrypt error:", err);

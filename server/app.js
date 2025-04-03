@@ -163,7 +163,7 @@ app.post('/register', async (req, res, next) => {
                 const accountStatus = "Pending";
 
                 if (accountStatus === "Pending") {
-                    return res.json({ success: true, message: "Registration successful! Your account is pending approval.", redirect: "/initial-registration" });
+                    return res.json({ success: true, message: "Registration successful! Your account is pending approval.", redirect: "/initial-registration", userID });
                 }
 
                 res.json({ success: true, message: "Registration successful!", userID });
