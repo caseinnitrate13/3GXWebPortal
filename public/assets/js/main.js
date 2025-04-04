@@ -281,7 +281,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // alert(data.message); 
             localStorage.setItem('user', JSON.stringify({ userID: data.userID }));
 
-            window.location.href = data.redirect; 
+            window.location.href = data.redirect;
           } else {
             alert(data.message);
           }
@@ -314,84 +314,84 @@ document.addEventListener('DOMContentLoaded', function () {
 document.addEventListener("DOMContentLoaded", function () {
   // INITIAL REGISTRATION
   document.getElementById('reloadBtn')?.addEventListener('click', async function () {
-      try {
-          const storedUser = localStorage.getItem('user');
-        
-          if (!storedUser) {
-              alert('No user found. Please log in again.');
-              window.location.href = "/";
-              return;
-          }
+    try {
+      const storedUser = localStorage.getItem('user');
 
-          const user = JSON.parse(storedUser);
-          const response = await fetch('/login', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ userID: user.userID }) 
-          });
-
-          const data = await response.json();
-
-          if (data.success) {
-              window.location.href = data.redirect;
-          } else {
-              alert(data.message);
-          }
-      } catch (error) {
-          console.error('Error checking account status:', error);
-          alert('An error occurred while checking your account status.');
+      if (!storedUser) {
+        alert('No user found. Please log in again.');
+        window.location.href = "/";
+        return;
       }
+
+      const user = JSON.parse(storedUser);
+      const response = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userID: user.userID })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        window.location.href = data.redirect;
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error('Error checking account status:', error);
+      alert('An error occurred while checking your account status.');
+    }
   });
 
   // LOGIN
   document.getElementById('loginBtn')?.addEventListener('click', async function (event) {
-      event.preventDefault();
+    event.preventDefault();
 
-      const loginUsername = document.getElementById('loginUsername');
-      const loginPassword = document.getElementById('loginPassword');
+    const loginUsername = document.getElementById('loginUsername');
+    const loginPassword = document.getElementById('loginPassword');
 
-      if (!loginUsername || !loginPassword) return;
+    if (!loginUsername || !loginPassword) return;
 
-      let isValid = true;
+    let isValid = true;
 
-      function validateField(input) {
-          if (input.value.trim() === "") {
-              input.classList.add('is-invalid');
-              input.classList.remove('is-valid');
-              isValid = false;
-          } else {
-              input.classList.add('is-valid');
-              input.classList.remove('is-invalid');
-          }
+    function validateField(input) {
+      if (input.value.trim() === "") {
+        input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
+        isValid = false;
+      } else {
+        input.classList.add('is-valid');
+        input.classList.remove('is-invalid');
       }
+    }
 
-      validateField(loginUsername);
-      validateField(loginPassword);
+    validateField(loginUsername);
+    validateField(loginPassword);
 
-      if (isValid) {
-          try {
-              const response = await fetch('/login', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                      username: loginUsername.value,
-                      password: loginPassword.value
-                  }),
-              });
+    if (isValid) {
+      try {
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: loginUsername.value,
+            password: loginPassword.value
+          }),
+        });
 
-              const data = await response.json();
+        const data = await response.json();
 
-              if (data.success) {
-                  localStorage.setItem('user', JSON.stringify(data.user));
-                  window.location.href = data.redirect || "/quotation";
-              } else {
-                  alert(data.message);
-              }
-          } catch (error) {
-              console.error('Login failed:', error);
-              alert('An error occurred during login');
-          }
+        if (data.success) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+          window.location.href = data.redirect || "/quotation";
+        } else {
+          alert(data.message);
+        }
+      } catch (error) {
+        console.error('Login failed:', error);
+        alert('An error occurred during login');
       }
+    }
   });
 });
 
@@ -401,38 +401,56 @@ document.addEventListener("DOMContentLoaded", () => {
   const userID = JSON.parse(localStorage.getItem("userID"));
 
   if (!userID) {
-      console.error("User not logged in");
-      return;
+    console.error("User not logged in");
+    return;
   }
 
   fetch(`/user-details?userID=${userID}`)
-      .then(response => response.json())
-      .then(data => {
-          if (data.success) {
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        const isQuotationPage = location.pathname === '/quotation';
+        const isAccountPage = location.pathname === '/account';
+        const isRFQFormPage = location.pathname === '/request-for-quotation-form';
 
-              const isQuotationPage = location.pathname === '/quotation';
-              const isAccountPage = location.pathname === '/account';
-               const isRFQFormPage = location.pathname === '/request-for-quotation-form';
+        if (isQuotationPage || isRFQFormPage) {
+          document.getElementById("headerCompanyName").textContent = data.user.companyName;
+          document.getElementById("toggleCompanyName").textContent = data.user.companyName;
+        } else if (isAccountPage) {
+          document.getElementById("username").textContent = data.user.username;
+          document.getElementById("companyName").textContent = data.user.companyName;
+          document.getElementById("companyAddress").textContent = data.user.companyAddress;
+          document.getElementById("email").textContent = data.user.companyEmail;
 
-              if (isQuotationPage || isRFQFormPage) {
-                  document.getElementById("headerCompanyName").textContent = data.user.companyName;
-                  document.getElementById("toggleCompanyName").textContent = data.user.companyName;
-              } else if (isAccountPage) {
-                  document.getElementById("username").textContent = data.user.username;
-                  document.getElementById("companyName").textContent = data.user.companyName;
-                  document.getElementById("companyAddress").textContent = data.user.companyAddress;
-                  document.getElementById("email").textContent = data.user.companyEmail;
-                  document.getElementById("representative").textContent = data.user.repNames;
-                  document.getElementById("phoneNumber").textContent = data.user.repNum;
-                  document.getElementById("profilecompanyName").textContent = data.user.companyName;
-                  document.getElementById("headerCompanyName").textContent = data.user.companyName;
-                  document.getElementById("toggleCompanyName").textContent = data.user.companyName;
-              }
-          } else {
-              console.error("Error fetching user details:", data.message);
+          let repArray = [];
+          try {
+            repArray = JSON.parse(data.user.repNames);
+          } catch (e) {
+            console.error("Failed to parse repNames:", e);
           }
-      })
-      .catch(error => console.error("Fetch error:", error));
+
+          let repName = 'No representative found';
+          let repPosition = 'No position found';
+          if (Array.isArray(repArray) && repArray.length > 0) {
+            repName = repArray[0]?.name || repName;
+            repPosition = repArray[0]?.position || repPosition;
+          }
+
+          document.getElementById("representative").textContent = repName;
+          document.getElementById("mainRepName").textContent = repName;
+          document.getElementById("mainRepDept").textContent = repPosition;
+          document.getElementById("phoneNumber").textContent = data.user.repNum;
+          document.getElementById("profilecompanyName").textContent = data.user.companyName;
+          document.getElementById("headerCompanyName").textContent = data.user.companyName;
+          document.getElementById("toggleCompanyName").textContent = data.user.companyName;
+        }
+      } else {
+        console.error("Error fetching user details:", data.message);
+      }
+    })
+    .catch(error => console.error("Fetch error:", error));
+
+
 });
 
 
@@ -513,23 +531,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.body.style.overflow = 'auto';
     document.body.style.paddingRight = '0px';
-});
+  });
 
-// ensure proper display
-const addSubRep = document.getElementById('addSubRep');
-addSubRep.addEventListener("click", function () {
-  form.classList.remove("was-validated");
-  const addRepModalElement = document.getElementById('addSubRepModal')
-  document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-  const representativeModal = new bootstrap.Modal(addRepModalElement);
-  representativeModal.show();
-});
+  // ensure proper display
+  const addSubRep = document.getElementById('addSubRep');
+  addSubRep.addEventListener("click", function () {
+    form.classList.remove("was-validated");
+    const addRepModalElement = document.getElementById('addSubRepModal')
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+    const representativeModal = new bootstrap.Modal(addRepModalElement);
+    representativeModal.show();
+  });
 
-// EDIT SUB-REPRESENTATIVE
-let selectedRow = null;
+  // EDIT SUB-REPRESENTATIVE
+  let selectedRow = null;
 
-document.getElementById("editRepTable").addEventListener("click", function (event) {
-  if (event.target.classList.contains("bi-pencil-square")) {
+  document.getElementById("editRepTable").addEventListener("click", function (event) {
+    if (event.target.classList.contains("bi-pencil-square")) {
       selectedRow = event.target.closest("tr");
 
       repName = selectedRow.cells[1].textContent.trim();
@@ -543,135 +561,135 @@ document.getElementById("editRepTable").addEventListener("click", function (even
 
       let editModal = new bootstrap.Modal(document.getElementById("editRow"));
       editModal.show();
-  }
-});
+    }
+  });
 
 
-const saveRow = document.getElementById("saveRow");
-saveRow.addEventListener("click", function () {
-  const editRow = document.getElementById("editRow");
-  const editRowModal = bootstrap.Modal.getInstance(editRow);
-  const newRepInput = document.getElementById("editRepInput");
-  const newRepDeptInput = document.getElementById("editRepDeptInput");
+  const saveRow = document.getElementById("saveRow");
+  saveRow.addEventListener("click", function () {
+    const editRow = document.getElementById("editRow");
+    const editRowModal = bootstrap.Modal.getInstance(editRow);
+    const newRepInput = document.getElementById("editRepInput");
+    const newRepDeptInput = document.getElementById("editRepDeptInput");
 
-  let isValid = true;
+    let isValid = true;
 
-  function validateField(input, regex = null) {
+    function validateField(input, regex = null) {
       if (input.value.trim() === "") {
-          input.classList.add('is-invalid');
-          input.classList.remove('is-valid');
-          isValid = false;
+        input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
+        isValid = false;
       } else if (regex && !regex.test(input.value)) {
-          input.classList.add('is-invalid');
-          input.classList.remove('is-valid');
-          isValid = false;
+        input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
+        isValid = false;
       } else {
-          input.classList.add('is-valid');
-          input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
+        input.classList.remove('is-invalid');
       }
-  }
+    }
 
-  validateField(newRepInput, /^[A-Za-z\s]+$/);
-  validateField(newRepDeptInput, /^[A-Za-z0-9\s]+$/);
+    validateField(newRepInput, /^[A-Za-z\s]+$/);
+    validateField(newRepDeptInput, /^[A-Za-z0-9\s]+$/);
 
-  if (isValid) {
+    if (isValid) {
       if (editRowModal) {
-          newRepInput.classList.remove('is-valid');
-          newRepDeptInput.classList.remove('is-valid');
-          editRowModal.hide();
+        newRepInput.classList.remove('is-valid');
+        newRepDeptInput.classList.remove('is-valid');
+        editRowModal.hide();
       }
 
       if (selectedRow) {
-          const newRepname = newRepInput.value.trim();
-          const newRepDept = newRepDeptInput.value.trim();
-          selectedRow.cells[1].textContent = newRepname;
-          selectedRow.cells[2].textContent = newRepDept;
+        const newRepname = newRepInput.value.trim();
+        const newRepDept = newRepDeptInput.value.trim();
+        selectedRow.cells[1].textContent = newRepname;
+        selectedRow.cells[2].textContent = newRepDept;
       }
-  }
-});
+    }
+  });
 
-// editSubRepModal close backdrop 
-document.getElementById("editSubRepModal").addEventListener("hidden.bs.modal", function () {
-  document.body.classList.remove("modal-open");
-  document.body.style.overflow = 'auto';
-});
+  // editSubRepModal close backdrop 
+  document.getElementById("editSubRepModal").addEventListener("hidden.bs.modal", function () {
+    document.body.classList.remove("modal-open");
+    document.body.style.overflow = 'auto';
+  });
 
-// editRow close backdrop 
-document.getElementById("editRow").addEventListener("hidden.bs.modal", function () {
-  document.body.classList.remove("modal-open");
-  document.body.style.overflow = 'auto';
-  document.body.style.paddingRight = '0px';
+  // editRow close backdrop 
+  document.getElementById("editRow").addEventListener("hidden.bs.modal", function () {
+    document.body.classList.remove("modal-open");
+    document.body.style.overflow = 'auto';
+    document.body.style.paddingRight = '0px';
 
-  let editSubRepModal = new bootstrap.Modal(document.getElementById("editSubRepModal"));
-  editSubRepModal.show();
-});
+    let editSubRepModal = new bootstrap.Modal(document.getElementById("editSubRepModal"));
+    editSubRepModal.show();
+  });
 
-// EDIT MAIN REPRESENTATIVE
-const mainRepNameInput = document.getElementById('mainRepNameInput');
-const mainRepDeptInput = document.getElementById('mainRepDeptInput');
-const mainRepName = document.getElementById('mainRepName');
-const mainRepDept = document.getElementById('mainRepDept');
+  // EDIT MAIN REPRESENTATIVE
+  const mainRepNameInput = document.getElementById('mainRepNameInput');
+  const mainRepDeptInput = document.getElementById('mainRepDeptInput');
+  const mainRepName = document.getElementById('mainRepName');
+  const mainRepDept = document.getElementById('mainRepDept');
 
-const mainForm = document.getElementById("editMainRepForm");
-const saveMainRep = document.getElementById('saveMainRep');
+  const mainForm = document.getElementById("editMainRepForm");
+  const saveMainRep = document.getElementById('saveMainRep');
 
-saveMainRep.addEventListener('click', function () {
+  saveMainRep.addEventListener('click', function () {
     let isValid = true;
 
     // Validation function
     function validateField(input, regex = null) {
-        if (input.value.trim() === "") {
-            input.classList.add('is-invalid');
-            input.classList.remove('is-valid');
-            isValid = false;
-        } else if (regex && !regex.test(input.value)) {
-            input.classList.add('is-invalid');
-            input.classList.remove('is-valid');
-            isValid = false;
-        } else {
-            input.classList.add('is-valid');
-            input.classList.remove('is-invalid');
-        }
+      if (input.value.trim() === "") {
+        input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
+        isValid = false;
+      } else if (regex && !regex.test(input.value)) {
+        input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
+        isValid = false;
+      } else {
+        input.classList.add('is-valid');
+        input.classList.remove('is-invalid');
+      }
     }
 
-    validateField(mainRepNameInput, /^[A-Za-z\s]+$/); 
+    validateField(mainRepNameInput, /^[A-Za-z\s]+$/);
     validateField(mainRepDeptInput, /^[A-Za-z0-9\s]+$/);
 
     if (isValid) {
-        const newMainName = mainRepNameInput.value.trim();
-        const newMainDept = mainRepDeptInput.value.trim();
+      const newMainName = mainRepNameInput.value.trim();
+      const newMainDept = mainRepDeptInput.value.trim();
 
-        mainRepName.textContent = newMainName;
-        mainRepDept.textContent = newMainDept;
+      mainRepName.textContent = newMainName;
+      mainRepDept.textContent = newMainDept;
 
-        const editMainRepModal = document.getElementById('editMainRepModal');
-        const editMainModal = bootstrap.Modal.getInstance(editMainRepModal);
+      const editMainRepModal = document.getElementById('editMainRepModal');
+      const editMainModal = bootstrap.Modal.getInstance(editMainRepModal);
 
-        if (editMainModal) {
-            editMainModal.hide();
-        }
+      if (editMainModal) {
+        editMainModal.hide();
+      }
 
-        // reset inputs and remove backdrop
-        editMainRepModal.addEventListener('hidden.bs.modal', () => {
-            mainRepNameInput.value = "";
-            mainRepDeptInput.value = "";
+      // reset inputs and remove backdrop
+      editMainRepModal.addEventListener('hidden.bs.modal', () => {
+        mainRepNameInput.value = "";
+        mainRepDeptInput.value = "";
 
-            mainRepNameInput.classList.remove('is-valid', 'is-invalid');
-            mainRepDeptInput.classList.remove('is-valid', 'is-invalid');
+        mainRepNameInput.classList.remove('is-valid', 'is-invalid');
+        mainRepDeptInput.classList.remove('is-valid', 'is-invalid');
 
-            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-            document.body.style.overflow = 'auto';
-            document.body.style.paddingRight = '0px';
-        }, { once: true });
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+        document.body.style.overflow = 'auto';
+        document.body.style.paddingRight = '0px';
+      }, { once: true });
     }
-});
+  });
 
-// editSubRepModal close backdrop 
-document.getElementById("editMainRepModal").addEventListener("hidden.bs.modal", function () {
-  document.body.classList.remove("modal-open");
-  document.body.style.overflow = 'auto';
-  document.body.style.paddingRight = '0px';
-});
+  // editSubRepModal close backdrop 
+  document.getElementById("editMainRepModal").addEventListener("hidden.bs.modal", function () {
+    document.body.classList.remove("modal-open");
+    document.body.style.overflow = 'auto';
+    document.body.style.paddingRight = '0px';
+  });
 
   // ensure proper display
   const editMainRep = document.getElementById('editMainRep');
@@ -983,7 +1001,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Reset modal content when closed
   document.getElementById("attachmentModal").addEventListener("hidden.bs.modal", function () {
-    document.body.style.overflow = "auto"; 
+    document.body.style.overflow = "auto";
     document.body.style.paddingRight = "0px";
 
     fileUploadPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
@@ -1087,7 +1105,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Reset modal content when closed
   document.getElementById("signatureModal").addEventListener("hidden.bs.modal", function () {
-    document.body.style.overflow = "auto"; 
+    document.body.style.overflow = "auto";
     document.body.style.paddingRight = "0px";
     uploadSignPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
     uploadedImage = null;
@@ -1209,11 +1227,11 @@ submitButton.addEventListener('click', () => {
   previewArea.appendChild(imgElement);
 });
 
-  // restore scrolling 
-  document.getElementById("signaturePadModal").addEventListener("hidden.bs.modal", function () {
-    document.body.style.overflow = "auto"; 
-    document.body.style.paddingRight = "0px";
-  });
+// restore scrolling 
+document.getElementById("signaturePadModal").addEventListener("hidden.bs.modal", function () {
+  document.body.style.overflow = "auto";
+  document.body.style.paddingRight = "0px";
+});
 
 
 const closePreview = document.getElementById('closePreview');
