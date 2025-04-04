@@ -194,6 +194,7 @@ app.get('/account', (req, res) => {
     const accountContent = fs.readFileSync(path.join(__dirname, '..', 'public', 'account.html'), 'utf-8');
     res.send(template.replace('{{content}}', accountContent));
 });
+
 //Profile Preiew
 app.get('/user-details', (req, res) => {
     const { userID } = req.query;  // Retrieve userID from the query string

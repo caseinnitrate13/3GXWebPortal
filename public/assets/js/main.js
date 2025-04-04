@@ -397,7 +397,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // ACCOUNT
 
-// PROFILE PREVIEW
 document.addEventListener("DOMContentLoaded", () => {
   const userID = JSON.parse(localStorage.getItem("userID"));
 
@@ -410,16 +409,25 @@ document.addEventListener("DOMContentLoaded", () => {
       .then(response => response.json())
       .then(data => {
           if (data.success) {
-              
-              document.getElementById("username").textContent = data.user.username;
-              document.getElementById("companyName").textContent = data.user.companyName;
-              document.getElementById("companyAddress").textContent = data.user.companyAddress;
-              document.getElementById("email").textContent = data.user.companyEmail;
-              document.getElementById("representative").textContent = data.user.repNames;
-              document.getElementById("phoneNumber").textContent = data.user.repNum;
-              document.getElementById("profilecompanyName").textContent = data.user.companyName;
-              document.getElementById("headerCompanyName").textContent = data.user.companyName;
-              document.getElementById("toggleCompanyName").textContent = data.user.companyName;
+
+              const isQuotationPage = location.pathname === '/quotation';
+              const isAccountPage = location.pathname === '/account';
+               const isRFQFormPage = location.pathname === '/request-for-quotation-form';
+
+              if (isQuotationPage || isRFQFormPage) {
+                  document.getElementById("headerCompanyName").textContent = data.user.companyName;
+                  document.getElementById("toggleCompanyName").textContent = data.user.companyName;
+              } else if (isAccountPage) {
+                  document.getElementById("username").textContent = data.user.username;
+                  document.getElementById("companyName").textContent = data.user.companyName;
+                  document.getElementById("companyAddress").textContent = data.user.companyAddress;
+                  document.getElementById("email").textContent = data.user.companyEmail;
+                  document.getElementById("representative").textContent = data.user.repNames;
+                  document.getElementById("phoneNumber").textContent = data.user.repNum;
+                  document.getElementById("profilecompanyName").textContent = data.user.companyName;
+                  document.getElementById("headerCompanyName").textContent = data.user.companyName;
+                  document.getElementById("toggleCompanyName").textContent = data.user.companyName;
+              }
           } else {
               console.error("Error fetching user details:", data.message);
           }
