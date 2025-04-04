@@ -598,8 +598,7 @@ document.getElementById("editRow").addEventListener("hidden.bs.modal", function 
   editSubRepModal.show();
 });
 
-  // EDIT MAIN REPRESENTATIVE
-  // EDIT MAIN REPRESENTATIVE
+// EDIT MAIN REPRESENTATIVE
 const mainRepNameInput = document.getElementById('mainRepNameInput');
 const mainRepDeptInput = document.getElementById('mainRepDeptInput');
 const mainRepName = document.getElementById('mainRepName');
@@ -627,12 +626,10 @@ saveMainRep.addEventListener('click', function () {
         }
     }
 
-    validateField(mainRepNameInput, /^[A-Za-z\s]+$/); // Only letters and spaces
-    validateField(mainRepDeptInput, /^[A-Za-z0-9\s]+$/); // Letters, numbers, and spaces
+    validateField(mainRepNameInput, /^[A-Za-z\s]+$/); 
+    validateField(mainRepDeptInput, /^[A-Za-z0-9\s]+$/);
 
-    // If valid, proceed
     if (isValid) {
-        // If valid, update the values
         const newMainName = mainRepNameInput.value.trim();
         const newMainDept = mainRepDeptInput.value.trim();
 
