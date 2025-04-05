@@ -195,15 +195,14 @@ app.get('/account', (req, res) => {
     res.send(template.replace('{{content}}', accountContent));
 });
 
-//Profile Preiew
+//USER DETAILS (PROFILE OVERVIEW, REPRESENTATIVES, ETC.)
 app.get('/user-details', (req, res) => {
-    const { userID } = req.query;  // Retrieve userID from the query string
+    const { userID } = req.query;
 
     if (!userID) {
         return res.status(400).json({ success: false, message: "Missing user ID" });
     }
 
-    // Assuming dbService.getUserDetails is a function that retrieves user details based on userID
     dbService.getUserDetails(userID, (err, result) => {
         if (err) {
             return res.status(500).json({ success: false, message: "Internal server error" });
@@ -211,9 +210,32 @@ app.get('/user-details', (req, res) => {
         if (!result.success) {
             return res.status(404).json({ success: false, message: result.message });
         }
-        res.json(result);  // Send back the user details as a JSON response
+        res.json(result);
     });
 });
+
+app.post('/update-representative', (req, res) => {
+    const { userID, repNames } = req.body;
+  
+    // Validation
+    if (!userID || !repNames || !repNames[0] || !repNames[0].name || !repNames[0].position) {
+      return res.status(400).json({ success: false, message: "Missing required fields." });
+    }
+  
+    // Update representative info in the database
+    dbService.updateRepNames(userID, repNames, (err, result) => {
+      if (err) {
+        console.error("Error updating representative:", err);
+        return res.status(500).json({ success: false, message: "Database error." });
+      }
+  
+      if (result) {
+        return res.status(200).json({ success: true, message: "Representative updated successfully." });
+      } else {
+        return res.status(400).json({ success: false, message: "Failed to update representative." });
+      }
+    });
+  });
 
 
 
