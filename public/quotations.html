@@ -26,7 +26,7 @@
     </div>
   </div>
   
-  <a href="/request-for-quotation-form" class="btn btn-primary rounded-pill request-btn">
+  <a href="/request-for-quotation-form" class="btn blue text-white rounded-pill request-btn">
     <i class="bi bi-plus"></i> <span>Request</span>
   </a>
 </div>
@@ -346,7 +346,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body card-modal-body">
-        <table id="draftModalTable" class="table table-hover datatable table-fs">
+        <table id="draftModalTable" class="table table-hover table-bordered datatable table-fs">
           <thead>
             <tr>
               <th><input type="checkbox" class="select-checkbox-business me-2" title="select"></th>
@@ -362,18 +362,20 @@
               <td>Unity Pugh</td>
               <td>9958</td>
               <td>Elliott Snyder</td>
-               <td class="d-inline-flex align-items-center gap-3">
-                  <div data-bs-toggle="modal" data-bs-target="#deleteRowModal">
-                    <i id="deleteReq" class="bi bi-trash remove-row pointer ms-2"  data-bs-toggle="tooltip" data-bs-placement="top" title="Delete"></i>
-                  </div>
-                    <a href="/request-for-quotation-form"><i id="editReq" class="bi bi-pencil-square pointer text-black" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"></i></a>
+              <td class="d-flex justify-content-center align-content-center gap-3">
+                <div data-bs-toggle="modal" data-bs-target="#deleteRowModal">
+                  <i id="deleteReq" class="bi bi-trash remove-row pointer "  data-bs-toggle="tooltip" data-bs-placement="top" title="Delete"></i>
+                </div>
+                <div>
+                  <a href="/request-for-quotation-form"><i id="editReq" class="bi bi-pencil-square pointer text-black" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"></i></a>
+                </div>
               </td>
             </tr>
           </tbody>
         </table>
         </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn blue text-white rounded-pill" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -408,7 +410,7 @@
         </table>
         </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn blue text-white rounded-pill" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -453,7 +455,7 @@
         </table>
         </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn blue text-white rounded-pill" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -472,8 +474,8 @@
        <p>Are you sure you want to delete this draft?</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button id="deleteRow" type="button" class="btn btn-primary">Delete</button>
+        <button type="button" class="btn blue text-white rounded-pill" data-bs-dismiss="modal">Close</button>
+        <button id="deleteRow" type="button" class="btn rose text-white rounded-pill">Delete</button>
       </div>
     </div>
   </div>

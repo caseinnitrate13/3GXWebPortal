@@ -22,7 +22,7 @@ html, body {
 
 body {
   font-family: "Montserrat ", sans-serif;
-  background: #f6f9ff;
+  background: #FEFEFE;
   color: #444444;
   display: flex;
   flex-direction: column;
@@ -440,7 +440,7 @@ h6 {
 .logo span {
   font-size: 26px;
   font-weight: 700;
-  color: #012970;
+  color: #fff;
   font-family: "Nunito", sans-serif;
 }
 
@@ -449,7 +449,7 @@ h6 {
   z-index: 997;
   height: 60px;
   box-shadow: 0px 2px 20px rgba(1, 41, 112, 0.1);
-  background-color: #fff;
+  background-color: #8ea6d2;
   padding-left: 20px;
   /* Toggle Sidebar Button */
   /* Search Bar */
@@ -459,7 +459,7 @@ h6 {
   font-size: 32px;
   padding-left: 10px;
   cursor: pointer;
-  color: #012970;
+  color: #ffff;
 }
 
 .header .search-bar {
@@ -541,13 +541,13 @@ h6 {
 
 .header-nav .nav-icon {
   font-size: 22px;
-  color: #012970;
+  color: #fff;
   margin-right: 25px;
   position: relative;
 }
 
 .header-nav .nav-profile {
-  color: #012970;
+  color: #fff;
 }
 
 .header-nav .nav-profile img {
@@ -764,6 +764,7 @@ h6 {
   border-radius: 4px;
   margin-top: 30px;
   border: 1px solid #40A3EE;
+  box-shadow: 0px 4px 8px #015d5f37; 
 }
 
 .sidebar-nav .nav-link i {
@@ -778,7 +779,7 @@ h6 {
 }
 
 .sidebar-nav .nav-link.collapsed i {
-  color: #899bbd;
+  color: #012970;
 }
 
 .sidebar-nav .nav-link:hover {
@@ -1317,9 +1318,9 @@ h6 {
   font-size: 14px;
 }
 
-.card-modal-dialog {
+/* .card-modal-dialog {
   max-width: 80%; 
-}
+} */
 
 .card-modal-content {
   max-height: 80vh; 
@@ -1339,12 +1340,14 @@ h6 {
 #draftCard, #pendingCard, #quoteCard{
   transform: translateY(0);
   transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
- cursor: pointer;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid #28a4a8;
 }
 
 #draftCard:hover, #pendingCard:hover, #quoteCard:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 4px 8px #8ea6d2; 
 }
 
 .pointer{
@@ -1580,13 +1583,31 @@ border-top-right-radius: 10px;
 
 /* MODAL */
 .modal-header{
-  background-color: #40A3EE;
-  color: #ffffff;
+  background-color: #9CBAE0;
+  color: rgb(255, 255, 255);
 }
 
 
+.blue{
+  background-color: #6983be;
+}
+.dark-blue{
+  background-color: #1F4373;
+}
+.blue2{
+  background-color: #adbe88;
+}
+.rose{
+  background-color: #ef9869;
+}
 
+.blue:hover{
+  background-color: #1f59a5;
+}
 
+.rose:hover{
+  background-color: #F1845d;
+}
 
 @media (max-width: 576px) {
   body {
