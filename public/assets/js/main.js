@@ -397,6 +397,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // ACCOUNT
 
+//USER DETAILS
 document.addEventListener("DOMContentLoaded", () => {
   const userID = JSON.parse(localStorage.getItem("userID"));
 
@@ -456,7 +457,53 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // REPRESENTATIVE
+
+
 document.addEventListener("DOMContentLoaded", function () {
+
+  document.getElementById("saveMainRep").addEventListener("click", async () => {
+    const name = document.getElementById("mainRepNameInput").value.trim();
+    const position = document.getElementById("mainRepDeptInput").value.trim();
+    const userID = localStorage.getItem("userID");
+
+    // Validation
+    if (!name || !position) {
+      alert("Please fill in both name and department.");
+      return;
+    }
+
+    const repNames = [{ name, position }];
+
+    try {
+      const response = await fetch('/update-representative', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userID, repNames }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update UI after successful update
+        document.getElementById("mainRepName").textContent = name;
+        document.getElementById("mainRepDept").textContent = position;
+        document.getElementById("representative").textContent = name;
+
+        // Close the modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById("editMainRepModal"));
+        modal.hide();
+        alert("Representative updated successfully!");
+      } else {
+        alert("Failed to update representative.");
+      }
+    } catch (err) {
+      console.error("Update error:", err);
+      alert("Something went wrong.");
+    }
+  });
+
 
   // ADD SUB-REPRESENTATIVE
   const addSubRepBtn = document.getElementById('addSubRepBtn');

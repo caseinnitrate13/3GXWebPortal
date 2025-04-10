@@ -35,7 +35,7 @@ function checkDuplicateUser(username, companyEmail, callback) {
     connection.query(query, [username, companyEmail], (err, result) => {
         if (err) return callback(err, null);
         if (result.length > 0) return callback(null, true);
-        return callback(null, false); 
+        return callback(null, false);
     });
 }
 
@@ -105,4 +105,36 @@ function getUserDetails(userID, callback) {
     });
 }
 
-module.exports = { registerUser, checkDuplicateUser, loginUser, getUserDetails };
+// Function to update the mainrepNames
+function updateRepNames(userID, repNames, callback) {
+    userID = userID.trim();
+    if (userID.startsWith('"') && userID.endsWith('"')) {
+        userID = userID.slice(1, -1);
+    }
+
+    const repNamesJSON = JSON.stringify(repNames);
+
+    const updateQuery = 'UPDATE users SET repNames = ? WHERE userID = ?';
+    console.log("Executing update query:", updateQuery);
+    console.log("With values:", [repNamesJSON, userID]);
+
+    connection.query(updateQuery, [repNamesJSON, userID], (err, result) => {
+        if (err) {
+            console.log("Error updating repNames:", err);
+            return callback(err, null);
+        }
+
+        console.log("Update result:", result);
+        if (result.affectedRows > 0) {
+            return callback(null, { success: true });
+        } else {
+            console.log("No rows affected. UserID may not exist.");
+            return callback(null, { success: false, message: "User not found or data unchanged" });
+        }
+    });
+}
+
+
+
+
+module.exports = { registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames };
