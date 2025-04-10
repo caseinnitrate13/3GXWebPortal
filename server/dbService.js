@@ -134,7 +134,31 @@ function updateRepNames(userID, repNames, callback) {
     });
 }
 
+function addSubRepresentative(userID, rep, callback) {
+    const getQuery = 'SELECT repNames FROM users WHERE userID = ?';
+    connection.query(getQuery, [userID], (err, result) => {
+        if (err) return callback(err);
 
+        if (result.length === 0) {
+            return callback(null, { notFound: true });
+        }
 
+        let currentReps = [];
+        try {
+            currentReps = result[0].repNames ? JSON.parse(result[0].repNames) : [];
+        } catch (e) {
+            return callback(new Error('Invalid repNames format.'));
+        }
 
-module.exports = { registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames };
+        currentReps.push(rep);
+
+        const updateQuery = 'UPDATE users SET repNames = ? WHERE userID = ?';
+        connection.query(updateQuery, [JSON.stringify(currentReps), userID], (err, updateResult) => {
+            if (err) return callback(err);
+
+            return callback(null, { success: updateResult.affectedRows > 0 });
+        });
+    });
+}
+
+module.exports = { registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames, addSubRepresentative };

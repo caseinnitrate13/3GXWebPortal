@@ -216,26 +216,50 @@ app.get('/user-details', (req, res) => {
 
 app.post('/update-representative', (req, res) => {
     const { userID, repNames } = req.body;
-  
-    // Validation
+
     if (!userID || !repNames || !repNames[0] || !repNames[0].name || !repNames[0].position) {
-      return res.status(400).json({ success: false, message: "Missing required fields." });
+        return res.status(400).json({ success: false, message: "Missing required fields." });
     }
-  
-    // Update representative info in the database
+
     dbService.updateRepNames(userID, repNames, (err, result) => {
-      if (err) {
-        console.error("Error updating representative:", err);
-        return res.status(500).json({ success: false, message: "Database error." });
-      }
-  
-      if (result) {
-        return res.status(200).json({ success: true, message: "Representative updated successfully." });
-      } else {
-        return res.status(400).json({ success: false, message: "Failed to update representative." });
-      }
+        if (err) {
+            console.error("Error updating representative:", err);
+            return res.status(500).json({ success: false, message: "Database error." });
+        }
+
+        if (result) {
+            return res.status(200).json({ success: true, message: "Representative updated successfully." });
+        } else {
+            return res.status(400).json({ success: false, message: "Failed to update representative." });
+        }
     });
-  });
+});
+
+
+app.post('/add-sub-rep', (req, res) => {
+    const { userID, rep } = req.body;
+
+    if (!userID || !rep || !rep.name || !rep.position) {
+        return res.status(400).json({ success: false, message: "Invalid data." });
+    }
+
+    dbService.addSubRepresentative(userID, rep, (err, result) => {
+        if (err) {
+            console.error("Database error:", err);
+            return res.status(500).json({ success: false, message: "Database error." });
+        }
+
+        if (result.notFound) {
+            return res.status(404).json({ success: false, message: "User not found." });
+        }
+
+        if (result.success) {
+            return res.json({ success: true });
+        } else {
+            return res.status(500).json({ success: false, message: "Failed to update representative." });
+        }
+    });
+});
 
 
 
