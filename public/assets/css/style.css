@@ -759,9 +759,11 @@ h6 {
   font-weight: 600;
   color: #4154f1;
   transition: 0.3;
-  background: #f6f9ff;
+  background: #ffffff;
   padding: 10px 15px;
   border-radius: 4px;
+  margin-top: 30px;
+  border: 1px solid #40A3EE;
 }
 
 .sidebar-nav .nav-link i {
@@ -1574,6 +1576,14 @@ border-top-right-radius: 10px;
   overflow: hidden; 
   text-overflow: ellipsis;
 }
+
+
+/* MODAL */
+.modal-header{
+  background-color: #40A3EE;
+  color: #ffffff;
+}
+
 
 
 
