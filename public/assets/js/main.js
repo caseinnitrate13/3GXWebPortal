@@ -461,12 +461,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("DOMContentLoaded", function () {
 
+
+  //MAIN REPRESENTATIVE
   document.getElementById("saveMainRep").addEventListener("click", async () => {
     const name = document.getElementById("mainRepNameInput").value.trim();
     const position = document.getElementById("mainRepDeptInput").value.trim();
     const userID = localStorage.getItem("userID");
 
-    // Validation
     if (!name || !position) {
       alert("Please fill in both name and department.");
       return;
@@ -486,7 +487,6 @@ document.addEventListener("DOMContentLoaded", function () {
       const result = await response.json();
 
       if (result.success) {
-        // Update UI after successful update
         document.getElementById("mainRepName").textContent = name;
         document.getElementById("mainRepDept").textContent = position;
         document.getElementById("representative").textContent = name;
@@ -545,6 +545,36 @@ document.addEventListener("DOMContentLoaded", function () {
         ;
 
       document.getElementById("subRepList").appendChild(subRepEntry);
+
+      // Prepare the data for backend
+      const newSubRep = {
+        userID: localStorage.getItem("userID"), // assuming you store userID
+        rep: {
+          name: RepName,
+          position: "Sub Representative",
+          department: RepDept
+        }
+      };
+
+      fetch('/add-sub-rep', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newSubRep)
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            console.log("Sub-representative added to database.");
+          } else {
+            console.error("Failed to update sub-representative:", data.message);
+          }
+        })
+        .catch(error => {
+          console.error("Error sending sub-representative data:", error);
+        });
+
 
       // close modal 
       const addSubRepModal = document.getElementById('addSubRepModal');
