@@ -316,6 +316,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById('reloadBtn')?.addEventListener('click', async function () {
     try {
       const storedUser = localStorage.getItem('user');
+      
 
       if (!storedUser) {
         alert('No user found. Please log in again.');
@@ -400,6 +401,7 @@ document.addEventListener("DOMContentLoaded", function () {
 //USER DETAILS
 document.addEventListener("DOMContentLoaded", () => {
   const userID = JSON.parse(localStorage.getItem("userID"));
+  console.log('USerID', userID);
 
   if (!userID) {
     console.error("User not logged in");
