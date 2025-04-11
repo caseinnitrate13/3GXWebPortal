@@ -309,6 +309,9 @@ document.addEventListener('DOMContentLoaded', function () {
     label.textContent = this.files.length ? truncateFileName(this.files[0].name) : 'Upload Valid ID';
   });
 
+
+
+
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -316,7 +319,8 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById('reloadBtn')?.addEventListener('click', async function () {
     try {
       const storedUser = localStorage.getItem('user');
-      
+      console.log('stored user', storedUser);
+
 
       if (!storedUser) {
         alert('No user found. Please log in again.');
@@ -400,8 +404,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 //USER DETAILS
 document.addEventListener("DOMContentLoaded", () => {
-  const userID = JSON.parse(localStorage.getItem("userID"));
-  console.log('USerID', userID);
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const userID = storedUser?.userID;
 
   if (!userID) {
     console.error("User not logged in");
@@ -468,7 +472,9 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("saveMainRep").addEventListener("click", async () => {
     const name = document.getElementById("mainRepNameInput").value.trim();
     const position = document.getElementById("mainRepDeptInput").value.trim();
-    const userID = localStorage.getItem("userID");
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const userID = storedUser?.userID;
+
 
     if (!name || !position) {
       alert("Please fill in both name and department.");
