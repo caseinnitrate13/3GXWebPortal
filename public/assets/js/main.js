@@ -820,7 +820,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const headerCompanyName = document.getElementById('headerCompanyName');
   const headerProfileImg = document.getElementById('headerProfileImg');
   const ProfileImgDisplay = document.getElementById('profileDisplay');
-  const defaultImage = "/assets/img/default-profile.png";
+  const defaultImage = "/assets/img/profile-icon.png";
 
   let isEditing = false;
   let uploadedImageURL = defaultImage;
