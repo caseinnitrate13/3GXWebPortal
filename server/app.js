@@ -261,7 +261,20 @@ app.post('/add-sub-rep', (req, res) => {
     });
 });
 
+app.get('/get-sub-reps', async (req, res) => {
+    const userID = req.query.userID;
 
+    if (!userID) {
+        return res.status(400).json({ success: false, message: "Missing userID" });
+    }
+
+    try {
+        const reps = await dbService.getSubRepresentatives(userID);
+        return res.json({ success: true, reps });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.toString() });
+    }
+});
 
 app.get('/view-quotation', (req, res) => {
     const viewQuotation = fs.readFileSync(path.join(__dirname, '..', 'public', 'view-quotation.html'), 'utf-8');

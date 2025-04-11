@@ -161,4 +161,28 @@ function addSubRepresentative(userID, rep, callback) {
     });
 }
 
-module.exports = { registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames, addSubRepresentative };
+function getSubRepresentatives(userID) {
+  return new Promise((resolve, reject) => {
+    const getQuery = 'SELECT repNames FROM users WHERE userID = ?';
+    connection.query(getQuery, [userID], (err, result) => {
+      if (err) {
+        return reject("Database error: " + err);
+      }
+
+      if (result.length === 0) {
+        return reject("User not found");
+      }
+
+      let reps = [];
+      try {
+        reps = result[0].repNames ? JSON.parse(result[0].repNames) : [];
+        return resolve(reps);
+      } catch (e) {
+        return reject("Invalid repNames format");
+      }
+    });
+  });
+}
+
+module.exports = { registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames, 
+    addSubRepresentative, getSubRepresentatives };

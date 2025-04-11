@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const formData = new FormData();
 
       const repNamesArray = [
-        { name: document.getElementById('regRepName').value, position: "Main Representative" }
+        { name: document.getElementById('regRepName').value, position: "Authorized Representative" }
       ];
 
       formData.append('regUsername', document.getElementById('regUsername').value);
@@ -450,6 +450,25 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById("profilecompanyName").textContent = data.user.companyName;
           document.getElementById("headerCompanyName").textContent = data.user.companyName;
           document.getElementById("toggleCompanyName").textContent = data.user.companyName;
+
+          fetch(`/get-sub-reps?userID=${userID}`)
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                const subRepList = document.getElementById("subRepList");
+                subRepList.innerHTML = "";
+
+                const subReps = data.reps.slice(1);
+
+                subReps.forEach(rep => {
+                  const subRepEntry = document.createElement("div");
+                  subRepEntry.classList.add("sub-rep-entry", "mb-2");
+                  subRepEntry.innerHTML = `<strong>${rep.name}</strong><br><span class="text-muted">${rep.department}</span>`;
+                  subRepList.appendChild(subRepEntry);
+                });
+              }
+            })
+            .catch(error => console.error("Error fetching sub-reps:", error));
         }
       } else {
         console.error("Error fetching user details:", data.message);
@@ -546,7 +565,6 @@ document.addEventListener("DOMContentLoaded", function () {
       const RepName = subRepName.value.trim();
       const RepDept = subRepDept.value.trim();
 
-      // Create a new sub-representative entry
       const subRepEntry = document.createElement("div");
       subRepEntry.classList.add("sub-rep-entry", "mb-2");
       subRepEntry.innerHTML = `<strong>${RepName}</strong><br><span class="text-muted">${RepDept}</span>`
@@ -554,9 +572,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
       document.getElementById("subRepList").appendChild(subRepEntry);
 
-      // Prepare the data for backend
       const newSubRep = {
-        userID: localStorage.getItem("userID"), // assuming you store userID
+        userID: JSON.parse(localStorage.getItem("user"))?.userID,
         rep: {
           name: RepName,
           position: "Sub Representative",
