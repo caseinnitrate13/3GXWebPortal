@@ -864,18 +864,21 @@ document.addEventListener("DOMContentLoaded", function () {
   const headerCompanyName = document.getElementById('headerCompanyName');
   const headerProfileImg = document.getElementById('headerProfileImg');
   const ProfileImgDisplay = document.getElementById('profileDisplay');
-  const defaultImage = "/assets/img/profile-icon.png";
+  const defaultImage = "/assets/img/account.png";
 
   let isEditing = false;
   let uploadedImageURL = defaultImage;
 
   profileUpload.disabled = true;
+  profileUpload.style.pointerEvents = 'none';
   deleteProfile.disabled = true;
+  deleteProfile.style.pointerEvents = 'none';
 
   saveEdit.addEventListener('click', function () {
     if (!isEditing) {
       profileUpload.disabled = false;
-      deleteProfile.disabled = false;
+      profileUpload.style.pointerEvents = 'auto';
+      deleteProfile.style.pointerEvents = 'auto';
 
       // upload profile
       profileUpload.addEventListener("click", function (event) {
