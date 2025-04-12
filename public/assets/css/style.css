@@ -114,7 +114,7 @@ h6 {
   font-size: 24px;
   margin-bottom: 0;
   font-weight: 600;
-  color: #012970;
+  color: #000000;
 }
 
 /*--------------------------------------------------------------
@@ -127,7 +127,7 @@ h6 {
   right: 15px;
   bottom: 15px;
   z-index: 99999;
-  background: #4154f1;
+  background: #AA251C;
   width: 40px;
   height: 40px;
   border-radius: 4px;
@@ -141,7 +141,7 @@ h6 {
 }
 
 .back-to-top:hover {
-  background: #6776f4;
+  background: #DD1C1C;
   color: #fff;
 }
 
@@ -290,7 +290,7 @@ h6 {
   padding: 20px 0 15px 0;
   font-size: 18px;
   font-weight: 700px;
-  color: #012970;
+  color: #000000;
   font-family: "Montserrat", sans-serif;
 }
 
@@ -346,7 +346,7 @@ h6 {
 }
 
 .accordion-button:not(.collapsed) {
-  color: #012970;
+  color: #000000;
   background-color: #f6f9ff;
 }
 
@@ -406,13 +406,13 @@ h6 {
 
 .nav-tabs-bordered .nav-link:hover,
 .nav-tabs-bordered .nav-link:focus {
-  color: #4154f1;
+  color: #AA251C;
 }
 
 .nav-tabs-bordered .nav-link.active {
   background-color: #fff;
-  color: #4154f1;
-  border-bottom: 2px solid #4154f1;
+  color: #AA251C;
+  border-bottom: 2px solid #AA251C;
 }
 
 /*--------------------------------------------------------------
@@ -449,7 +449,7 @@ h6 {
   z-index: 997;
   height: 60px;
   box-shadow: 0px 2px 20px rgba(1, 41, 112, 0.1);
-  background-color: #8ea6d2;
+  background-color: #AA251C;
   padding-left: 20px;
   /* Toggle Sidebar Button */
   /* Search Bar */
@@ -501,7 +501,7 @@ h6 {
 .header .search-form input {
   border: 0;
   font-size: 14px;
-  color: #012970;
+  color: #000000;
   border: 1px solid rgba(1, 41, 112, 0.2);
   padding: 7px 38px 7px 8px;
   border-radius: 3px;
@@ -524,7 +524,7 @@ h6 {
 }
 
 .header .search-form button i {
-  color: #012970;
+  color: #000000;
 } */
 
 /*--------------------------------------------------------------
@@ -664,8 +664,8 @@ h6 {
 }
 
 .header-nav .profile .dropdown-item:hover {
-  background-color: #8ea6d251;
-  /* color: #fff; */
+  background-color: #AA251c;
+  color: #fff;
 }
 
 /*--------------------------------------------------------------
@@ -760,11 +760,11 @@ h6 {
   font-weight: 600;
   color: #ffff;
   transition: 0.3;
-  background: #8ea6d2;
+  background: #AA251c;
   padding: 10px 15px;
   border-radius: 4px;
   margin-top: 30px;
-  /* border: 2px solid #8ea6d2; */
+  /* border: 2px solid #AA251c; */
   box-shadow: 0px 4px 8px #00000037; 
 }
 
@@ -775,18 +775,18 @@ h6 {
 }
 
 .sidebar-nav .nav-link.collapsed {
-  color: #012970;
+  color: #000000;
   background: #fff;
-  border: 1px solid #8ea6d2;
+  border: 1px solid #AA251c;
 }
 
 .sidebar-nav .nav-link.collapsed i {
-  color: #012970;
+  color: #000000;
 }
 
 .sidebar-nav .nav-link:hover {
   color: #fff;
-  background: #8ea6d2;
+  background: #AA251c;
 }
 
 .sidebar-nav .nav-link:hover i {
@@ -813,7 +813,7 @@ h6 {
   align-items: center;
   font-size: 14px;
   font-weight: 600;
-  color: #012970;
+  color: #000000;
   transition: 0.3;
   padding: 10px 0 10px 40px;
   transition: 0.3s;
@@ -883,7 +883,7 @@ h6 {
 
 .dashboard .info-card h6 {
   font-size: 28px;
-  color: #012970;
+  color: #000000;
   font-weight: 700;
   margin: 0;
   padding: 0;
@@ -979,7 +979,7 @@ h6 {
 }
 
 .dashboard .news h4 a {
-  color: #012970;
+  color: #000000;
   transition: 0.3s;
 }
 
@@ -1051,7 +1051,7 @@ h6 {
   background-color: #fff;
   border-radius: 0.25rem;
   text-align: center;
-  color: #012970;
+  color: #000000;
   padding: 15px 0;
 }
 
@@ -1100,7 +1100,7 @@ h6 {
 }
 
 .profile .profile-card .social-links a:hover {
-  color: #012970;
+  color: #000000;
 }
 
 .profile .profile-overview .row {
@@ -1109,7 +1109,7 @@ h6 {
 }
 
 .profile .profile-overview .card-title {
-  color: #012970;
+  color: #;
 }
 
 .profile .profile-overview .label {
@@ -1154,7 +1154,7 @@ h6 {
 
 .contact .info-box h3 {
   font-size: 20px;
-  color: #012970;
+  color: #000000;
   font-weight: 700;
   margin: 20px 0 10px 0;
 }
@@ -1268,7 +1268,7 @@ h6 {
 .error-404 h2 {
   font-size: 24px;
   font-weight: 700;
-  color: #012970;
+  color: #000000;
   margin-bottom: 30px;
 }
 
@@ -1300,14 +1300,14 @@ h6 {
 
 .footer .copyright {
   text-align: center;
-  color: #012970;
+  color: #000000;
 }
 
 .footer .credits {
   padding-top: 5px;
   text-align: center;
   font-size: 13px;
-  color: #012970;
+  color: #000000;
 }
 
 
@@ -1344,12 +1344,12 @@ h6 {
   transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
   cursor: pointer;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  border: 1px solid #28a4a8;
+  border: 1px solid #DD1c1a;
 }
 
 #draftCard:hover, #pendingCard:hover, #quoteCard:hover {
   transform: translateY(-5px);
-  box-shadow: 0px 4px 8px #8ea6d2; 
+  box-shadow: 0px 4px 8px #DD1C1A; 
 }
 
 .pointer{
@@ -1585,38 +1585,38 @@ thead.table-thead{
 
 /* MODAL */
 .modal-header{
-  background-color: #9CBAE0;
+  background-color: #D5462D;
   color: rgb(255, 255, 255);
 }
 
 
 .blue{
-  background-color: #5dade2;
+  background-color: #D5462D;
 }
 .purple{
-  background-color: #8ea6d2;
+  background-color: #AA251c;
 }
 .blue2{
   background-color: #adbe88;
 }
 .rose{
-  background-color: #e57373;
+  background-color: #FFC11F;
 }
 .light-green{
-  background-color: #6fcf97;
+  background-color: #D5462D;
 }
 
 .blue:hover, .blue:active{
-  background-color: #3498db !important;
+  background-color: #DD1C1C !important;
 }
 .purple:hover, .purple:active{
   background-color: #4771be !important;
 }
 .rose:hover, .rose:active{
-  background-color: #d32f2f !important;
+  background-color: #FE650D !important;
 }
 .light-green:hover, .ligh-green:active{
-  background-color: #57b981 !important;
+  background-color: #DD1C1C !important;
 }
 
 @media (max-width: 576px) {
