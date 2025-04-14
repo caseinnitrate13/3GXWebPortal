@@ -3,12 +3,12 @@
 </div>
 <div class="d-flex align-items-center justify-content-between mt-4 w400 flex-wrap">
   <div class="d-flex align-items-center viewtype-container flex-nowrap">
-    <span class="pe-2 viewtype-text">View Type:</span> 
+    <span class="pe-2 viewtype-text text-dark">View Type:</span> 
     <div class="dropdown ms-2">
-      <a class="d-flex align-items-center border px-2 py-1 text-secondary viewtype-dropdown" href="#" data-bs-toggle="dropdown">
+      <a class="d-flex align-items-center border border-dark px-2 py-1 text-dark viewtype-dropdown" href="#" data-bs-toggle="dropdown">
         <span id="selected-view" class="dropdown-toggle">Card View</span>
       </a>
-      <ul class="dropdown-menu dropdown-menu-right dropdown-menu-arrow text-secondary">
+      <ul class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
         <li>
           <a class="dropdown-item d-flex align-items-center view-option" href="#" data-view="card">
             <i class="bi bi-card-text me-1"></i>
@@ -62,7 +62,7 @@
     <div class="col-lg-4">
       <div id="quoteCard" class="card" data-bs-toggle="modal" data-bs-target="#quoteCardModal">
         <div class="card-body card-center-text text-center fs-3">
-          <i class="bi bi-quote fs-1"></i>
+          <i class="bi bi-card-text fs-1"></i>
           <h2 class="w800">QUOTATIONS</h2> 
           12
         </div>
@@ -372,7 +372,7 @@
 <div class="modal fade" id="draftCardModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content card-modal-content">
-      <div class="modal-header">
+      <div class="modal-header draft-modal-header">
         <h5 class="modal-title">Draft RFQs</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
@@ -416,7 +416,7 @@
 <div class="modal fade" id="pendingCardModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content card-modal-content">
-      <div class="modal-header">
+      <div class="modal-header pending-modal-header">
         <h5 class="modal-title">Pending RFQs</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
@@ -451,7 +451,7 @@
 <div class="modal fade" id="quoteCardModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content card-modal-content">
-      <div class="modal-header">
+      <div class="modal-header quotation-modal-header">
         <h5 class="modal-title">Quotations</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>

@@ -23,7 +23,7 @@ html, body {
 body {
   font-family: "Montserrat ", sans-serif;
   background: #FEFEFE;
-  color: #444444;
+  color: #000000;
   display: flex;
   flex-direction: column;
 }
@@ -1321,6 +1321,21 @@ h6 {
   border: 2px solid #0995B0;
 }
 
+.draft-modal-header {
+  background-color: #EE9521 !important;
+  color: #ffffff !important;
+}
+
+.pending-modal-header {
+  background-color: #E34A3A !important;
+  color: #ffffff !important;
+}
+
+.quotation-modal-header {
+  background-color: #0995B0 !important;
+  color: #ffffff !important;
+}
+
 .pointer{
   cursor: pointer;
 }
@@ -1523,6 +1538,7 @@ thead.table-thead{
   width: 100px;  
   height: 100px;
   object-fit: cover;
+  /* box-shadow: 0px 0px 20px rgba(112, 1, 1, 0.1); */
 }
 
 .rounded-profile, #headerProfileImg{
@@ -1582,6 +1598,12 @@ thead.table-thead{
   background-color: #DD1C1C !important;
   color: #fff !important;
 }
+
+/* .account-card {
+  background-color: #AA251C;
+  color: #fff;
+  border: none;
+} */
 
 @media (max-width: 576px) {
   body {
