@@ -106,11 +106,6 @@
           select: 3,
           sortSequence: ["desc"]
         },
-        {
-          select: 4,
-          cellClass: "green",
-          headerClass: "red"
-        }
       ]
     });
   });
@@ -915,6 +910,11 @@ document.addEventListener("DOMContentLoaded", function () {
       emailEdit.readOnly = true;
       repNameEdit.readOnly = true;
       phoneNumEdit.readOnly = true;
+
+      profileUpload.disabled = true;
+      profileUpload.style.pointerEvents = 'none';
+      deleteProfile.disabled = true;
+      deleteProfile.style.pointerEvents = 'none';
 
       saveEdit.textContent = "Edit Details";
     }

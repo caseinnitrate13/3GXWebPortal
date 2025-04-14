@@ -273,9 +273,9 @@ h6 {
 /* Card */
 .card {
   margin-bottom: 30px;
-  border: none;
+  border: 1px solid #000000;
   border-radius: 5px;
-  box-shadow: 0px 0 30px rgba(1, 41, 112, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .card-header,
@@ -1109,7 +1109,7 @@ h6 {
 }
 
 .profile .profile-overview .card-title {
-  color: #;
+  color: #000000;
 }
 
 .profile .profile-overview .label {
@@ -1344,12 +1344,54 @@ h6 {
   transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
   cursor: pointer;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  border: 1px solid #DD1c1a;
+
+}
+#draftCard {
+  border: 1px solid #EE9521;
+  color: #EE9521;
 }
 
-#draftCard:hover, #pendingCard:hover, #quoteCard:hover {
+#pendingCard {
+  border: 1px solid #E34A3A;
+  color: #E34A3A;
+}
+
+#quoteCard {
+  border: 1px solid #0995B0;
+  color: #0995B0;
+}
+
+#draftCard:hover {
   transform: translateY(-5px);
-  box-shadow: 0px 4px 8px #DD1C1A; 
+  background-color: #EE9521;
+  box-shadow: 0px 4px 8px #EE9521; 
+  color: #fff;
+}
+
+#pendingCard:hover {
+  transform: translateY(-5px);
+  background-color: #E34A3A;
+  box-shadow: 0px 4px 8px #E34A3A; 
+  color: #fff;
+}
+
+#quoteCard:hover {
+  transform: translateY(-5px);
+  background-color: #0995B0;
+  box-shadow: 0px 4px 8px #0995B0; 
+  color: #fff;
+}
+
+#draftTable {
+  border: 2px solid #EE9521;
+}
+
+#pendingTable {
+  border: 2px solid #E34A3A;
+}
+
+#quotationTable {
+  border: 2px solid #0995B0;
 }
 
 .pointer{
@@ -1584,39 +1626,34 @@ thead.table-thead{
 
 
 /* MODAL */
-.modal-header{
+.modal-header {
   background-color: #D5462D;
   color: rgb(255, 255, 255);
 }
 
+/* BUTTONS */
+.close-btn {
+  border: 1px solid #DD1C1C;
+} 
 
-.blue{
-  background-color: #D5462D;
-}
-.purple{
-  background-color: #AA251c;
-}
-.blue2{
-  background-color: #adbe88;
-}
-.rose{
-  background-color: #FFC11F;
-}
-.light-green{
-  background-color: #D5462D;
+.close-btn:hover, .close-btn:active {
+  background-color: #DD1C1C;
+  color: #ffffff;
 }
 
-.blue:hover, .blue:active{
+.red{
+  background-color: #D5462D;
+  color: #fff;
+}
+
+.border-btn{
+  border: 1px solid #DD1C1A;
+  color: #DD1C1A;
+}
+
+.red:hover, .red:active, .outlined-btn:hover, .outlined-btn:active, .border-btn:hover, .border-btn:active{
   background-color: #DD1C1C !important;
-}
-.purple:hover, .purple:active{
-  background-color: #4771be !important;
-}
-.rose:hover, .rose:active{
-  background-color: #FE650D !important;
-}
-.light-green:hover, .ligh-green:active{
-  background-color: #DD1C1C !important;
+  color: #fff !important;
 }
 
 @media (max-width: 576px) {

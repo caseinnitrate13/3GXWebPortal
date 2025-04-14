@@ -51,7 +51,7 @@
             <div class="table-container mt-4">
                 <div class="table-responsive ">
                     <table class="table overflow-hidden">
-                        <thead class="table-primary">
+                        <thead class="table-secondary">
                             <tr>
                                 <th>Item</th>
                                 <th>Description</th>
@@ -73,14 +73,14 @@
                                 <td><input type="text" class="form-control-plaintext border-bottom-custom" name="unit_price"></td>
                                 <!-- <td><input type="text" class="form-control-plaintext border-bottom-custom" name="total" readonly></td> -->
                                 <td>
-                                    <button type="button" class="btn rose text-white btn-sm remove-row"><i class="bi bi-trash3"></i></button>
+                                    <button type="button" class="btn red btn-sm remove-row"><i class="bi bi-trash3"></i></button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="d-flex justify-content-center align-content-center">
-                    <button id="addRowBtn" class="btn btn-dashed btn-outline-dark"><i class="bi bi-plus-circle me-1"></i> Add New Row</button>
+                    <button id="addRowBtn" class="btn btn-dashed outlined-btn"><i class="bi bi-plus-circle me-1"></i> Add New Row</button>
                 </div>
             </div>
         
@@ -95,17 +95,17 @@
 
             <!-- add attachments -->
             <div class="d-flex justify-content-center align-content-center mt-4" data-bs-toggle="modal" data-bs-target="#attachmentModal">
-                <button type="button" id="attachBtn" class="btn btn-dashed btn-outline-dark"><i class="bi bi-paperclip me-1"></i>Add Attachments</button>
+                <button type="button" id="attachBtn" class="btn btn-dashed outlined-btn"><i class="bi bi-paperclip me-1"></i>Add Attachments</button>
             </div>
 
             <!-- upload signature -->
             <div class="d-flex justify-content-end align-content-end mt-5" data-bs-toggle="modal" data-bs-target="#signatureModal">
-                <button type="button" id="uploadSignBtn" class="btn btn-dashed btn-outline-dark"><i class="bi bi-paperclip me-1"></i>Upload Signature</button>
+                <button type="button" id="uploadSignBtn" class="btn btn-dashed outlined-btn"><i class="bi bi-paperclip me-1"></i>Upload Signature</button>
             </div>
             
             <!-- signature pad-->
             <div class="d-flex justify-content-end align-content-end mt-3" data-bs-toggle="modal" data-bs-target="#signaturePadModal">
-                <button type="button" id="signPadBtn" class="btn btn-dashed btn-outline-dark"><i class="bi bi-pencil-square me-1"></i>Use Signature Pad</button>
+                <button type="button" id="signPadBtn" class="btn btn-dashed outlined-btn"><i class="bi bi-pencil-square me-1"></i>Use Signature Pad</button>
             </div>
 
             <div class="d-flex justify-content-end align-content-end">
@@ -123,10 +123,10 @@
             </div>
             
             <div class="d-flex flex-column flex-md-row justify-content-center align-items-center mt-5 gap-3">
-                <button id="saveDraftBtn" type="button" class="btn blue text-white rounded-pill">
+                <button id="saveDraftBtn" type="button" class="btn red rounded-pill">
                     Save as Draft
                 </button>
-                <button id="sendBtn" type="button" class="btn blue text-white rounded-pill">
+                <button id="sendBtn" type="button" class="btn red rounded-pill">
                     Send to Supplier
                 </button>
             </div>
@@ -151,12 +151,12 @@
                 </div>
                 <input type="file" id="fileUpload" accept=".doc,.docx" hidden> 
                 <div class="text-center mt-3">
-                    <button id="fileUploadBtn" class="btn btn-outline-dark rounded-pill"> <i class="bi bi-upload me-2"></i>Upload File</button>
+                    <button id="fileUploadBtn" class="btn outlined-btn border-dark rounded-pill ps-4 pe-4"> <i class="bi bi-upload me-2"></i>Upload File</button>
                 </div>
             </div>
             <div class="modal-footer d-flex justify-content-between align-content-end">
                 <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn blue text-white rounded-pill" id="uploadSaveBtn" >Save</button>
+                <button type="button" class="btn red rounded-pill" id="uploadSaveBtn" >Save</button>
             </div>
         </div>
     </div>
@@ -178,14 +178,14 @@
                 </div>
                 <input type="file" id="fileInput" accept="image/*" hidden> 
                 <div class="text-center mt-3">
-                    <button id="uploadImgBtn" class="btn purple text-white rounded-pill"> 
+                    <button id="uploadImgBtn" class="btn red rounded-pill"> 
                         <i class="bi bi-upload me-2"></i>Upload Signature
                     </button>
                 </div>
             </div>
             <div class="modal-footer d-flex justify-content-between align-content-end">
                 <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
-                <button id="saveButton" type="button" class="btn blue text-white rounded-pill">Save</button>
+                <button id="saveButton" type="button" class="btn red rounded-pill">Save</button>
             </div>
         </div>
     </div>
@@ -206,14 +206,14 @@
                     <canvas id="signature-pad" class="signature-pad"></canvas>
                     <br>
                     <div class="text-center mt-3">
-                        <button id="clear" class="btn btn-outline-dark rounded-pill"> <i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+                        <button id="clear" class="btn outlined-btn rounded-pill"> <i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
                     </div>
                 </div>
             </div>
             <div class="modal-footer d-flex justify-content-between align-content-end">
                 <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
                 <!-- Submit button inside the form -->
-                <button id="submit" type="submit" class="btn blue text-white rounded-pill">Submit</button>
+                <button id="submit" type="submit" class="btn red rounded-pill">Submit</button>
             </div>
         </div>
     </div>
