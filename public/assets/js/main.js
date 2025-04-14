@@ -461,6 +461,28 @@ document.addEventListener("DOMContentLoaded", () => {
                   subRepEntry.innerHTML = `<strong>${rep.name}</strong><br><span class="text-muted">${rep.department}</span>`;
                   subRepList.appendChild(subRepEntry);
                 });
+
+                //Sub Reps List on Modal
+                const editRepTableBody = document.querySelector("#editRepTable tbody");
+                editRepTableBody.innerHTML = ""; 
+
+                subReps.forEach((rep, index) => {
+                  const row = document.createElement("tr");
+                  row.innerHTML = `
+                    <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                    <td>${rep.name}</td>
+                    <td>${rep.department}</td>
+                    <td class="d-flex justify-content-center align-items-center">
+                      <div data-bs-toggle="tooltip" data-bs-placement="top" title="Delete">
+                        <i class="bi bi-trash me-2 remove-row" data-bs-toggle="modal" data-bs-target="#deleteRowModal" data-rep-index="${index + 1}"></i>
+                      </div>
+                      <div data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                        <i class="bi bi-pencil-square" data-bs-toggle="modal" data-bs-target="#editRow" data-rep-index="${index + 1}"></i>
+                      </div>
+                    </td>
+                  `;
+                  editRepTableBody.appendChild(row);
+                });
               }
             })
             .catch(error => console.error("Error fetching sub-reps:", error));
@@ -477,7 +499,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // REPRESENTATIVE
-
 
 document.addEventListener("DOMContentLoaded", function () {
 
