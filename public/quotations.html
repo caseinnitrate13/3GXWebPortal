@@ -3,12 +3,12 @@
 </div>
 <div class="d-flex align-items-center justify-content-between mt-4 w400 flex-wrap">
   <div class="d-flex align-items-center viewtype-container flex-nowrap">
-    <span class="pe-2 viewtype-text">View Type:</span> 
+    <span class="pe-2 viewtype-text text-dark">View Type:</span> 
     <div class="dropdown ms-2">
-      <a class="d-flex align-items-center border px-2 py-1 text-secondary viewtype-dropdown" href="#" data-bs-toggle="dropdown">
+      <a class="d-flex align-items-center border border-dark px-2 py-1 text-dark viewtype-dropdown" href="#" data-bs-toggle="dropdown">
         <span id="selected-view" class="dropdown-toggle">Card View</span>
       </a>
-      <ul class="dropdown-menu dropdown-menu-right dropdown-menu-arrow text-secondary">
+      <ul class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
         <li>
           <a class="dropdown-item d-flex align-items-center view-option" href="#" data-view="card">
             <i class="bi bi-card-text me-1"></i>
@@ -26,7 +26,7 @@
     </div>
   </div>
   
-  <a href="/request-for-quotation-form" class="btn blue text-white rounded-pill request-btn">
+  <a href="/request-for-quotation-form" class="btn red rounded-pill request-btn">
     <i class="bi bi-plus"></i> <span>Request</span>
   </a>
 </div>
@@ -40,6 +40,7 @@
       <!-- draft card -->
       <div id="draftCard" class="card" data-bs-toggle="modal" data-bs-target="#draftCardModal">
         <div class="card-body card-center-text text-center fs-3" >
+          <i class="bi bi-pencil-square fs-1"></i>
           <h2 class="w800">DRAFTS</h2> 
           12
         </div>
@@ -50,6 +51,7 @@
     <div class="col-lg-4">
       <div id="pendingCard" class="card" data-bs-toggle="modal" data-bs-target="#pendingCardModal">
         <div class="card-body card-center-text text-center fs-3">
+          <i class="bi bi-hourglass-split fs-1"></i>
           <h2 class="w800">PENDINGS</h2> 
           12
         </div>
@@ -60,6 +62,7 @@
     <div class="col-lg-4">
       <div id="quoteCard" class="card" data-bs-toggle="modal" data-bs-target="#quoteCardModal">
         <div class="card-body card-center-text text-center fs-3">
+          <i class="bi bi-card-text fs-1"></i>
           <h2 class="w800">QUOTATIONS</h2> 
           12
         </div>
@@ -74,11 +77,11 @@
   <div class="row">
     <div class="col-lg-12">
       <!-- daft table -->
-      <div class="card">
+      <div id="draftTable" class="card">
         <div class="card-body">
           <h5 class="w700 mt-3">Draft RFQs</h5>
           <div class="table-responsive">
-            <table class="table datatable overflow-hidden">
+            <table class="table datatable table-bordered overflow-hidden">
               <thead>
                 <tr>
                   <th><input type="checkbox" class="select-checkbox-business me-2" title="select"></th>
@@ -96,6 +99,34 @@
                   <td>2000/02/02</td>
                   <td>3925</td>
                 </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>2000/02/02</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>2000/02/02</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>2000/02/02</td>
+                  <td>3925</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" class="select-checkbox-business" title="select"></td>
+                  <td>Unity Pugh</td>
+                  <td>9958</td>
+                  <td>2000/02/02</td>
+                  <td>3925</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -103,11 +134,11 @@
       </div>
 
       <!-- pending table -->
-      <div class="card">
+      <div id="pendingTable" class="card">
         <div class="card-body">
           <h5 class="w700 mt-3">Pending RFQs</h5>
           <div class="table-responsive">
-            <table class="table datatable table-bordered table-hover overflow-hidden">
+            <table class="table datatable table-bordered table-striped table-hover overflow-hidden">
               <thead>
                 <tr>
                   <th><input type="checkbox" class="select-checkbox-business me-2" title="select"></th>
@@ -296,11 +327,11 @@
       </div>
 
       <!-- quotation table -->
-      <div class="card">
+      <div id="quotationTable" class="card">
         <div class="card-body">
           <h5 class="w700 mt-3">Quotation</h5>
           <div class="table-responsive">
-            <table class="table datatable overflow-hidden">
+            <table class="table datatable table-striped overflow-hidden">
               <thead>
                 <tr>
                   <th>RFQ Number</th>
@@ -341,7 +372,7 @@
 <div class="modal fade" id="draftCardModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content card-modal-content">
-      <div class="modal-header">
+      <div class="modal-header draft-modal-header">
         <h5 class="modal-title">Draft RFQs</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
@@ -385,7 +416,7 @@
 <div class="modal fade" id="pendingCardModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content card-modal-content">
-      <div class="modal-header">
+      <div class="modal-header pending-modal-header">
         <h5 class="modal-title">Pending RFQs</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
@@ -420,7 +451,7 @@
 <div class="modal fade" id="quoteCardModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content card-modal-content">
-      <div class="modal-header">
+      <div class="modal-header quotation-modal-header">
         <h5 class="modal-title">Quotations</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
@@ -444,7 +475,33 @@
               <td>Elliott Snyder</td>
               <td>3925</td>
               <td>Enines</td>
+              <td>2006/03/09</td>
+              <td class="text-center">
+                <a href="/view-quotation">
+                  <i class="bi bi-eye me-1 text-dark " data-bs-toggle="tooltip" data-bs-placement="top" title="View"></i>
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td>Unity Pugh</td>
+              <td>9958</td>
+              <td>Elliott Snyder</td>
+              <td>3925</td>
+              <td>Enines</td>
               <td>2006/03/08</td>
+              <td class="text-center">
+                <a href="/view-quotation">
+                  <i class="bi bi-eye me-1 text-dark " data-bs-toggle="tooltip" data-bs-placement="top" title="View"></i>
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td>Unity Pugh</td>
+              <td>9958</td>
+              <td>Elliott Snyder</td>
+              <td>3925</td>
+              <td>Enines</td>
+              <td>2006/03/10</td>
               <td class="text-center">
                 <a href="/view-quotation">
                   <i class="bi bi-eye me-1 text-dark " data-bs-toggle="tooltip" data-bs-placement="top" title="View"></i>
@@ -475,7 +532,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Close</button>
-        <button id="deleteRow" type="button" class="btn rose text-white rounded-pill">Delete</button>
+        <button id="deleteRow" type="button" class="btn red rounded-pill">Delete</button>
       </div>
     </div>
   </div>

@@ -106,11 +106,6 @@
           select: 3,
           sortSequence: ["desc"]
         },
-        {
-          select: 4,
-          cellClass: "green",
-          headerClass: "red"
-        }
       ]
     });
   });
@@ -990,6 +985,11 @@ document.addEventListener("DOMContentLoaded", function () {
       repNameEdit.readOnly = true;
       phoneNumEdit.readOnly = true;
 
+      profileUpload.disabled = true;
+      profileUpload.style.pointerEvents = 'none';
+      deleteProfile.disabled = true;
+      deleteProfile.style.pointerEvents = 'none';
+
       saveEdit.textContent = "Edit Details";
     }
 
@@ -1086,7 +1086,7 @@ $(document).ready(function () {
             <td><input type="text" class="form-control-plaintext border-bottom-custom" name="special_request"></td>
             <td><input type="text" class="form-control-plaintext border-bottom-custom" name="unit_price"></td>
             <td>
-                <button type="button" class="btn btn-danger btn-sm remove-row"><i class="bi bi-trash3"></i></button>
+                <button type="button" class="btn red btn-sm remove-row"><i class="bi bi-trash3"></i></button>
             </td>
         </tr>
       `;
