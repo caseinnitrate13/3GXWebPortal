@@ -23,7 +23,7 @@ html, body {
 body {
   font-family: "Montserrat ", sans-serif;
   background: #FEFEFE;
-  color: #000000;
+  color: #444444;
   display: flex;
   flex-direction: column;
 }
@@ -273,7 +273,7 @@ h6 {
 /* Card */
 .card {
   margin-bottom: 30px;
-  border: 1px solid #000000;
+  /* border: 1px solid #000000; */
   border-radius: 5px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
