@@ -215,25 +215,36 @@ app.get('/user-details', (req, res) => {
 });
 
 app.post('/update-representative', (req, res) => {
-    const { userID, repNames } = req.body;
+    const { userID, repIndex, repData } = req.body;
 
-    if (!userID || !repNames || !repNames[0] || !repNames[0].name || !repNames[0].position) {
+    if (!userID || repIndex === undefined || !repData || !repData.name) {
         return res.status(400).json({ success: false, message: "Missing required fields." });
     }
 
-    dbService.updateRepNames(userID, repNames, (err, result) => {
+    if (repIndex > 0 && !repData.department) {
+        return res.status(400).json({ success: false, message: "Department is required for sub-representative." });
+    }
+
+    if (repIndex === 0) {
+
+        if (!repData.position) {
+            return res.status(400).json({ success: false, message: "Position is required for main representative." });
+        }
+    }
+    dbService.updateRepNames(userID, repIndex, repData, (err, result) => {
         if (err) {
             console.error("Error updating representative:", err);
             return res.status(500).json({ success: false, message: "Database error." });
         }
 
-        if (result) {
+        if (result.success) {
             return res.status(200).json({ success: true, message: "Representative updated successfully." });
         } else {
-            return res.status(400).json({ success: false, message: "Failed to update representative." });
+            return res.status(400).json({ success: false, message: result.message || "Update failed." });
         }
     });
 });
+
 
 
 app.post('/add-sub-rep', (req, res) => {

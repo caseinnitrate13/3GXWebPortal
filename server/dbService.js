@@ -105,34 +105,62 @@ function getUserDetails(userID, callback) {
     });
 }
 
-// Function to update the mainrepNames
-function updateRepNames(userID, repNames, callback) {
+
+// Function to update representatives
+function updateRepNames(userID, repIndex, repData, callback) {
     userID = userID.trim();
     if (userID.startsWith('"') && userID.endsWith('"')) {
         userID = userID.slice(1, -1);
     }
 
-    const repNamesJSON = JSON.stringify(repNames);
-
-    const updateQuery = 'UPDATE users SET repNames = ? WHERE userID = ?';
-    console.log("Executing update query:", updateQuery);
-    console.log("With values:", [repNamesJSON, userID]);
-
-    connection.query(updateQuery, [repNamesJSON, userID], (err, result) => {
-        if (err) {
-            console.log("Error updating repNames:", err);
-            return callback(err, null);
+    const selectQuery = 'SELECT repNames FROM users WHERE userID = ?';
+    connection.query(selectQuery, [userID], (selectErr, results) => {
+        if (selectErr) {
+            console.log("Error fetching repNames:", selectErr);
+            return callback(selectErr, null);
         }
 
-        console.log("Update result:", result);
-        if (result.affectedRows > 0) {
-            return callback(null, { success: true });
+        if (results.length === 0) {
+            return callback(null, { success: false, message: "User not found" });
+        }
+
+        let repNamesArray = [];
+        try {
+            repNamesArray = JSON.parse(results[0].repNames || '[]');
+        } catch (parseErr) {
+            console.log("Error parsing repNames:", parseErr);
+            return callback(parseErr, null);
+        }
+
+        if (repIndex >= 0 && repIndex < repNamesArray.length) {
+            repNamesArray[repIndex] = repData;
+        } else if (repIndex === repNamesArray.length) {
+            repNamesArray.push(repData);
         } else {
-            console.log("No rows affected. UserID may not exist.");
-            return callback(null, { success: false, message: "User not found or data unchanged" });
+            return callback(null, { success: false, message: "Invalid representative index." });
         }
+
+        const repNamesJSON = JSON.stringify(repNamesArray);
+        connection.query(
+            'UPDATE users SET repNames = ? WHERE userID = ?',
+            [repNamesJSON, userID],
+            (updateErr, result) => {
+                if (updateErr) {
+                    console.log("Error updating repNames:", updateErr);
+                    return callback(updateErr, null);
+                }
+
+                if (result.affectedRows > 0) {
+                    return callback(null, { success: true });
+                } else {
+                    return callback(null, { success: false, message: "No changes made." });
+                }
+            }
+        );
     });
 }
+
+
 
 function addSubRepresentative(userID, rep, callback) {
     const getQuery = 'SELECT repNames FROM users WHERE userID = ?';
@@ -162,27 +190,29 @@ function addSubRepresentative(userID, rep, callback) {
 }
 
 function getSubRepresentatives(userID) {
-  return new Promise((resolve, reject) => {
-    const getQuery = 'SELECT repNames FROM users WHERE userID = ?';
-    connection.query(getQuery, [userID], (err, result) => {
-      if (err) {
-        return reject("Database error: " + err);
-      }
+    return new Promise((resolve, reject) => {
+        const getQuery = 'SELECT repNames FROM users WHERE userID = ?';
+        connection.query(getQuery, [userID], (err, result) => {
+            if (err) {
+                return reject("Database error: " + err);
+            }
 
-      if (result.length === 0) {
-        return reject("User not found");
-      }
+            if (result.length === 0) {
+                return reject("User not found");
+            }
 
-      let reps = [];
-      try {
-        reps = result[0].repNames ? JSON.parse(result[0].repNames) : [];
-        return resolve(reps);
-      } catch (e) {
-        return reject("Invalid repNames format");
-      }
+            let reps = [];
+            try {
+                reps = result[0].repNames ? JSON.parse(result[0].repNames) : [];
+                return resolve(reps);
+            } catch (e) {
+                return reject("Invalid repNames format");
+            }
+        });
     });
-  });
 }
 
-module.exports = { registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames, 
-    addSubRepresentative, getSubRepresentatives };
+module.exports = {
+    registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames,
+    addSubRepresentative, getSubRepresentatives
+};

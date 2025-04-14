@@ -464,7 +464,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 //Sub Reps List on Modal
                 const editRepTableBody = document.querySelector("#editRepTable tbody");
-                editRepTableBody.innerHTML = ""; 
+                editRepTableBody.innerHTML = "";
 
                 subReps.forEach((rep, index) => {
                   const row = document.createElement("tr");
@@ -510,13 +510,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     const userID = storedUser?.userID;
 
-
     if (!name || !position) {
       alert("Please fill in both name and department.");
       return;
     }
-
-    const repNames = [{ name, position }];
 
     try {
       const response = await fetch('/update-representative', {
@@ -524,7 +521,11 @@ document.addEventListener("DOMContentLoaded", function () {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userID, repNames }),
+        body: JSON.stringify({
+          userID,
+          repIndex: 0,
+          repData: { name, position }
+        }),
       });
 
       const result = await response.json();
@@ -534,7 +535,6 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("mainRepDept").textContent = position;
         document.getElementById("representative").textContent = name;
 
-        // Close the modal
         const modal = bootstrap.Modal.getInstance(document.getElementById("editMainRepModal"));
         modal.hide();
         alert("Representative updated successfully!");
@@ -544,6 +544,67 @@ document.addEventListener("DOMContentLoaded", function () {
     } catch (err) {
       console.error("Update error:", err);
       alert("Something went wrong.");
+    }
+  });
+
+
+  // EDIT MAIN REPRESENTATIVE
+  const mainRepNameInput = document.getElementById('mainRepNameInput');
+  const mainRepDeptInput = document.getElementById('mainRepDeptInput');
+  const mainRepName = document.getElementById('mainRepName');
+  const mainRepDept = document.getElementById('mainRepDept');
+
+  const mainForm = document.getElementById("editMainRepForm");
+  const saveMainRep = document.getElementById('saveMainRep');
+
+  saveMainRep.addEventListener('click', function () {
+    let isValid = true;
+
+    // Validation function
+    function validateField(input, regex = null) {
+      if (input.value.trim() === "") {
+        input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
+        isValid = false;
+      } else if (regex && !regex.test(input.value)) {
+        input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
+        isValid = false;
+      } else {
+        input.classList.add('is-valid');
+        input.classList.remove('is-invalid');
+      }
+    }
+
+    validateField(mainRepNameInput, /^[A-Za-z\s]+$/);
+    validateField(mainRepDeptInput, /^[A-Za-z0-9\s]+$/);
+
+    if (isValid) {
+      const newMainName = mainRepNameInput.value.trim();
+      const newMainDept = mainRepDeptInput.value.trim();
+
+      mainRepName.textContent = newMainName;
+      mainRepDept.textContent = newMainDept;
+
+      const editMainRepModal = document.getElementById('editMainRepModal');
+      const editMainModal = bootstrap.Modal.getInstance(editMainRepModal);
+
+      if (editMainModal) {
+        editMainModal.hide();
+      }
+
+      // reset inputs and remove backdrop
+      editMainRepModal.addEventListener('hidden.bs.modal', () => {
+        mainRepNameInput.value = "";
+        mainRepDeptInput.value = "";
+
+        mainRepNameInput.classList.remove('is-valid', 'is-invalid');
+        mainRepDeptInput.classList.remove('is-valid', 'is-invalid');
+
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+        document.body.style.overflow = 'auto';
+        document.body.style.paddingRight = '0px';
+      }, { once: true });
     }
   });
 
@@ -674,14 +735,12 @@ document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("editRepInput").value = repName;
       document.getElementById("editRepDeptInput").value = repDept;
 
-      // remove any existing backdrops before opening modal
       document.querySelectorAll(".modal-backdrop").forEach(backdrop => backdrop.remove());
 
       let editModal = new bootstrap.Modal(document.getElementById("editRow"));
       editModal.show();
     }
   });
-
 
   const saveRow = document.getElementById("saveRow");
   saveRow.addEventListener("click", function () {
@@ -707,24 +766,77 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
+    // Validate fields
     validateField(newRepInput, /^[A-Za-z\s]+$/);
     validateField(newRepDeptInput, /^[A-Za-z0-9\s]+$/);
 
     if (isValid) {
+      const newRepname = newRepInput.value.trim();
+      const newRepDept = newRepDeptInput.value.trim();
+
+      if (selectedRow) {
+        selectedRow.cells[1].textContent = newRepname;
+        selectedRow.cells[2].textContent = newRepDept;
+      }
+
       if (editRowModal) {
         newRepInput.classList.remove('is-valid');
         newRepDeptInput.classList.remove('is-valid');
         editRowModal.hide();
       }
 
-      if (selectedRow) {
-        const newRepname = newRepInput.value.trim();
-        const newRepDept = newRepDeptInput.value.trim();
-        selectedRow.cells[1].textContent = newRepname;
-        selectedRow.cells[2].textContent = newRepDept;
-      }
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      const userID = storedUser?.userID;
+
+  
+      fetch(`/get-sub-reps?userID=${userID}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.reps) {
+            const currentRepNames = data.reps;
+            const subRepIndex = selectedRow.rowIndex; 
+            if (currentRepNames && currentRepNames[subRepIndex]) {
+              currentRepNames[subRepIndex] = {
+                name: newRepname,
+                department: newRepDept
+              };
+
+              fetch("/update-representative", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  userID,
+                  repIndex: subRepIndex,
+                  repData: {
+                    name: newRepname,
+                    department: newRepDept
+                  }
+                })
+              })
+                .then(response => response.json())
+                .then(updateData => {
+                  if (updateData.success) {
+                    console.log("Sub-representative updated successfully.");
+                  } else {
+                    console.error("Failed to update sub-representative:", updateData.message);
+                  }
+                })
+                .catch(error => {
+                  console.error("Error sending update:", error);
+                });
+            }
+          } else {
+            console.error("Failed to fetch current representatives");
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching current sub-representatives:", error);
+        });
     }
   });
+
 
   // editSubRepModal close backdrop 
   document.getElementById("editSubRepModal").addEventListener("hidden.bs.modal", function () {
@@ -742,65 +854,6 @@ document.addEventListener("DOMContentLoaded", function () {
     editSubRepModal.show();
   });
 
-  // EDIT MAIN REPRESENTATIVE
-  const mainRepNameInput = document.getElementById('mainRepNameInput');
-  const mainRepDeptInput = document.getElementById('mainRepDeptInput');
-  const mainRepName = document.getElementById('mainRepName');
-  const mainRepDept = document.getElementById('mainRepDept');
-
-  const mainForm = document.getElementById("editMainRepForm");
-  const saveMainRep = document.getElementById('saveMainRep');
-
-  saveMainRep.addEventListener('click', function () {
-    let isValid = true;
-
-    // Validation function
-    function validateField(input, regex = null) {
-      if (input.value.trim() === "") {
-        input.classList.add('is-invalid');
-        input.classList.remove('is-valid');
-        isValid = false;
-      } else if (regex && !regex.test(input.value)) {
-        input.classList.add('is-invalid');
-        input.classList.remove('is-valid');
-        isValid = false;
-      } else {
-        input.classList.add('is-valid');
-        input.classList.remove('is-invalid');
-      }
-    }
-
-    validateField(mainRepNameInput, /^[A-Za-z\s]+$/);
-    validateField(mainRepDeptInput, /^[A-Za-z0-9\s]+$/);
-
-    if (isValid) {
-      const newMainName = mainRepNameInput.value.trim();
-      const newMainDept = mainRepDeptInput.value.trim();
-
-      mainRepName.textContent = newMainName;
-      mainRepDept.textContent = newMainDept;
-
-      const editMainRepModal = document.getElementById('editMainRepModal');
-      const editMainModal = bootstrap.Modal.getInstance(editMainRepModal);
-
-      if (editMainModal) {
-        editMainModal.hide();
-      }
-
-      // reset inputs and remove backdrop
-      editMainRepModal.addEventListener('hidden.bs.modal', () => {
-        mainRepNameInput.value = "";
-        mainRepDeptInput.value = "";
-
-        mainRepNameInput.classList.remove('is-valid', 'is-invalid');
-        mainRepDeptInput.classList.remove('is-valid', 'is-invalid');
-
-        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-        document.body.style.overflow = 'auto';
-        document.body.style.paddingRight = '0px';
-      }, { once: true });
-    }
-  });
 
   // editSubRepModal close backdrop 
   document.getElementById("editMainRepModal").addEventListener("hidden.bs.modal", function () {
