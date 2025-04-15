@@ -304,9 +304,6 @@ document.addEventListener('DOMContentLoaded', function () {
     label.textContent = this.files.length ? truncateFileName(this.files[0].name) : 'Upload Valid ID';
   });
 
-
-
-
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -343,7 +340,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // LOGIN
+  // LOGIN | INDEX
   document.getElementById('loginBtn')?.addEventListener('click', async function (event) {
     event.preventDefault();
 
@@ -360,7 +357,7 @@ document.addEventListener("DOMContentLoaded", function () {
         input.classList.remove('is-valid');
         isValid = false;
       } else {
-        input.classList.add('is-valid');
+        // input.classList.add('is-valid');
         input.classList.remove('is-invalid');
       }
     }
@@ -385,14 +382,25 @@ document.addEventListener("DOMContentLoaded", function () {
           localStorage.setItem('user', JSON.stringify(data.user));
           window.location.href = data.redirect || "/quotation";
         } else {
-          alert(data.message);
+          showModal(data.message);
         }
       } catch (error) {
         console.error('Login failed:', error);
-        alert('An error occurred during login');
+        showModal('An error occurred during login');
       }
     }
+
+    function showModal(message) {
+      const modalBody = document.getElementById('alertModalBody');
+      modalBody.textContent = message;
+    
+      const modal = new bootstrap.Modal(document.getElementById('alertModal'));
+      modal.show();
+    }
+
   });
+
+
 });
 
 // ACCOUNT
