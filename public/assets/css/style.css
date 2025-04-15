@@ -127,7 +127,7 @@ h6 {
   right: 15px;
   bottom: 15px;
   z-index: 99999;
-  background: #AA251C;
+  background: #40A3EE;
   width: 40px;
   height: 40px;
   border-radius: 4px;
@@ -141,7 +141,7 @@ h6 {
 }
 
 .back-to-top:hover {
-  background: #DD1C1C;
+  background: #288cd8;
   color: #fff;
 }
 
@@ -199,7 +199,7 @@ h6 {
 }
 
 .dropdown-menu .dropdown-item:hover {
-  background-color: #AA251c;
+  background-color: #40A3EE;
   color: #fff;
 }
 
@@ -275,7 +275,7 @@ h6 {
 /* Card */
 .card {
   margin-bottom: 30px;
-  /* border: 1px solid #000000; */
+  border: 1px solid #40A3EE;
   border-radius: 5px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
@@ -408,13 +408,13 @@ h6 {
 
 .nav-tabs-bordered .nav-link:hover,
 .nav-tabs-bordered .nav-link:focus {
-  color: #AA251C;
+  color: #40A3EE;
 }
 
 .nav-tabs-bordered .nav-link.active {
   background-color: #fff;
-  color: #AA251C;
-  border-bottom: 2px solid #AA251C;
+  color: #40A3EE;
+  border-bottom: 2px solid #40A3EE;
 }
 
 /*--------------------------------------------------------------
@@ -451,7 +451,7 @@ h6 {
   z-index: 997;
   height: 60px;
   box-shadow: 0px 2px 20px rgba(1, 41, 112, 0.1);
-  background-color: #AA251C;
+  background-color: #40A3EE;
   padding-left: 20px;
   /* Toggle Sidebar Button */
   /* Search Bar */
@@ -593,7 +593,7 @@ h6 {
 }
 
 .header-nav .profile .dropdown-item:hover {
-  background-color: #AA251c;
+  background-color: #40A3EE;
   color: #fff;
 }
 
@@ -689,11 +689,11 @@ h6 {
   font-weight: 600;
   color: #ffff;
   transition: 0.3;
-  background: #AA251c;
+  background: #40A3EE;
   padding: 10px 15px;
   border-radius: 4px;
   margin-top: 30px;
-  /* border: 2px solid #AA251c; */
+  /* border: 2px solid #40A3EE; */
   box-shadow: 0px 4px 8px #00000037; 
 }
 
@@ -706,7 +706,7 @@ h6 {
 .sidebar-nav .nav-link.collapsed {
   color: #000000;
   background: #fff;
-  border: 1px solid #AA251c;
+  border: 1px solid #40A3EE;
 }
 
 .sidebar-nav .nav-link.collapsed i {
@@ -715,7 +715,7 @@ h6 {
 
 .sidebar-nav .nav-link:hover {
   color: #fff;
-  background: #AA251c;
+  background: #40A3EE;
 }
 
 .sidebar-nav .nav-link:hover i {
@@ -1275,68 +1275,22 @@ h6 {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 
 }
-#draftCard {
-  border: 1px solid #EE9521;
-  color: #EE9521;
+
+#quoteCard, #pendingCard,  #draftCard{
+  border: 1px solid #40A3EE;
+  color: #000000;
 }
 
-#pendingCard {
-  border: 1px solid #E34A3A;
-  color: #E34A3A;
-}
-
-#quoteCard {
-  border: 1px solid #0995B0;
-  color: #0995B0;
-}
-
-#draftCard:hover {
+#draftCard:hover, #pendingCard:hover, #quoteCard:hover {
   transform: translateY(-5px);
-  background-color: #EE9521;
-  box-shadow: 0px 4px 8px #EE9521; 
+  background-color: #40A3EE;
+  box-shadow: 0px 4px 8px #40A3EE; 
   color: #fff;
 }
 
-#pendingCard:hover {
-  transform: translateY(-5px);
-  background-color: #E34A3A;
-  box-shadow: 0px 4px 8px #E34A3A; 
-  color: #fff;
-}
-
-#quoteCard:hover {
-  transform: translateY(-5px);
-  background-color: #0995B0;
-  box-shadow: 0px 4px 8px #0995B0; 
-  color: #fff;
-}
-
-#draftTable {
-  border: 2px solid #EE9521;
-}
-
-#pendingTable {
-  border: 2px solid #E34A3A;
-}
-
-#quotationTable {
-  border: 2px solid #0995B0;
-}
-
-.draft-modal-header {
-  background-color: #EE9521 !important;
-  color: #ffffff !important;
-}
-
-.pending-modal-header {
-  background-color: #E34A3A !important;
-  color: #ffffff !important;
-}
-
-.quotation-modal-header {
-  background-color: #0995B0 !important;
-  color: #ffffff !important;
-}
+/* #quotationTable, #pendingTable, #draftTable, .card {
+  border: 1px solid #40A3EE;
+}  */
 
 .pointer{
   cursor: pointer;
@@ -1572,37 +1526,29 @@ thead.table-thead{
 
 /* MODAL */
 .modal-header {
-  background-color: #D5462D;
+  background-color: #40A3EE;
   color: rgb(255, 255, 255);
 }
 
 /* BUTTONS */
-.close-btn {
-  border: 1px solid #DD1C1C;
-} 
 
-.close-btn:hover, .close-btn:active {
-  background-color: #DD1C1C;
-  color: #ffffff;
-}
-
-.red{
-  background-color: #D5462D;
+.blue{
+  background-color: #40A3EE;
   color: #fff;
 }
 
 .border-btn{
-  border: 1px solid #DD1C1A;
-  color: #DD1C1A;
+  border: 1px solid #40A3EE;
+  color: #40A3EE;
 }
 
-.red:hover, .red:active, .outlined-btn:hover, .outlined-btn:active, .border-btn:hover, .border-btn:active{
-  background-color: #DD1C1C !important;
+.blue:hover, .blue:active, .outlined-btn:hover, .outlined-btn:active, .border-btn:hover, .border-btn:active{
+  background-color: #288cd8 !important;
   color: #fff !important;
 }
 
 /* .account-card {
-  background-color: #AA251C;
+  background-color: #40A3EE;
   color: #fff;
   border: none;
 } */

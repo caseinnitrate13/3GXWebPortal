@@ -88,7 +88,7 @@
                       </div>
                     </div>
                     <div class="col-12 gx-5">
-                      <button class="btn red w-100" type="submit" id="loginBtn">Login</button>
+                      <button class="btn blue w-100" type="submit" id="loginBtn">Login</button>
                     </div>
                     <div class="col-12 gy-1 text-center small">
                       <p class="mb-0">Don't have account? <a href="register">Create an account</a></p>
@@ -111,6 +111,25 @@
         </div>
 
       </section>
+
+      <!-- alert modal -->
+      <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+          <div class="modal-content rounded-3 shadow">
+            <div class="modal-header">
+              <h5 class="modal-title" id="alertModalLabel">Login Message</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="alertModalBody">
+              <!-- alert message goes here -->
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn blue btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
   </main><!-- End #main -->
 
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
