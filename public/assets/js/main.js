@@ -127,23 +127,33 @@
 
 })();
 
-
-
 document.addEventListener('DOMContentLoaded', function () {
 
-
   // SIDEBAR
-  const quotation = document.getElementById('quotation');
+  const requestQuotation = document.getElementById('requestQuotation');
+  const quotation = document.getElementById('quotations');
   const account = document.getElementById('account');
 
   const path = window.location.pathname;
-
-  if (path.includes('/quotation')) {
+  console.log(path);
+  if(path.includes('/quotations')) {
     quotation.classList.remove('collapsed');
     account.classList.add('collapsed');
+    requestQuotation.classList.add('collapsed');
+    console.log('quoteations path');
+
+   
+  } else if (path.includes('/request-quotation')) {
+    requestQuotation.classList.remove('collapsed');
+    account.classList.add('collapsed');
+    quotation.classList.add('collapsed');
+    console.log('rfq path');
+
   } else if (path.includes('/account')) {
     account.classList.remove('collapsed');
     quotation.classList.add('collapsed');
+    requestQuotation.classList.add('collapsed');
+    console.log('account path');
   }
 
 
@@ -380,7 +390,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (data.success) {
           localStorage.setItem('user', JSON.stringify(data.user));
-          window.location.href = data.redirect || "/quotation";
+          window.location.href = data.redirect || "/request-quotation";
         } else {
           showModal(data.message);
         }
@@ -419,7 +429,7 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        const isQuotationPage = location.pathname === '/quotation';
+        const isQuotationPage = location.pathname === '/request-quotation';
         const isAccountPage = location.pathname === '/account';
         const isRFQFormPage = location.pathname === '/request-for-quotation-form';
 
@@ -1448,9 +1458,9 @@ document.getElementById('signPadBtn').addEventListener('click', () => {
 
 // save/send form
 document.getElementById('sendBtn').addEventListener('click', () => {
-  window.location.href = "quotation";
+  window.location.href = "/request-quotation";
 });
 
 document.getElementById('saveDraftBtn').addEventListener('click', () => {
-  window.location.href = "quotation";
+  window.location.href = "/request-quotation";
 });
