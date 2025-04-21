@@ -1346,7 +1346,7 @@ thead.table-thead{
 }
 
 /* FILE UPLOAD */
-#fileUploadPreview{
+#fileUploadPreview, #purchaseOrderPreview{
   border: 2px dashed #7a6c69;
   text-align: center;
   margin: 30px 70px;
@@ -1509,7 +1509,8 @@ thead.table-thead{
 
 /* VIEW QUOTATATION */
 .vq-label{
-  min-width: 135px;
+  max-width: 300px;
+  background-color: #18d26e;
 }
 
 .invalid-feedback{

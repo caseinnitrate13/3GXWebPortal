@@ -65,30 +65,10 @@
     return new bootstrap.Tooltip(tooltipTriggerEl)
   })
 
-  /**
-   * Initiate Datatables
-   */
-  // const datatables = select('.datatable', true)
-  // datatables.forEach(datatable => {
-  //   new simpleDatatables.DataTable(datatable, {
-  //     responsive: true,
-  //     perPageSelect: [5, 10, 15, ["All", -1]],
-  //     columns: [{
-  //       select: 2,
-  //       sortSequence: ["desc", "asc"]
-  //     },
-  //     {
-  //       select: 3,
-  //       sortSequence: ["desc"]
-  //     },
-  //     {
-  //       select: 4,
-  //       cellClass: "green",
-  //       headerClass: "red"
-  //     }
-  //     ]
-  //   });
-  // })
+  new bootstrap.Tooltip(document.body, {
+    selector: '[data-bs-toggle="tooltip"]'
+  });
+  
 
   const datatables = document.querySelectorAll(".datatable");
 
@@ -136,14 +116,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const path = window.location.pathname;
   console.log(path);
-  if(path.includes('/quotations')) {
+  if(path.includes('/quotations') || path.includes('/view-quotation')) {
     quotation.classList.remove('collapsed');
     account.classList.add('collapsed');
     requestQuotation.classList.add('collapsed');
-    console.log('quoteations path');
+    console.log('quotations path');
 
-   
-  } else if (path.includes('/request-quotation')) {
+  } else if (path.includes('/request-quotation') || path.includes('/request-for-quotation-form')) {
     requestQuotation.classList.remove('collapsed');
     account.classList.add('collapsed');
     quotation.classList.add('collapsed');
@@ -1042,25 +1021,193 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // delete table
-  let selectedRow;
+  
 
-  document.querySelectorAll(".remove-row").forEach((btn) => {
-    btn.addEventListener("click", function () {
-      selectedRow = this.closest("tr");
+  // VIEW QUOTATION
+  const purchaseOrderPreview = document.getElementById("purchaseOrderPreview");
+  const purchaseOrderUpload = document.getElementById("purchaseOrderUpload");
+  const quotationTable = document.getElementById("quotationTable")
+  const purchaseOrderBtn = document.getElementById("purchaseOrderBtn");
+  const approveSaveBtn = document.getElementById("approveSaveBtn");
+  const declineSaveBtn = document.getElementById("declineSaveBtn");
+  const approveBtn = document.getElementById("approveBtn");
+  const declineBtn = document.getElementById("declineBtn");
+
+  let poFileName = null;
+  let selectedRow = null;
+
+
+  if (quotationTable){
+    quotationTable.addEventListener('click', function (event) {
+      if (event.target.classList.contains('approve-icon') || event.target.classList.contains('decline-icon')) {
+          selectedRow = event.target.closest('tr');
+      }
     });
-  });
+  }
+      
+  if (purchaseOrderBtn && purchaseOrderUpload && purchaseOrderPreview) {
+    purchaseOrderBtn.addEventListener("click", function () {
+      purchaseOrderUpload.click();
+    });
 
-  document.getElementById("deleteRow").addEventListener("click", function () {
-    if (selectedRow) {
-      selectedRow.remove();
-      selectedRow = null;
+    purchaseOrderUpload.addEventListener("change", function (event) {
+      if (event.target.files.length > 0) {
+        handleFile(event.target.files[0]);
+      }
+    });
+
+    purchaseOrderPreview.addEventListener("dragover", function (event) {
+      event.preventDefault();
+      purchaseOrderPreview.classList.add("drag-over");
+    });
+
+    purchaseOrderPreview.addEventListener("dragleave", function () {
+      purchaseOrderPreview.classList.remove("drag-over");
+    });
+
+    purchaseOrderPreview.addEventListener("drop", function (event) {
+      event.preventDefault();
+      purchaseOrderPreview.classList.remove("drag-over");
+      if (event.dataTransfer.files.length > 0) {
+        handleFile(event.dataTransfer.files[0]);
+      }
+    });
+
+    function handleFile(file) {
+      if (file) {
+        poFileName = file.name;
+        purchaseOrderPreview.innerHTML = `
+          <div class="file-preview">
+            <i class="bi bi-file-earmark-text"></i>
+            <p>${poFileName}</p>
+          </div>
+        `;
+      }
+    }
+    
+    approveSaveBtn.addEventListener("click", function () {
+      if (poFileName) {
+        // Check which modal is present
+        const approveQuotationModal = document.getElementById('approveQuotationModal');
+        const approveConfirmationModal = document.getElementById('approveConfirmationModal');
+
+        if (approveQuotationModal) {
+          // Logic specific to view-quotation.html
+          approveBtn.textContent = 'Approved';
+          declineBtn.style.display = 'none';
+          const approveModal = bootstrap.Modal.getInstance(approveQuotationModal);
+          if (approveModal) {
+            approveModal.hide();
+          }
+          approveQuotationModal.addEventListener('hidden.bs.modal', () => {
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+            document.body.style.overflow = 'auto';
+          }, { once: true });
+          approveBtn.disabled = true;
+        } else if (approveConfirmationModal) {
+          if (selectedRow) {
+            const remarksCell = selectedRow.querySelector('.remarks-cell');
+            if (remarksCell) {
+                remarksCell.textContent = 'Approved';
+            }
+          }
+
+          const approveConfirmation = bootstrap.Modal.getInstance(approveConfirmationModal);
+          if (approveConfirmation) {
+              approveConfirmation.hide();
+          }
+
+          approveConfirmationModal.addEventListener('hidden.bs.modal', () => {
+              document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+              document.body.style.overflow = 'auto';
+          }, { once: true });
+      
+        }
+      } else {
+        alert("Please upload a file before saving.");
+      }
+    });
+
+    console.log("decline next");
+    // decline PO modal save
+    declineSaveBtn.addEventListener('click', function() {
+      if (declineQuotationModal) {
+        // Logic specific to view-quotation.html
+        declineBtn.textContent = 'Declined';
+        approveBtn.style.display = 'none';
+
+        const declineModal = bootstrap.Modal.getInstance(declineQuotationModal);
+        if (declineModal) {
+          declineModal.hide();
+        }
+
+        declineQuotationModal.addEventListener('hidden.bs.modal', () => {
+          document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+          document.body.style.overflow = 'auto';
+        }, { once: true });
+        declineBtn.disabled = true;
+        
+      } else if (declineTableModal){
+        if (selectedRow) {
+          const remarksCell = selectedRow.querySelector('.remarks-cell');
+          if (remarksCell) {
+              remarksCell.textContent = 'Declined';
+          }
+        }
+
+        const declineModal = bootstrap.Modal.getInstance(declineTableModal);
+        if (declineModal) {
+          declineModal.hide();
+        }
+
+        declineModal.addEventListener('hidden.bs.modal', () => {
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+            document.body.style.overflow = 'auto';
+        }, { once: true });
+      }
+    });
+
+
+
+    // Reset modal content when closed
+    const approveQuotationModal = document.getElementById("approveQuotationModal");
+    if (approveQuotationModal) {
+      approveQuotationModal.addEventListener("hidden.bs.modal", function () {
+        document.body.style.overflow = "auto";
+        document.body.style.paddingRight = "0px";
+        purchaseOrderPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
+        poFileName = null;
+      });
     }
 
-    const deleteModal = bootstrap.Modal.getInstance(document.getElementById("deleteRowModal"));
-    deleteModal.hide();
-  });
+    const approveConfirmationModal = document.getElementById("approveConfirmationModal");
+    if (approveConfirmationModal) {
+      approveConfirmationModal.addEventListener("hidden.bs.modal", function () {
+        document.body.style.overflow = "auto";
+        document.body.style.paddingRight = "0px";
+        purchaseOrderPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
+        poFileName = null;
+      });
+    }
 
+    const declineQuotationModal = document.getElementById("declineQuotationModal");
+    if (declineQuotationModal) {
+      declineQuotationModal.addEventListener("hidden.bs.modal", function () {
+        document.body.style.overflow = "auto";
+        document.body.style.paddingRight = "0px";
+      });
+    }
+
+    const declineTableModal = document.getElementById("declineTableModal");
+    if (declineTableModal) {
+      declineTableModal.addEventListener("hidden.bs.modal", function () {
+        document.body.style.overflow = "auto";
+        document.body.style.paddingRight = "0px";
+      });
+    }
+
+  }
+  
 });
 
 
@@ -1104,7 +1251,7 @@ $(document).ready(function () {
             <td><input type="text" class="form-control-plaintext border-bottom-custom" name="special_request"></td>
             <td><input type="text" class="form-control-plaintext border-bottom-custom" name="unit_price"></td>
             <td>
-                <button type="button" class="btn red btn-sm remove-row"><i class="bi bi-trash3"></i></button>
+                <button type="button" class="btn btn-danger btn-sm remove-row"><i class="bi bi-trash3"></i></button>
             </td>
         </tr>
       `;
