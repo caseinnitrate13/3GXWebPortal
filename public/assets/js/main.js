@@ -884,6 +884,13 @@ document.addEventListener("DOMContentLoaded", function () {
     mainModal.show();
   });
 
+  //Delete Sub Representative
+
+  
+
+
+
+
   // logout
   const logout = document.getElementById("logoutBtn");
   logout.addEventListener('click', function () {
