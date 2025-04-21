@@ -382,7 +382,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function showModal(message) {
       const modalBody = document.getElementById('alertModalBody');
       modalBody.textContent = message;
-    
+
       const modal = new bootstrap.Modal(document.getElementById('alertModal'));
       modal.show();
     }
@@ -420,6 +420,13 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById("companyName").textContent = data.user.companyName;
           document.getElementById("companyAddress").textContent = data.user.companyAddress;
           document.getElementById("email").textContent = data.user.companyEmail;
+
+          document.getElementById("usernameEdit").value = data.user.username;
+          document.getElementById("companyNameEdit").value = data.user.companyName;
+          document.getElementById("companyAddressEdit").value = data.user.companyAddress;
+          document.getElementById("emailEdit").value = data.user.companyEmail;
+          document.getElementById("phoneNumEdit").value = data.user.repNum;
+
 
           let repArray = [];
           try {
@@ -498,7 +505,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // REPRESENTATIVE
 
 document.addEventListener("DOMContentLoaded", function () {
-
 
   //MAIN REPRESENTATIVE
   document.getElementById("saveMainRep").addEventListener("click", async () => {
@@ -785,13 +791,13 @@ document.addEventListener("DOMContentLoaded", function () {
       const storedUser = JSON.parse(localStorage.getItem("user"));
       const userID = storedUser?.userID;
 
-  
+
       fetch(`/get-sub-reps?userID=${userID}`)
         .then(response => response.json())
         .then(data => {
           if (data.success && data.reps) {
             const currentRepNames = data.reps;
-            const subRepIndex = selectedRow.rowIndex; 
+            const subRepIndex = selectedRow.rowIndex;
             if (currentRepNames && currentRepNames[subRepIndex]) {
               currentRepNames[subRepIndex] = {
                 name: newRepname,
@@ -873,6 +879,37 @@ document.addEventListener("DOMContentLoaded", function () {
     mainModal.show();
   });
 
+  //Delete Sub Representative
+  let repIndexToDelete = null;
+
+  document.addEventListener("click", (e) => {
+    if (e.target.matches(".remove-row")) {
+      repIndexToDelete = parseInt(e.target.getAttribute("data-rep-index"));
+    }
+
+    if (e.target.id === "deleteRow" && repIndexToDelete !== null) {
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      const userID = storedUser?.userID;
+
+      fetch("/delete-sub-rep", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userID, repIndex: repIndexToDelete }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            location.reload();
+          } else {
+            console.error(data.message);
+          }
+        })
+        .catch((err) => console.error("Delete error:", err));
+    }
+  });
+
+
+
   // logout
   const logout = document.getElementById("logoutBtn");
   logout.addEventListener('click', function () {
@@ -893,14 +930,12 @@ document.addEventListener("DOMContentLoaded", function () {
   const companyNameEdit = document.getElementById('companyNameEdit');
   const companyAddressEdit = document.getElementById('companyAddressEdit');
   const emailEdit = document.getElementById('emailEdit');
-  const repNameEdit = document.getElementById('repNameEdit');
   const phoneNumEdit = document.getElementById('phoneNumEdit');
 
   const username = document.getElementById('username');
   const companyName = document.getElementById('companyName');
   const companyAddress = document.getElementById('companyAddress');
   const email = document.getElementById('email');
-  const representative = document.getElementById('representative');
   const phoneNumber = document.getElementById('phoneNumber');
 
   const formValidation = document.getElementById('editProfileForm');
@@ -949,11 +984,11 @@ document.addEventListener("DOMContentLoaded", function () {
       companyNameEdit.readOnly = false;
       companyAddressEdit.readOnly = false;
       emailEdit.readOnly = false;
-      repNameEdit.readOnly = false;
       phoneNumEdit.readOnly = false;
 
       usernameEdit.focus();
       saveEdit.textContent = "Save Changes";
+
     } else {
       // Validate form before saving
       if (!formValidation.checkValidity()) {
@@ -966,7 +1001,6 @@ document.addEventListener("DOMContentLoaded", function () {
       companyName.textContent = companyNameEdit.value.trim();
       companyAddress.textContent = companyAddressEdit.value.trim();
       email.textContent = emailEdit.value.trim();
-      representative.textContent = repNameEdit.value.trim();
       phoneNumber.textContent = phoneNumEdit.value.trim();
 
       profilecompanyName.textContent = companyNameEdit.value.trim();
@@ -979,7 +1013,6 @@ document.addEventListener("DOMContentLoaded", function () {
       companyNameEdit.readOnly = true;
       companyAddressEdit.readOnly = true;
       emailEdit.readOnly = true;
-      repNameEdit.readOnly = true;
       phoneNumEdit.readOnly = true;
 
       profileUpload.disabled = true;
@@ -988,6 +1021,35 @@ document.addEventListener("DOMContentLoaded", function () {
       deleteProfile.style.pointerEvents = 'none';
 
       saveEdit.textContent = "Edit Details";
+
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      const userID = storedUser?.userID;
+
+      const updatedData = {
+        userID: userID,
+        username: usernameEdit.value.trim(),
+        companyName: companyNameEdit.value.trim(),
+        companyAddress: companyAddressEdit.value.trim(),
+        email: emailEdit.value.trim(),
+        phoneNumber: phoneNumEdit.value.trim()
+      };
+
+      fetch('/update-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedData)
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            console.log('Profile updated successfully.');
+          } else {
+            console.error('Error updating profile:', data.message);
+          }
+        })
+        .catch(error => console.error('Error:', error));
     }
 
     isEditing = !isEditing;
