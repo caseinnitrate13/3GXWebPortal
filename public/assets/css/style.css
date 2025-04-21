@@ -417,6 +417,7 @@ h6 {
   border-bottom: 2px solid #40A3EE;
 }
 
+
 /*--------------------------------------------------------------
 # Header
 --------------------------------------------------------------*/
@@ -1276,9 +1277,8 @@ h6 {
 
 }
 
-#quoteCard, #pendingCard,  #draftCard{
-  border: 1px solid #40A3EE;
-  color: #000000;
+#draftCard, #pendingCard {
+  flex: 0 0 auto; /* Prevent flexbox from stretching the cards */
 }
 
 #draftCard:hover, #pendingCard:hover, #quoteCard:hover {

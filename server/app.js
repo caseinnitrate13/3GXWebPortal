@@ -45,7 +45,7 @@ app.post('/login', (req, res) => {
         }
 
         // Redirect logic
-        let redirectUrl = "/quotation";
+        let redirectUrl = "/request-quotation";
         if (result.accountStatus === "Pending") {
             redirectUrl = "/initial-registration";
         } else if (result.accountStatus === "Rejected") {
@@ -177,10 +177,16 @@ app.post('/register', async (req, res, next) => {
 });
 
 
-app.get('/quotation', (req, res) => {
-    const quotationContent = fs.readFileSync(path.join(__dirname, '..', 'public', 'quotations.html'), 'utf-8');
-    res.send(template.replace('{{content}}', quotationContent));
+app.get('/request-quotation', (req, res) => {
+    const requestQuotation = fs.readFileSync(path.join(__dirname, '..', 'public', 'request-quotation.html'), 'utf-8');
+    res.send(template.replace('{{content}}', requestQuotation));
 });
+
+app.get('/quotations', (req, res) => {
+    const quotaion = fs.readFileSync(path.join(__dirname, '..', 'public', 'quotations.html'), 'utf-8');
+    res.send(template.replace('{{content}}', quotaion));
+});
+
 
 app.get('/request-for-quotation-form', (req, res) => {
     const requestForm = fs.readFileSync(path.join(__dirname, '..', 'public', 'rfq-form.html'), 'utf-8');
