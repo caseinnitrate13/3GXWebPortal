@@ -212,7 +212,35 @@ function getSubRepresentatives(userID) {
     });
 }
 
+function deleteSubRepresentative(userID, repIndex, callback) {
+    const sqlSelect = "SELECT repNames FROM users WHERE userID = ?";
+
+    connection.query(sqlSelect, [userID], (err, results) => {
+        if (err || results.length === 0) return callback(err || new Error("User not found"));
+
+        let repList;
+        try {
+            repList = JSON.parse(results[0].repNames);
+        } catch (parseError) {
+            return callback(parseError);
+        }
+
+        if (!Array.isArray(repList) || repIndex < 1 || repIndex >= repList.length) {
+            return callback(new Error("Invalid representative index"));
+        }
+
+        // Remove the sub-rep (main rep is at index 0, so we skip that)
+        repList.splice(repIndex, 1);
+
+        const updatedRepNames = JSON.stringify(repList);
+        const sqlUpdate = "UPDATE users SET repNames = ? WHERE userID = ?";
+
+        connection.query(sqlUpdate, [updatedRepNames, userID], callback);
+    });
+}
+
+
 module.exports = {
     registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames,
-    addSubRepresentative, getSubRepresentatives
+    addSubRepresentative, getSubRepresentatives, deleteSubRepresentative
 };

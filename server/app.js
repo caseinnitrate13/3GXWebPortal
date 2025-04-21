@@ -293,6 +293,22 @@ app.get('/get-sub-reps', async (req, res) => {
     }
 });
 
+app.post("/delete-sub-rep", (req, res) => {
+    const { userID, repIndex } = req.body;
+  
+    if (!userID || repIndex === undefined) {
+      return res.status(400).json({ success: false, message: "Missing userID or repIndex." });
+    }
+  
+    dbService.deleteSubRepresentative(userID, repIndex, (err, result) => {
+      if (err) {
+        return res.status(500).json({ success: false, message: "Failed to delete representative." });
+      }
+      return res.status(200).json({ success: true, message: "Representative deleted successfully." });
+    });
+  });
+  
+
 app.get('/view-quotation', (req, res) => {
     const viewQuotation = fs.readFileSync(path.join(__dirname, '..', 'public', 'view-quotation.html'), 'utf-8');
     res.send(template.replace('{{content}}', viewQuotation));

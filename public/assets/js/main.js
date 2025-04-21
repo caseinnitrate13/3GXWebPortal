@@ -136,13 +136,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const path = window.location.pathname;
   console.log(path);
-  if(path.includes('/quotations')) {
+  if (path.includes('/quotations')) {
     quotation.classList.remove('collapsed');
     account.classList.add('collapsed');
     requestQuotation.classList.add('collapsed');
     console.log('quoteations path');
 
-   
+
   } else if (path.includes('/request-quotation')) {
     requestQuotation.classList.remove('collapsed');
     account.classList.add('collapsed');
@@ -403,7 +403,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function showModal(message) {
       const modalBody = document.getElementById('alertModalBody');
       modalBody.textContent = message;
-    
+
       const modal = new bootstrap.Modal(document.getElementById('alertModal'));
       modal.show();
     }
@@ -519,7 +519,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // REPRESENTATIVE
 
 document.addEventListener("DOMContentLoaded", function () {
-
 
   //MAIN REPRESENTATIVE
   document.getElementById("saveMainRep").addEventListener("click", async () => {
@@ -806,13 +805,13 @@ document.addEventListener("DOMContentLoaded", function () {
       const storedUser = JSON.parse(localStorage.getItem("user"));
       const userID = storedUser?.userID;
 
-  
+
       fetch(`/get-sub-reps?userID=${userID}`)
         .then(response => response.json())
         .then(data => {
           if (data.success && data.reps) {
             const currentRepNames = data.reps;
-            const subRepIndex = selectedRow.rowIndex; 
+            const subRepIndex = selectedRow.rowIndex;
             if (currentRepNames && currentRepNames[subRepIndex]) {
               currentRepNames[subRepIndex] = {
                 name: newRepname,
@@ -895,8 +894,35 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   //Delete Sub Representative
+  let repIndexToDelete = null;
 
-  
+  document.addEventListener("click", (e) => {
+    if (e.target.matches(".remove-row")) {
+      repIndexToDelete = parseInt(e.target.getAttribute("data-rep-index"));
+    }
+
+    if (e.target.id === "deleteRow" && repIndexToDelete !== null) {
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      const userID = storedUser?.userID;
+
+      fetch("/delete-sub-rep", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userID, repIndex: repIndexToDelete }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            location.reload();
+          } else {
+            console.error(data.message);
+          }
+        })
+        .catch((err) => console.error("Delete error:", err));
+    }
+  });
+
+
 
 
 
