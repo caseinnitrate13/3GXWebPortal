@@ -252,7 +252,6 @@ app.post('/update-representative', (req, res) => {
 });
 
 
-
 app.post('/add-sub-rep', (req, res) => {
     const { userID, rep } = req.body;
 
@@ -295,19 +294,42 @@ app.get('/get-sub-reps', async (req, res) => {
 
 app.post("/delete-sub-rep", (req, res) => {
     const { userID, repIndex } = req.body;
-  
+
     if (!userID || repIndex === undefined) {
-      return res.status(400).json({ success: false, message: "Missing userID or repIndex." });
+        return res.status(400).json({ success: false, message: "Missing userID or repIndex." });
     }
-  
+
     dbService.deleteSubRepresentative(userID, repIndex, (err, result) => {
-      if (err) {
-        return res.status(500).json({ success: false, message: "Failed to delete representative." });
-      }
-      return res.status(200).json({ success: true, message: "Representative deleted successfully." });
+        if (err) {
+            return res.status(500).json({ success: false, message: "Failed to delete representative." });
+        }
+        return res.status(200).json({ success: true, message: "Representative deleted successfully." });
     });
-  });
-  
+});
+
+app.post('/update-profile', (req, res) => {
+    const { userID, username, companyName, companyAddress, email, phoneNumber } = req.body;
+
+    if (!userID ||  !username || !companyName || !companyAddress || !email || !phoneNumber) {
+        return res.status(400).json({ success: false, message: "Missing required fields." });
+    }
+
+    // Call to the function in dbService to update the user profile
+    dbService.updateClientProfile(userID, username, companyName, companyAddress, email, phoneNumber, (err, result) => {
+        if (err) {
+            console.error("Error updating profile:", err);
+            return res.status(500).json({ success: false, message: "Database error." });
+        }
+
+        if (result.success) {
+            return res.status(200).json({ success: true, message: "Profile updated successfully." });
+        } else {
+            return res.status(400).json({ success: false, message: result.message || "Update failed." });
+        }
+    });
+});
+
+
 
 app.get('/view-quotation', (req, res) => {
     const viewQuotation = fs.readFileSync(path.join(__dirname, '..', 'public', 'view-quotation.html'), 'utf-8');

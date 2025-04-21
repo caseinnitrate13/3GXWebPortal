@@ -442,6 +442,13 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById("companyAddress").textContent = data.user.companyAddress;
           document.getElementById("email").textContent = data.user.companyEmail;
 
+          document.getElementById("usernameEdit").value = data.user.username;
+          document.getElementById("companyNameEdit").value = data.user.companyName;
+          document.getElementById("companyAddressEdit").value = data.user.companyAddress;
+          document.getElementById("emailEdit").value = data.user.companyEmail;
+          document.getElementById("phoneNumEdit").value = data.user.repNum;
+
+
           let repArray = [];
           try {
             repArray = JSON.parse(data.user.repNames);
@@ -924,9 +931,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-
-
-
   // logout
   const logout = document.getElementById("logoutBtn");
   logout.addEventListener('click', function () {
@@ -947,14 +951,12 @@ document.addEventListener("DOMContentLoaded", function () {
   const companyNameEdit = document.getElementById('companyNameEdit');
   const companyAddressEdit = document.getElementById('companyAddressEdit');
   const emailEdit = document.getElementById('emailEdit');
-  const repNameEdit = document.getElementById('repNameEdit');
   const phoneNumEdit = document.getElementById('phoneNumEdit');
 
   const username = document.getElementById('username');
   const companyName = document.getElementById('companyName');
   const companyAddress = document.getElementById('companyAddress');
   const email = document.getElementById('email');
-  const representative = document.getElementById('representative');
   const phoneNumber = document.getElementById('phoneNumber');
 
   const formValidation = document.getElementById('editProfileForm');
@@ -1003,11 +1005,11 @@ document.addEventListener("DOMContentLoaded", function () {
       companyNameEdit.readOnly = false;
       companyAddressEdit.readOnly = false;
       emailEdit.readOnly = false;
-      repNameEdit.readOnly = false;
       phoneNumEdit.readOnly = false;
 
       usernameEdit.focus();
       saveEdit.textContent = "Save Changes";
+
     } else {
       // Validate form before saving
       if (!formValidation.checkValidity()) {
@@ -1020,7 +1022,6 @@ document.addEventListener("DOMContentLoaded", function () {
       companyName.textContent = companyNameEdit.value.trim();
       companyAddress.textContent = companyAddressEdit.value.trim();
       email.textContent = emailEdit.value.trim();
-      representative.textContent = repNameEdit.value.trim();
       phoneNumber.textContent = phoneNumEdit.value.trim();
 
       profilecompanyName.textContent = companyNameEdit.value.trim();
@@ -1033,7 +1034,6 @@ document.addEventListener("DOMContentLoaded", function () {
       companyNameEdit.readOnly = true;
       companyAddressEdit.readOnly = true;
       emailEdit.readOnly = true;
-      repNameEdit.readOnly = true;
       phoneNumEdit.readOnly = true;
 
       profileUpload.disabled = true;
@@ -1042,6 +1042,35 @@ document.addEventListener("DOMContentLoaded", function () {
       deleteProfile.style.pointerEvents = 'none';
 
       saveEdit.textContent = "Edit Details";
+
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      const userID = storedUser?.userID;
+
+      const updatedData = {
+        userID: userID,
+        username: usernameEdit.value.trim(),
+        companyName: companyNameEdit.value.trim(),
+        companyAddress: companyAddressEdit.value.trim(),
+        email: emailEdit.value.trim(),
+        phoneNumber: phoneNumEdit.value.trim()
+      };
+
+      fetch('/update-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedData)
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            console.log('Profile updated successfully.');
+          } else {
+            console.error('Error updating profile:', data.message);
+          }
+        })
+        .catch(error => console.error('Error:', error));
     }
 
     isEditing = !isEditing;

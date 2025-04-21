@@ -239,8 +239,29 @@ function deleteSubRepresentative(userID, repIndex, callback) {
     });
 }
 
+function updateClientProfile(userID, username, companyName, companyAddress, email, phoneNumber, callback) {
+    userID = userID.trim();
+    if (userID.startsWith('"') && userID.endsWith('"')) {
+        userID = userID.slice(1, -1);
+    }
+
+    const sql = `UPDATE users SET username = ?, companyName = ?, companyAddress = ?, companyEmail = ?, repNum = ? WHERE userID = ?`;
+    
+    connection.query(sql, [username, companyName, companyAddress, email, phoneNumber, userID], (err, result) => {
+        if (err) {
+            console.error("Error updating profile:", err);
+            return callback(err, null);
+        }
+
+        if (result.affectedRows > 0) {
+            return callback(null, { success: true });
+        } else {
+            return callback(null, { success: false, message: "No changes made." });
+        }
+    });
+}
 
 module.exports = {
     registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames,
-    addSubRepresentative, getSubRepresentatives, deleteSubRepresentative
+    addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateClientProfile
 };
