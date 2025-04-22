@@ -105,17 +105,21 @@
           <div class="modal-body">
               <p class="fw-bold">Do you want to approve this quotation?</p>
               <div class="mb-3">
-                  <div for="remarks" class="form-label">Upload you Purchase Order (PO):</div>
+                    <div for="remarks" class="form-label">Upload you Purchase Order (PO):</div>
 
-                  <div id="purchaseOrderPreview" class="file-preview">
-                      <span><i class="bi bi-plus "></i></span>
-                       <h4>Drag File</h4>
-                   </div>
-                   <input type="file" id="purchaseOrderUpload" accept=".pdf,.doc,.docx" hidden>
+                    <div id="purchaseOrderPreview" class="file-preview">
+                        <span><i class="bi bi-plus "></i></span>
+                        <h4>Drag File</h4>
+                    </div>
+                    <input type="file" id="purchaseOrderUpload" accept=".pdf,.doc,.docx" hidden>
 
-                   <div class="text-center mt-3">
-                       <button id="purchaseOrderBtn" class="btn outlined-btn border-dark rounded-pill ps-4 pe-4"> <i class="bi bi-upload me-2"></i>Upload File</button>
-                   </div>
+                    <div class="text-center mt-3">
+                        <button id="purchaseOrderBtn" class="btn outlined-btn border-dark rounded-pill ps-4 pe-4"> <i class="bi bi-upload me-2"></i>Upload File</button>
+                    </div>
+
+                    <div class="invalid-feedback d-none text-center mt-3" id="validIdError">
+                      * Please upload file before saving.
+                    </div>
               </div>
           </div>
           <div class="modal-footer">
@@ -140,6 +144,9 @@
               <div class="mb-3">
                   <label for="remarks" class="form-label">Please leave your remarks</label>
                   <textarea class="form-control" id="remarks" rows="3"></textarea>
+              </div>
+              <div class="invalid-feedback d-none text-center mt-3" id="noRemarks">
+                * Please add some remarks.
               </div>
           </div>
           <div class="modal-footer">

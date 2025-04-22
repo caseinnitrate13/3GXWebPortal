@@ -118,27 +118,21 @@ document.addEventListener('DOMContentLoaded', function () {
   console.log(path);
   if (path.includes('/quotations') || path.includes('/view-quotation')) {
     quotation.classList.remove('collapsed');
-    account.classList.add('collapsed');
-    requestQuotation.classList.add('collapsed');
     console.log('quotations path');
 
   } else if (path.includes('/request-quotation') || path.includes('/request-for-quotation-form')) {
     requestQuotation.classList.remove('collapsed');
-    account.classList.add('collapsed');
-    quotation.classList.add('collapsed');
     console.log('rfq path');
 
   } else if (path.includes('/account')) {
     account.classList.remove('collapsed');
-    quotation.classList.add('collapsed');
-    requestQuotation.classList.add('collapsed');
     console.log('account path');
   }
 
 
   // REGISTER ACCOUNT
   document.getElementById('createAccount').addEventListener('click', function (event) {
-    event.preventDefault(); // Prevent page refresh
+    event.preventDefault();
 
     const form = document.getElementById('registerForm');
     const regUsername = document.getElementById('regUsername');
@@ -172,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Username (10- alphanumeric characters)
-    validateField(regUsername, /^[a-zA-Z0-9\s]{10,}$/);
+    validateField(regUsername, /^[a-zA-Z0-9\s]{8,}$/);
 
     // Password validation (10-15 characters, at least one uppercase, one lowercase, one number, one special character)
     validateField(regPassword, /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/);
@@ -1184,15 +1178,18 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
       }
     }
-
+    
+    // approve save 
+    const validIdError = document.getElementById('validIdError');
     approveSaveBtn.addEventListener("click", function () {
       if (poFileName) {
-        // Check which modal is present
+        validIdError.classList.remove('d-block');
+        validIdError.classList.add('d-none');
+        
         const approveQuotationModal = document.getElementById('approveQuotationModal');
         const approveConfirmationModal = document.getElementById('approveConfirmationModal');
 
         if (approveQuotationModal) {
-          // Logic specific to view-quotation.html
           approveBtn.textContent = 'Approved';
           declineBtn.style.display = 'none';
           const approveModal = bootstrap.Modal.getInstance(approveQuotationModal);
@@ -1202,6 +1199,8 @@ document.addEventListener("DOMContentLoaded", function () {
           approveQuotationModal.addEventListener('hidden.bs.modal', () => {
             document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
             document.body.style.overflow = 'auto';
+            validIdError.classList.remove('d-block');
+            validIdError.classList.add('d-none');
           }, { once: true });
           approveBtn.disabled = true;
         } else if (approveConfirmationModal) {
@@ -1218,53 +1217,75 @@ document.addEventListener("DOMContentLoaded", function () {
           }
 
           approveConfirmationModal.addEventListener('hidden.bs.modal', () => {
-            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-            document.body.style.overflow = 'auto';
+              document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+              document.body.style.overflow = 'auto';
+              validIdError.classList.remove('d-block');
+              validIdError.classList.add('d-none');
           }, { once: true });
 
         }
       } else {
-        alert("Please upload a file before saving.");
+        validIdError.classList.remove('d-none');
+        validIdError.classList.add('d-block');
       }
     });
 
-    console.log("decline next");
+
     // decline PO modal save
-    declineSaveBtn.addEventListener('click', function () {
-      if (declineQuotationModal) {
-        // Logic specific to view-quotation.html
-        declineBtn.textContent = 'Declined';
-        approveBtn.style.display = 'none';
+    const remarks = document.getElementById('remarks');
+    const noRemarksMessage = document.getElementById('noRemarks');
 
-        const declineModal = bootstrap.Modal.getInstance(declineQuotationModal);
-        if (declineModal) {
-          declineModal.hide();
-        }
+    declineSaveBtn.addEventListener('click', function() {
+      if (remarks.value.trim() !== ""){
+        noRemarksMessage.classList.remove('d-block');
+        noRemarksMessage.classList.add('d-none');
 
-        declineQuotationModal.addEventListener('hidden.bs.modal', () => {
-          document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-          document.body.style.overflow = 'auto';
-        }, { once: true });
-        declineBtn.disabled = true;
-
-      } else if (declineTableModal) {
-        if (selectedRow) {
-          const remarksCell = selectedRow.querySelector('.remarks-cell');
-          if (remarksCell) {
-            remarksCell.textContent = 'Declined';
+        if (declineQuotationModal) {
+          declineBtn.textContent = 'Declined';
+          approveBtn.style.display = 'none';
+  
+          const declineModal = bootstrap.Modal.getInstance(declineQuotationModal);
+          if (declineModal) {
+            declineModal.hide();
           }
+  
+          declineQuotationModal.addEventListener('hidden.bs.modal', () => {
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+            document.body.style.overflow = 'auto';
+
+            noRemarksMessage.classList.remove('d-block');
+            noRemarksMessage.classList.add('d-none');
+
+          }, { once: true });
+          declineBtn.disabled = true;
+          
+        } else if (declineTableModal){
+          if (selectedRow) {
+            const remarksCell = selectedRow.querySelector('.remarks-cell');
+            if (remarksCell) {
+                remarksCell.textContent = 'Declined';
+            }
+          }
+  
+          const declineModal = bootstrap.Modal.getInstance(declineTableModal);
+          if (declineModal) {
+            declineModal.hide();
+          }
+  
+          declineModal.addEventListener('hidden.bs.modal', () => {
+              document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+              document.body.style.overflow = 'auto';
+
+              noRemarksMessage.classList.remove('d-block');
+              noRemarksMessage.classList.add('d-none');
+          }, { once: true });
         }
 
-        const declineModal = bootstrap.Modal.getInstance(declineTableModal);
-        if (declineModal) {
-          declineModal.hide();
-        }
-
-        declineModal.addEventListener('hidden.bs.modal', () => {
-          document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-          document.body.style.overflow = 'auto';
-        }, { once: true });
+      } else {
+        noRemarksMessage.classList.remove('d-none');
+        noRemarksMessage.classList.add('d-block');
       }
+
     });
 
 
@@ -1277,6 +1298,9 @@ document.addEventListener("DOMContentLoaded", function () {
         document.body.style.paddingRight = "0px";
         purchaseOrderPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
         poFileName = null;
+
+        validIdError.classList.remove('d-block');
+        validIdError.classList.add('d-none');
       });
     }
 
@@ -1287,6 +1311,9 @@ document.addEventListener("DOMContentLoaded", function () {
         document.body.style.paddingRight = "0px";
         purchaseOrderPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
         poFileName = null;
+
+        validIdError.classList.remove('d-block');
+        validIdError.classList.add('d-none');
       });
     }
 
@@ -1295,6 +1322,9 @@ document.addEventListener("DOMContentLoaded", function () {
       declineQuotationModal.addEventListener("hidden.bs.modal", function () {
         document.body.style.overflow = "auto";
         document.body.style.paddingRight = "0px";
+
+        noRemarksMessage.classList.remove('d-block');
+        noRemarksMessage.classList.add('d-none');
       });
     }
 
@@ -1303,9 +1333,11 @@ document.addEventListener("DOMContentLoaded", function () {
       declineTableModal.addEventListener("hidden.bs.modal", function () {
         document.body.style.overflow = "auto";
         document.body.style.paddingRight = "0px";
+
+        noRemarksMessage.classList.remove('d-block');
+        noRemarksMessage.classList.add('d-none');
       });
     }
-
   }
 
 });
@@ -1417,8 +1449,12 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // save uploaded file
+  const noUploadedFile = document.getElementById('noUploadedFile');
   uploadSaveBtn.addEventListener("click", function () {
     if (uploadedFileName) {
+      noUploadedFile.classList.remove('d-block');
+      noUploadedFile.classList.add('d-none');
+
       const attachmentModalElement = document.getElementById('attachmentModal');
       const signatureModal = bootstrap.Modal.getInstance(attachmentModalElement);
 
@@ -1430,7 +1466,8 @@ document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
         document.body.style.overflow = 'auto';
 
-        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        noUploadedFile.classList.remove('d-block');
+        noUploadedFile.classList.add('d-none');
       }, { once: true });
 
 
@@ -1440,6 +1477,9 @@ document.addEventListener("DOMContentLoaded", function () {
         : uploadedFileName;
 
       attachBtn.innerHTML = `<i class="bi bi-paperclip me-1"></i> ${displayFileName}`;
+    } else {
+      noUploadedFile.classList.remove('d-none');
+      noUploadedFile.classList.add('d-block');
     }
   });
 
@@ -1452,6 +1492,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     uploadedFileName = null;
     fileUpload.value = "";
+
+    noUploadedFile.classList.remove('d-block');
+    noUploadedFile.classList.add('d-none');
   });
 
 
@@ -1463,7 +1506,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const signatureModal = new bootstrap.Modal(signatureModalElement);
     signatureModal.show();
   });
-
 
 });
 
@@ -1518,10 +1560,14 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Save uploaded image to previewContainer
+  // save uploaded image to previewContainer
+  const noSignatureUploaded = document.getElementById('noSignatureUploaded');
   saveButton.addEventListener("click", function () {
 
     if (uploadedImage) {
+      noSignatureUploaded.classList.remove('d-block');
+      noSignatureUploaded.classList.add('d-none');
+
       const signatureModalElement = document.getElementById('signatureModal');
       const signatureModal = bootstrap.Modal.getInstance(signatureModalElement);
 
@@ -1532,6 +1578,9 @@ document.addEventListener("DOMContentLoaded", function () {
       signatureModalElement.addEventListener('hidden.bs.modal', () => {
         document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
         document.body.style.overflow = 'auto';
+
+        noSignatureUploaded.classList.remove('d-block');
+        noSignatureUploaded.classList.add('d-none');
       }, { once: true });
 
       const uploadSignBtn = document.getElementById('uploadSignBtn');
@@ -1544,6 +1593,9 @@ document.addEventListener("DOMContentLoaded", function () {
       previewContainer.style.display = "block";
       document.getElementById("signatureModal").classList.remove("show");
       document.body.classList.remove("modal-open");
+    } else {
+      noSignatureUploaded.classList.remove('d-none');
+      noSignatureUploaded.classList.add('d-block');
     }
   });
 
@@ -1553,18 +1605,19 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.style.paddingRight = "0px";
     uploadSignPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
     uploadedImage = null;
+
+    noSignatureUploaded.classList.remove('d-block');
+    noSignatureUploaded.classList.add('d-none');
   });
 
   // Ensure modal resets properly when reopening
-  document.getElementById('uploadSignBtn').addEventListener('click', () => {
-    const signatureModalElement = document.getElementById('signatureModal');
+  // document.getElementById('uploadSignBtn').addEventListener('click', () => {
+  //   const signatureModalElement = document.getElementById('signatureModal');
+  //   document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
 
-    // Remove lingering backdrops (if any)
-    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-
-    const signatureModal = new bootstrap.Modal(signatureModalElement);
-    signatureModal.show();
-  });
+  //   const signatureModal = new bootstrap.Modal(signatureModalElement);
+  //   signatureModal.show();
+  // });
 
 });
 
@@ -1636,39 +1689,65 @@ clearButton.addEventListener('click', (event) => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 });
 
+function isCanvasBlank(canvas) {
+  const ctx = canvas.getContext('2d');
+  const pixelData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+  for (let i = 0; i < pixelData.length; i += 4) {
+    if (pixelData[i + 3] !== 0) { // Alpha channel is not transparent
+      return false; // Canvas is NOT blank
+    }
+  }
+  return true; // Canvas is blank
+}
+
+const emptyCanvas = document.getElementById('emptyCanvas');
+
 // submit
 submitButton.addEventListener('click', () => {
-  const imageURL = canvas.toDataURL();
-  const imgElement = document.createElement('img');
-  imgElement.src = imageURL;
-  imgElement.style.display = 'block';
 
-  const signatureModalElement = document.getElementById('signaturePadModal');
-  const signatureModal = bootstrap.Modal.getInstance(signatureModalElement);
+  if (isCanvasBlank(canvas)){
+    emptyCanvas.classList.remove('d-none');
+    emptyCanvas.classList.add('d-block');
+  } else {
+    emptyCanvas.classList.remove('d-block');
+    emptyCanvas.classList.add('d-none');
 
-  if (signatureModal) {
-    signatureModal.hide();
+    const imageURL = canvas.toDataURL();
+    const imgElement = document.createElement('img');
+    imgElement.src = imageURL;
+    imgElement.style.display = 'block';
+  
+    const signatureModalElement = document.getElementById('signaturePadModal');
+    const signatureModal = bootstrap.Modal.getInstance(signatureModalElement);
+  
+    if (signatureModal) {
+      signatureModal.hide();
+    }
+  
+    signatureModalElement.addEventListener('hidden.bs.modal', () => {
+      document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+      document.body.style.overflow = 'auto';
+  
+      emptyCanvas.classList.remove('d-block');
+      emptyCanvas.classList.add('d-none');
+
+      canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    }, { once: true });
+  
+    // preview image 
+    const previewArea = document.getElementById('signature-preview');
+    const uploadSignBtn = document.getElementById('uploadSignBtn');
+    const signPadBtn = document.getElementById('signPadBtn');
+    const previewContainer = document.getElementById('previewContainer');
+  
+    uploadSignBtn.style.display = 'none';
+    signPadBtn.style.display = 'none';
+    previewContainer.style.display = 'block';
+  
+    previewArea.innerHTML = '';
+    previewArea.appendChild(imgElement);
   }
-
-  signatureModalElement.addEventListener('hidden.bs.modal', () => {
-    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-    document.body.style.overflow = 'auto';
-
-    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-  }, { once: true });
-
-  // preview image 
-  const previewArea = document.getElementById('signature-preview');
-  const uploadSignBtn = document.getElementById('uploadSignBtn');
-  const signPadBtn = document.getElementById('signPadBtn');
-  const previewContainer = document.getElementById('previewContainer');
-
-  uploadSignBtn.style.display = 'none';
-  signPadBtn.style.display = 'none';
-  previewContainer.style.display = 'block';
-
-  previewArea.innerHTML = '';
-  previewArea.appendChild(imgElement);
 });
 
 // restore scrolling 
@@ -1692,9 +1771,10 @@ closePreview.addEventListener('click', () => {
 // Ensure modal resets properly when reopening
 document.getElementById('signPadBtn').addEventListener('click', () => {
   const signatureModalElement = document.getElementById('signaturePadModal');
-
-  // Remove lingering backdrops (if any)
   document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+
+  emptyCanvas.classList.remove('d-block');
+  emptyCanvas.classList.add('d-none');
 
   canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
 
