@@ -676,6 +676,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(data => {
           if (data.success) {
             console.log("Sub-representative added to database.");
+            location.reload();
           } else {
             console.error("Failed to update sub-representative:", data.message);
           }
@@ -826,6 +827,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 .then(updateData => {
                   if (updateData.success) {
                     console.log("Sub-representative updated successfully.");
+                    location.reload();
                   } else {
                     console.error("Failed to update sub-representative:", updateData.message);
                   }
@@ -1087,6 +1089,78 @@ document.addEventListener("DOMContentLoaded", function () {
     isEditing = !isEditing;
   });
 
+
+  //CHANGE PASSWORD
+  document.querySelector('#profile-change-password form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const userID = storedUser?.userID;
+    const currentPasswordInput = document.getElementById("currentPassword");
+    const newPasswordInput = document.getElementById("newPassword");
+    const renewPasswordInput = document.getElementById("renewPassword");
+
+    const currentPassword = currentPasswordInput.value;
+    const newPassword = newPasswordInput.value;
+    const renewPassword = renewPasswordInput.value;
+
+    const currentFeedback = document.getElementById("currentPasswordFeedback");
+    const newFeedback = document.getElementById("newPasswordFeedback");
+    const renewFeedback = document.getElementById("renewPasswordFeedback");
+
+    [currentPasswordInput, newPasswordInput, renewPasswordInput].forEach(input => input.classList.remove("is-invalid"));
+    [currentFeedback, newFeedback, renewFeedback].forEach(fb => fb.style.display = "none");
+
+    if (!userID) return alert("User not logged in.");
+
+    let hasError = false;
+
+    if (!newPassword) {
+      newPasswordInput.classList.add("is-invalid");
+      newFeedback.style.display = "block";
+      newFeedback.textContent = "New password is required.";
+      hasError = true;
+    }
+
+    if (newPassword !== renewPassword) {
+      renewPasswordInput.classList.add("is-invalid");
+      renewFeedback.style.display = "block";
+      renewFeedback.textContent = "Passwords do not match.";
+      hasError = true;
+    }
+
+    if (hasError) return;
+
+    try {
+      const res = await fetch('/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userID, currentPassword, newPassword })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        currentPasswordInput.value = "";
+        newPasswordInput.value = "";
+        renewPasswordInput.value = "";
+
+        // Show modal without extra function
+        document.getElementById("alertModalLabel").textContent = "Success";
+        document.getElementById("alertModalBody").textContent = data.message || "Password changed successfully.";
+        const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
+        alertModal.show();
+      } else {
+        currentPasswordInput.classList.add("is-invalid");
+        currentFeedback.style.display = "block";
+        currentFeedback.textContent = data.message || "Current password is incorrect.";
+      }
+    } catch (err) {
+      console.error("Error changing password:", err);
+      alert("Server error.");
+    }
+  });
+
+
 });
 
 
@@ -1178,14 +1252,14 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
       }
     }
-    
+
     // approve save 
     const validIdError = document.getElementById('validIdError');
     approveSaveBtn.addEventListener("click", function () {
       if (poFileName) {
         validIdError.classList.remove('d-block');
         validIdError.classList.add('d-none');
-        
+
         const approveQuotationModal = document.getElementById('approveQuotationModal');
         const approveConfirmationModal = document.getElementById('approveConfirmationModal');
 
@@ -1217,10 +1291,10 @@ document.addEventListener("DOMContentLoaded", function () {
           }
 
           approveConfirmationModal.addEventListener('hidden.bs.modal', () => {
-              document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-              document.body.style.overflow = 'auto';
-              validIdError.classList.remove('d-block');
-              validIdError.classList.add('d-none');
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+            document.body.style.overflow = 'auto';
+            validIdError.classList.remove('d-block');
+            validIdError.classList.add('d-none');
           }, { once: true });
 
         }
@@ -1235,20 +1309,20 @@ document.addEventListener("DOMContentLoaded", function () {
     const remarks = document.getElementById('remarks');
     const noRemarksMessage = document.getElementById('noRemarks');
 
-    declineSaveBtn.addEventListener('click', function() {
-      if (remarks.value.trim() !== ""){
+    declineSaveBtn.addEventListener('click', function () {
+      if (remarks.value.trim() !== "") {
         noRemarksMessage.classList.remove('d-block');
         noRemarksMessage.classList.add('d-none');
 
         if (declineQuotationModal) {
           declineBtn.textContent = 'Declined';
           approveBtn.style.display = 'none';
-  
+
           const declineModal = bootstrap.Modal.getInstance(declineQuotationModal);
           if (declineModal) {
             declineModal.hide();
           }
-  
+
           declineQuotationModal.addEventListener('hidden.bs.modal', () => {
             document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
             document.body.style.overflow = 'auto';
@@ -1258,26 +1332,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
           }, { once: true });
           declineBtn.disabled = true;
-          
-        } else if (declineTableModal){
+
+        } else if (declineTableModal) {
           if (selectedRow) {
             const remarksCell = selectedRow.querySelector('.remarks-cell');
             if (remarksCell) {
-                remarksCell.textContent = 'Declined';
+              remarksCell.textContent = 'Declined';
             }
           }
-  
+
           const declineModal = bootstrap.Modal.getInstance(declineTableModal);
           if (declineModal) {
             declineModal.hide();
           }
-  
-          declineModal.addEventListener('hidden.bs.modal', () => {
-              document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-              document.body.style.overflow = 'auto';
 
-              noRemarksMessage.classList.remove('d-block');
-              noRemarksMessage.classList.add('d-none');
+          declineModal.addEventListener('hidden.bs.modal', () => {
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+            document.body.style.overflow = 'auto';
+
+            noRemarksMessage.classList.remove('d-block');
+            noRemarksMessage.classList.add('d-none');
           }, { once: true });
         }
 
@@ -1706,7 +1780,7 @@ const emptyCanvas = document.getElementById('emptyCanvas');
 // submit
 submitButton.addEventListener('click', () => {
 
-  if (isCanvasBlank(canvas)){
+  if (isCanvasBlank(canvas)) {
     emptyCanvas.classList.remove('d-none');
     emptyCanvas.classList.add('d-block');
   } else {
@@ -1717,34 +1791,34 @@ submitButton.addEventListener('click', () => {
     const imgElement = document.createElement('img');
     imgElement.src = imageURL;
     imgElement.style.display = 'block';
-  
+
     const signatureModalElement = document.getElementById('signaturePadModal');
     const signatureModal = bootstrap.Modal.getInstance(signatureModalElement);
-  
+
     if (signatureModal) {
       signatureModal.hide();
     }
-  
+
     signatureModalElement.addEventListener('hidden.bs.modal', () => {
       document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
       document.body.style.overflow = 'auto';
-  
+
       emptyCanvas.classList.remove('d-block');
       emptyCanvas.classList.add('d-none');
 
       canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
     }, { once: true });
-  
+
     // preview image 
     const previewArea = document.getElementById('signature-preview');
     const uploadSignBtn = document.getElementById('uploadSignBtn');
     const signPadBtn = document.getElementById('signPadBtn');
     const previewContainer = document.getElementById('previewContainer');
-  
+
     uploadSignBtn.style.display = 'none';
     signPadBtn.style.display = 'none';
     previewContainer.style.display = 'block';
-  
+
     previewArea.innerHTML = '';
     previewArea.appendChild(imgElement);
   }

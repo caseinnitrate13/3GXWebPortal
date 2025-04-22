@@ -278,10 +278,35 @@ async function deleteUserProfilePic(userID) {
     });
 }
 
+function updateUserPassword(userID, currentPassword, newHashedPassword) {
+    return new Promise((resolve, reject) => {
+
+        const sqlGetUser = "SELECT * FROM users WHERE userID = ?";
+        connection.query(sqlGetUser, [userID], (err, results) => {
+            if (err) return reject(err);
+            if (results.length === 0) {
+                return resolve({ success: false, message: "User not found." });
+            }
+            const user = results[0];
+            bcrypt.compare(currentPassword, user.password, (compareErr, isMatch) => {
+                if (compareErr) return reject(compareErr);
+                if (!isMatch) {
+                    return resolve({ success: false, message: "Current password is incorrect." });
+                }
+                const sqlUpdate = "UPDATE users SET password = ? WHERE userID = ?";
+                connection.query(sqlUpdate, [newHashedPassword, userID], (updateErr, updateResult) => {
+                    if (updateErr) return reject(updateErr);
+                    resolve({ success: updateResult.affectedRows > 0 });
+                });
+            });
+        });
+    });
+}
 
 
 
 module.exports = {
     registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames,
-    addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateUserProfile, deleteUserProfilePic
+    addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateUserProfile, deleteUserProfilePic,
+    updateUserPassword
 };

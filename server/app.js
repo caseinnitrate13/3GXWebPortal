@@ -386,6 +386,29 @@ app.post('/delete-profile-pic', async (req, res) => {
     }
 });
 
+app.post("/change-password", async (req, res) => {
+    const { userID, currentPassword, newPassword } = req.body;
+
+    if (!userID || !currentPassword || !newPassword) {
+        return res.status(400).json({ success: false, message: "Missing fields." });
+    }
+
+    try {
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+        const result = await dbService.updateUserPassword(userID, currentPassword, hashedNewPassword);
+
+        if (result.success) {
+            return res.json({ success: true, message: "Password updated successfully." });
+        } else {
+            return res.status(400).json({ success: false, message: result.message });
+        }
+
+    } catch (error) {
+        console.error("Error changing password:", error);
+        return res.status(500).json({ success: false, message: "Server error." });
+    }
+});
+
 
 app.get('/view-quotation', (req, res) => {
     const viewQuotation = fs.readFileSync(path.join(__dirname, '..', 'public', 'view-quotation.html'), 'utf-8');
