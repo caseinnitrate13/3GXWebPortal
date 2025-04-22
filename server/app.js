@@ -363,6 +363,30 @@ app.post('/update-profile', upload.fields([
 });
 
 
+app.post('/delete-profile-pic', async (req, res) => {
+    const { userID } = req.body;
+
+    if (!userID) {
+        return res.status(400).json({ success: false, message: 'Missing userID' });
+    }
+
+    try {
+        const profilePicPath = path.join(__dirname, 'uploads', 'users', userID, 'profile_pic', 'profile.jpg');
+
+        if (fs.existsSync(profilePicPath)) {
+            fs.unlinkSync(profilePicPath);
+        }
+
+        const result = await dbService.deleteUserProfilePic(userID);
+
+        res.json({ success: result.success, message: 'Profile picture deleted' });
+    } catch (error) {
+        console.error('Delete profile pic error:', error);
+        res.status(500).json({ success: false, message: 'Server error deleting profile picture' });
+    }
+});
+
+
 app.get('/view-quotation', (req, res) => {
     const viewQuotation = fs.readFileSync(path.join(__dirname, '..', 'public', 'view-quotation.html'), 'utf-8');
     res.send(template.replace('{{content}}', viewQuotation));

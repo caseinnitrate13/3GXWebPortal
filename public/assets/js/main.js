@@ -418,7 +418,7 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById("headerCompanyName").textContent = data.user.companyName;
           document.getElementById("toggleCompanyName").textContent = data.user.companyName;
           const profileImg = document.getElementById('headerProfileImg');
-          profileImg.src = data.user.profilepic || 'assets/img/default-profile.png';
+          profileImg.src = data.user.profilepic || 'assets/img/account.png';
         } else if (isAccountPage) {
           document.getElementById("username").textContent = data.user.username;
           document.getElementById("companyName").textContent = data.user.companyName;
@@ -432,13 +432,13 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById("phoneNumEdit").value = data.user.repNum;
 
           const profileImg = document.getElementById('headerProfileImg');
-          profileImg.src = data.user.profilepic || 'assets/img/default-profile.png';
+          profileImg.src = data.user.profilepic || 'assets/img/account.png';
 
           const profileDisplay = document.getElementById('profileDisplay');
-          profileDisplay.src = data.user.profilepic || 'assets/img/default-profile.png';
+          profileDisplay.src = data.user.profilepic || 'assets/img/account.png';
 
           const profilepreview = document.getElementById('profilepreview');
-          profilepreview.src = data.user.profilepic || 'assets/img/default-profile.png';
+          profilepreview.src = data.user.profilepic || 'assets/img/account.png';
 
           let repArray = [];
           try {
@@ -985,10 +985,35 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       deleteProfile.addEventListener('click', function () {
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+        const userID = storedUser?.userID;
+
+        if (!userID) return;
+
+        // Reset image on UI
         profileImage.src = defaultImage;
         profileInput.value = "";
         uploadedImageURL = defaultImage;
+
+        // Call backend to delete file + DB entry
+        fetch('/delete-profile-pic', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ userID })
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              console.log('Profile picture deleted successfully.');
+            } else {
+              console.error('Error deleting profile picture:', data.message);
+            }
+          })
+          .catch(err => console.error('Error:', err));
       });
+
 
       usernameEdit.readOnly = false;
       companyNameEdit.readOnly = false;

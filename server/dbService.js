@@ -239,7 +239,7 @@ function deleteSubRepresentative(userID, repIndex, callback) {
 }
 
 function updateUserProfile(data) {
-    const {userID, username, companyName, companyAddress, email, phoneNumber, profilepic} = data;
+    const { userID, username, companyName, companyAddress, email, phoneNumber, profilepic } = data;
 
     let sql = `UPDATE users SET username = ?, companyName = ?, companyAddress = ?, companyEmail = ?, repNum = ?`;
 
@@ -264,9 +264,24 @@ function updateUserProfile(data) {
     });
 }
 
+async function deleteUserProfilePic(userID) {
+    const sql = `UPDATE users SET profilepic = NULL WHERE userID = ?`;
+    return new Promise((resolve, reject) => {
+        connection.query(sql, [userID], (err, result) => {
+            if (err) {
+                console.error('Error deleting profile pic in DB:', err);
+                reject({ success: false, error: err });
+            } else {
+                resolve({ success: result.affectedRows > 0 });
+            }
+        });
+    });
+}
+
+
 
 
 module.exports = {
     registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames,
-    addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateUserProfile
+    addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateUserProfile, deleteUserProfilePic
 };
