@@ -95,7 +95,7 @@ function loginUser({ username, password, userID }, callback) {
 }
 
 function getUserDetails(userID, callback) {
-    const sql = `SELECT username, companyName, companyAddress, companyEmail, repNames, repNum FROM users WHERE userID = ?`;
+    const sql = `SELECT username, companyName, companyAddress, companyEmail, repNames, repNum, profilepic FROM users WHERE userID = ?`;
     connection.query(sql, [userID], (err, result) => {
         if (err) return callback(err, null);
         if (result.length === 0) {
@@ -229,7 +229,6 @@ function deleteSubRepresentative(userID, repIndex, callback) {
             return callback(new Error("Invalid representative index"));
         }
 
-        // Remove the sub-rep (main rep is at index 0, so we skip that)
         repList.splice(repIndex, 1);
 
         const updatedRepNames = JSON.stringify(repList);
@@ -239,29 +238,57 @@ function deleteSubRepresentative(userID, repIndex, callback) {
     });
 }
 
-function updateClientProfile(userID, username, companyName, companyAddress, email, phoneNumber, callback) {
-    userID = userID.trim();
-    if (userID.startsWith('"') && userID.endsWith('"')) {
-        userID = userID.slice(1, -1);
+// function updateClientProfile(userID, username, companyName, companyAddress, email, phoneNumber, callback) {
+//     userID = userID.trim();
+//     if (userID.startsWith('"') && userID.endsWith('"')) {
+//         userID = userID.slice(1, -1);
+//     }
+
+//     const sql = `UPDATE users SET username = ?, companyName = ?, companyAddress = ?, companyEmail = ?, repNum = ? WHERE userID = ?`;
+
+//     connection.query(sql, [username, companyName, companyAddress, email, phoneNumber, userID], (err, result) => {
+//         if (err) {
+//             console.error("Error updating profile:", err);
+//             return callback(err, null);
+//         }
+
+//         if (result.affectedRows > 0) {
+//             return callback(null, { success: true });
+//         } else {
+//             return callback(null, { success: false, message: "No changes made." });
+//         }
+//     });
+// }
+
+function updateUserProfile(data) {
+    const {userID, username, companyName, companyAddress, email, phoneNumber, profilepic} = data;
+
+    let sql = `UPDATE users SET username = ?, companyName = ?, companyAddress = ?, companyEmail = ?, repNum = ?`;
+
+    const values = [username, companyName, companyAddress, email, phoneNumber];
+
+    if (profilepic) {
+        sql += `, profilepic = ?`;
+        values.push(profilepic);
     }
 
-    const sql = `UPDATE users SET username = ?, companyName = ?, companyAddress = ?, companyEmail = ?, repNum = ? WHERE userID = ?`;
-    
-    connection.query(sql, [username, companyName, companyAddress, email, phoneNumber, userID], (err, result) => {
-        if (err) {
-            console.error("Error updating profile:", err);
-            return callback(err, null);
-        }
+    sql += ` WHERE userID = ?`;
+    values.push(userID);
 
-        if (result.affectedRows > 0) {
-            return callback(null, { success: true });
-        } else {
-            return callback(null, { success: false, message: "No changes made." });
-        }
+    return new Promise((resolve, reject) => {
+        connection.query(sql, values, (err, result) => {
+            if (err) {
+                console.error('Database error during updateUserProfile:', err);
+                return reject(err);
+            }
+            resolve({ success: result.affectedRows > 0 });
+        });
     });
 }
 
+
+
 module.exports = {
     registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames,
-    addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateClientProfile
+    addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateUserProfile
 };
