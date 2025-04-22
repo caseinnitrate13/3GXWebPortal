@@ -68,7 +68,7 @@
   new bootstrap.Tooltip(document.body, {
     selector: '[data-bs-toggle="tooltip"]'
   });
-  
+
 
   const datatables = document.querySelectorAll(".datatable");
 
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const path = window.location.pathname;
   console.log(path);
-  if(path.includes('/quotations') || path.includes('/view-quotation')) {
+  if (path.includes('/quotations') || path.includes('/view-quotation')) {
     quotation.classList.remove('collapsed');
     console.log('quotations path');
 
@@ -402,13 +402,17 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        const isQuotationPage = location.pathname === '/request-quotation';
+        const isReqQuotationPage = location.pathname === '/request-quotation';
         const isAccountPage = location.pathname === '/account';
         const isRFQFormPage = location.pathname === '/request-for-quotation-form';
+        const isQuoatationsPage = location.pathname === '/quotations';
+        const isViewQuotationPage = location.pathname === '/view-quotation';
 
-        if (isQuotationPage || isRFQFormPage) {
+        if (isReqQuotationPage || isRFQFormPage || isQuoatationsPage || isViewQuotationPage) {
           document.getElementById("headerCompanyName").textContent = data.user.companyName;
           document.getElementById("toggleCompanyName").textContent = data.user.companyName;
+          const profileImg = document.getElementById('headerProfileImg');
+          profileImg.src = data.user.profilepic || 'assets/img/default-profile.png';
         } else if (isAccountPage) {
           document.getElementById("username").textContent = data.user.username;
           document.getElementById("companyName").textContent = data.user.companyName;
@@ -421,6 +425,14 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById("emailEdit").value = data.user.companyEmail;
           document.getElementById("phoneNumEdit").value = data.user.repNum;
 
+          const profileImg = document.getElementById('headerProfileImg');
+          profileImg.src = data.user.profilepic || 'assets/img/default-profile.png';
+
+          const profileDisplay = document.getElementById('profileDisplay');
+          profileDisplay.src = data.user.profilepic || 'assets/img/default-profile.png';
+
+          const profilepreview = document.getElementById('profilepreview');
+          profilepreview.src = data.user.profilepic || 'assets/img/default-profile.png';
 
           let repArray = [];
           try {
@@ -490,8 +502,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     })
     .catch(error => console.error("Fetch error:", error));
-
-
 });
 
 
@@ -953,14 +963,13 @@ document.addEventListener("DOMContentLoaded", function () {
       profileUpload.disabled = false;
       profileUpload.style.pointerEvents = 'auto';
       deleteProfile.style.pointerEvents = 'auto';
+      deleteProfile.disabled = false;
 
-      // upload profile
       profileUpload.addEventListener("click", function (event) {
         event.preventDefault();
         profileInput.click();
       });
 
-      // Handle file selection
       profileInput.addEventListener("change", function (event) {
         if (event.target.files.length > 0) {
           const file = event.target.files[0];
@@ -972,6 +981,7 @@ document.addEventListener("DOMContentLoaded", function () {
       deleteProfile.addEventListener('click', function () {
         profileImage.src = defaultImage;
         profileInput.value = "";
+        uploadedImageURL = defaultImage;
       });
 
       usernameEdit.readOnly = false;
@@ -984,25 +994,57 @@ document.addEventListener("DOMContentLoaded", function () {
       saveEdit.textContent = "Save Changes";
 
     } else {
-      // Validate form before saving
       if (!formValidation.checkValidity()) {
         formValidation.classList.add("was-validated");
         return;
       }
 
-      // save values
-      username.textContent = usernameEdit.value.trim();
-      companyName.textContent = companyNameEdit.value.trim();
-      companyAddress.textContent = companyAddressEdit.value.trim();
-      email.textContent = emailEdit.value.trim();
-      phoneNumber.textContent = phoneNumEdit.value.trim();
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      const userID = storedUser?.userID;
 
-      profilecompanyName.textContent = companyNameEdit.value.trim();
-      headerCompanyName.textContent = companyNameEdit.value.trim();
+      const formData = new FormData();
+      formData.append("userID", userID);
+      formData.append("username", usernameEdit.value.trim());
+      formData.append("companyName", companyNameEdit.value.trim());
+      formData.append("companyAddress", companyAddressEdit.value.trim());
+      formData.append("email", emailEdit.value.trim());
+      formData.append("phoneNumber", phoneNumEdit.value.trim());
 
-      ProfileImgDisplay.src = uploadedImageURL;
-      headerProfileImg.src = uploadedImageURL;
+      if (profileInput.files.length > 0) {
+        formData.append("profilePic", profileInput.files[0]);
+      }
 
+      fetch('/update-profile', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            console.log('Profile updated successfully.');
+
+            username.textContent = usernameEdit.value.trim();
+            companyName.textContent = companyNameEdit.value.trim();
+            companyAddress.textContent = companyAddressEdit.value.trim();
+            email.textContent = emailEdit.value.trim();
+            phoneNumber.textContent = phoneNumEdit.value.trim();
+
+            profilecompanyName.textContent = companyNameEdit.value.trim();
+            headerCompanyName.textContent = companyNameEdit.value.trim();
+
+            const imagePath = data.profilepicPath || uploadedImageURL;
+            profileImage.src = imagePath;
+            ProfileImgDisplay.src = imagePath;
+            headerProfileImg.src = imagePath;
+
+            location.reload()
+          } else {
+            console.error('Error updating profile:', data.message);
+          }
+        })
+        .catch(error => console.error('Error:', error));
+
+      // Disable editing
       usernameEdit.readOnly = true;
       companyNameEdit.readOnly = true;
       companyAddressEdit.readOnly = true;
@@ -1015,35 +1057,6 @@ document.addEventListener("DOMContentLoaded", function () {
       deleteProfile.style.pointerEvents = 'none';
 
       saveEdit.textContent = "Edit Details";
-
-      const storedUser = JSON.parse(localStorage.getItem("user"));
-      const userID = storedUser?.userID;
-
-      const updatedData = {
-        userID: userID,
-        username: usernameEdit.value.trim(),
-        companyName: companyNameEdit.value.trim(),
-        companyAddress: companyAddressEdit.value.trim(),
-        email: emailEdit.value.trim(),
-        phoneNumber: phoneNumEdit.value.trim()
-      };
-
-      fetch('/update-profile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(updatedData)
-      })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            console.log('Profile updated successfully.');
-          } else {
-            console.error('Error updating profile:', data.message);
-          }
-        })
-        .catch(error => console.error('Error:', error));
     }
 
     isEditing = !isEditing;
@@ -1077,7 +1090,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  
+
 
   // VIEW QUOTATION
   const purchaseOrderPreview = document.getElementById("purchaseOrderPreview");
@@ -1093,14 +1106,14 @@ document.addEventListener("DOMContentLoaded", function () {
   let selectedRow = null;
 
 
-  if (quotationTable){
+  if (quotationTable) {
     quotationTable.addEventListener('click', function (event) {
       if (event.target.classList.contains('approve-icon') || event.target.classList.contains('decline-icon')) {
-          selectedRow = event.target.closest('tr');
+        selectedRow = event.target.closest('tr');
       }
     });
   }
-      
+
   if (purchaseOrderBtn && purchaseOrderUpload && purchaseOrderPreview) {
     purchaseOrderBtn.addEventListener("click", function () {
       purchaseOrderUpload.click();
@@ -1169,13 +1182,13 @@ document.addEventListener("DOMContentLoaded", function () {
           if (selectedRow) {
             const remarksCell = selectedRow.querySelector('.remarks-cell');
             if (remarksCell) {
-                remarksCell.textContent = 'Approved';
+              remarksCell.textContent = 'Approved';
             }
           }
 
           const approveConfirmation = bootstrap.Modal.getInstance(approveConfirmationModal);
           if (approveConfirmation) {
-              approveConfirmation.hide();
+            approveConfirmation.hide();
           }
 
           approveConfirmationModal.addEventListener('hidden.bs.modal', () => {
@@ -1184,7 +1197,7 @@ document.addEventListener("DOMContentLoaded", function () {
               validIdError.classList.remove('d-block');
               validIdError.classList.add('d-none');
           }, { once: true });
-      
+
         }
       } else {
         validIdError.classList.remove('d-none');
@@ -1301,7 +1314,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
   }
-  
+
 });
 
 

@@ -307,28 +307,60 @@ app.post("/delete-sub-rep", (req, res) => {
     });
 });
 
-app.post('/update-profile', (req, res) => {
-    const { userID, username, companyName, companyAddress, email, phoneNumber } = req.body;
+app.post('/update-profile', upload.fields([
+    { name: 'profilePic', maxCount: 1 }
+]), async (req, res) => {
+    try {
+        const {
+            userID, username, companyName, companyAddress, email, phoneNumber
+        } = req.body;
 
-    if (!userID ||  !username || !companyName || !companyAddress || !email || !phoneNumber) {
-        return res.status(400).json({ success: false, message: "Missing required fields." });
-    }
-
-    // Call to the function in dbService to update the user profile
-    dbService.updateClientProfile(userID, username, companyName, companyAddress, email, phoneNumber, (err, result) => {
-        if (err) {
-            console.error("Error updating profile:", err);
-            return res.status(500).json({ success: false, message: "Database error." });
+        if (!userID) {
+            return res.status(400).json({ success: false, message: "Missing userID" });
         }
+
+        let profilePicPath = null;
+
+        if (req.files && req.files['profilePic'] && req.files['profilePic'][0]) {
+            const profilePicFile = req.files['profilePic'][0];
+            const ext = path.extname(profilePicFile.originalname); // preserve extension
+            const profilePicFilename = `profile${ext}`; // always same name
+
+            const basePath = path.join(__dirname, 'uploads', 'users', userID);
+            const profilePicDir = path.join(basePath, 'profile_pic');
+            const profileFullPath = path.join(profilePicDir, profilePicFilename);
+
+            // Ensure the directory exists
+            fs.mkdirSync(profilePicDir, { recursive: true });
+
+            // Overwrite existing file
+            await fs.promises.writeFile(profileFullPath, profilePicFile.buffer);
+
+            // Path to save in DB
+            profilePicPath = `uploads/users/${userID}/profile_pic/${profilePicFilename}`;
+        }
+
+        const result = await dbService.updateUserProfile({
+            userID,
+            username,
+            companyName,
+            companyAddress,
+            email,
+            phoneNumber,
+            profilepic: profilePicPath // may be null if not updated
+        });
 
         if (result.success) {
-            return res.status(200).json({ success: true, message: "Profile updated successfully." });
+            res.json({ success: true, message: "Profile updated", profilepicPath: profilePicPath });
         } else {
-            return res.status(400).json({ success: false, message: result.message || "Update failed." });
+            res.status(500).json({ success: false, message: 'Failed to update user profile' });
         }
-    });
-});
 
+    } catch (error) {
+        console.error("Profile update error:", error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
 
 
 app.get('/view-quotation', (req, res) => {
