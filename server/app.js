@@ -363,7 +363,6 @@ app.post('/update-profile', upload.fields([
 });
 
 
-
 app.get('/view-quotation', (req, res) => {
     const viewQuotation = fs.readFileSync(path.join(__dirname, '..', 'public', 'view-quotation.html'), 'utf-8');
     res.send(template.replace('{{content}}', viewQuotation));
