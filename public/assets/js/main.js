@@ -412,7 +412,7 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById("headerCompanyName").textContent = data.user.companyName;
           document.getElementById("toggleCompanyName").textContent = data.user.companyName;
           const profileImg = document.getElementById('headerProfileImg');
-          profileImg.src = data.user.profilepic || 'assets/img/default-profile.png';
+          profileImg.src = data.user.profilepic || 'assets/img/account.png';
         } else if (isAccountPage) {
           document.getElementById("username").textContent = data.user.username;
           document.getElementById("companyName").textContent = data.user.companyName;
@@ -426,13 +426,13 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById("phoneNumEdit").value = data.user.repNum;
 
           const profileImg = document.getElementById('headerProfileImg');
-          profileImg.src = data.user.profilepic || 'assets/img/default-profile.png';
+          profileImg.src = data.user.profilepic || 'assets/img/account.png';
 
           const profileDisplay = document.getElementById('profileDisplay');
-          profileDisplay.src = data.user.profilepic || 'assets/img/default-profile.png';
+          profileDisplay.src = data.user.profilepic || 'assets/img/account.png';
 
           const profilepreview = document.getElementById('profilepreview');
-          profilepreview.src = data.user.profilepic || 'assets/img/default-profile.png';
+          profilepreview.src = data.user.profilepic || 'assets/img/account.png';
 
           let repArray = [];
           try {
@@ -676,6 +676,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(data => {
           if (data.success) {
             console.log("Sub-representative added to database.");
+            location.reload();
           } else {
             console.error("Failed to update sub-representative:", data.message);
           }
@@ -826,6 +827,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 .then(updateData => {
                   if (updateData.success) {
                     console.log("Sub-representative updated successfully.");
+                    location.reload();
                   } else {
                     console.error("Failed to update sub-representative:", updateData.message);
                   }
@@ -979,10 +981,35 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       deleteProfile.addEventListener('click', function () {
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+        const userID = storedUser?.userID;
+
+        if (!userID) return;
+
+        // Reset image on UI
         profileImage.src = defaultImage;
         profileInput.value = "";
         uploadedImageURL = defaultImage;
+
+        // Call backend to delete file + DB entry
+        fetch('/delete-profile-pic', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ userID })
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              console.log('Profile picture deleted successfully.');
+            } else {
+              console.error('Error deleting profile picture:', data.message);
+            }
+          })
+          .catch(err => console.error('Error:', err));
       });
+
 
       usernameEdit.readOnly = false;
       companyNameEdit.readOnly = false;
@@ -1062,7 +1089,81 @@ document.addEventListener("DOMContentLoaded", function () {
     isEditing = !isEditing;
   });
 
+
+  //CHANGE PASSWORD
+  document.querySelector('#profile-change-password form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const userID = storedUser?.userID;
+    const currentPasswordInput = document.getElementById("currentPassword");
+    const newPasswordInput = document.getElementById("newPassword");
+    const renewPasswordInput = document.getElementById("renewPassword");
+
+    const currentPassword = currentPasswordInput.value;
+    const newPassword = newPasswordInput.value;
+    const renewPassword = renewPasswordInput.value;
+
+    const currentFeedback = document.getElementById("currentPasswordFeedback");
+    const newFeedback = document.getElementById("newPasswordFeedback");
+    const renewFeedback = document.getElementById("renewPasswordFeedback");
+
+    [currentPasswordInput, newPasswordInput, renewPasswordInput].forEach(input => input.classList.remove("is-invalid"));
+    [currentFeedback, newFeedback, renewFeedback].forEach(fb => fb.style.display = "none");
+
+    if (!userID) return alert("User not logged in.");
+
+    let hasError = false;
+
+    if (!newPassword) {
+      newPasswordInput.classList.add("is-invalid");
+      newFeedback.style.display = "block";
+      newFeedback.textContent = "New password is required.";
+      hasError = true;
+    }
+
+    if (newPassword !== renewPassword) {
+      renewPasswordInput.classList.add("is-invalid");
+      renewFeedback.style.display = "block";
+      renewFeedback.textContent = "Passwords do not match.";
+      hasError = true;
+    }
+
+    if (hasError) return;
+
+    try {
+      const res = await fetch('/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userID, currentPassword, newPassword })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        currentPasswordInput.value = "";
+        newPasswordInput.value = "";
+        renewPasswordInput.value = "";
+
+        // Show modal without extra function
+        document.getElementById("alertModalLabel").textContent = "Success";
+        document.getElementById("alertModalBody").textContent = data.message || "Password changed successfully.";
+        const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
+        alertModal.show();
+      } else {
+        currentPasswordInput.classList.add("is-invalid");
+        currentFeedback.style.display = "block";
+        currentFeedback.textContent = data.message || "Current password is incorrect.";
+      }
+    } catch (err) {
+      console.error("Error changing password:", err);
+      alert("Server error.");
+    }
+  });
+
+
 });
+
+
 
 
 // QUOTATION
@@ -1089,8 +1190,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   });
-
-
 
   // VIEW QUOTATION
   const purchaseOrderPreview = document.getElementById("purchaseOrderPreview");
@@ -1153,14 +1252,14 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
       }
     }
-    
+
     // approve save 
     const validIdError = document.getElementById('validIdError');
     approveSaveBtn.addEventListener("click", function () {
       if (poFileName) {
         validIdError.classList.remove('d-block');
         validIdError.classList.add('d-none');
-        
+
         const approveQuotationModal = document.getElementById('approveQuotationModal');
         const approveConfirmationModal = document.getElementById('approveConfirmationModal');
 
@@ -1192,10 +1291,10 @@ document.addEventListener("DOMContentLoaded", function () {
           }
 
           approveConfirmationModal.addEventListener('hidden.bs.modal', () => {
-              document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-              document.body.style.overflow = 'auto';
-              validIdError.classList.remove('d-block');
-              validIdError.classList.add('d-none');
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+            document.body.style.overflow = 'auto';
+            validIdError.classList.remove('d-block');
+            validIdError.classList.add('d-none');
           }, { once: true });
 
         }
@@ -1210,20 +1309,20 @@ document.addEventListener("DOMContentLoaded", function () {
     const remarks = document.getElementById('remarks');
     const noRemarksMessage = document.getElementById('noRemarks');
 
-    declineSaveBtn.addEventListener('click', function() {
-      if (remarks.value.trim() !== ""){
+    declineSaveBtn.addEventListener('click', function () {
+      if (remarks.value.trim() !== "") {
         noRemarksMessage.classList.remove('d-block');
         noRemarksMessage.classList.add('d-none');
 
         if (declineQuotationModal) {
           declineBtn.textContent = 'Declined';
           approveBtn.style.display = 'none';
-  
+
           const declineModal = bootstrap.Modal.getInstance(declineQuotationModal);
           if (declineModal) {
             declineModal.hide();
           }
-  
+
           declineQuotationModal.addEventListener('hidden.bs.modal', () => {
             document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
             document.body.style.overflow = 'auto';
@@ -1233,26 +1332,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
           }, { once: true });
           declineBtn.disabled = true;
-          
-        } else if (declineTableModal){
+
+        } else if (declineTableModal) {
           if (selectedRow) {
             const remarksCell = selectedRow.querySelector('.remarks-cell');
             if (remarksCell) {
-                remarksCell.textContent = 'Declined';
+              remarksCell.textContent = 'Declined';
             }
           }
-  
+
           const declineModal = bootstrap.Modal.getInstance(declineTableModal);
           if (declineModal) {
             declineModal.hide();
           }
-  
-          declineModal.addEventListener('hidden.bs.modal', () => {
-              document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-              document.body.style.overflow = 'auto';
 
-              noRemarksMessage.classList.remove('d-block');
-              noRemarksMessage.classList.add('d-none');
+          declineModal.addEventListener('hidden.bs.modal', () => {
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+            document.body.style.overflow = 'auto';
+
+            noRemarksMessage.classList.remove('d-block');
+            noRemarksMessage.classList.add('d-none');
           }, { once: true });
         }
 
@@ -1318,9 +1417,9 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-// RFQ
+// REQUEST FOR QUOTATION
 // T&C textarea
-const quill = new Quill('#editor', {
+const quill = new Quill('#conditions', {
   modules: {
     toolbar: [
       ['bold', 'italic'],
@@ -1332,7 +1431,7 @@ const quill = new Quill('#editor', {
 });
 
 // note textares
-const quill2 = new Quill('#editor2', {
+const quill2 = new Quill('#note', {
   modules: {
     toolbar: [
       ['bold', 'italic'],
@@ -1681,7 +1780,7 @@ const emptyCanvas = document.getElementById('emptyCanvas');
 // submit
 submitButton.addEventListener('click', () => {
 
-  if (isCanvasBlank(canvas)){
+  if (isCanvasBlank(canvas)) {
     emptyCanvas.classList.remove('d-none');
     emptyCanvas.classList.add('d-block');
   } else {
@@ -1692,34 +1791,34 @@ submitButton.addEventListener('click', () => {
     const imgElement = document.createElement('img');
     imgElement.src = imageURL;
     imgElement.style.display = 'block';
-  
+
     const signatureModalElement = document.getElementById('signaturePadModal');
     const signatureModal = bootstrap.Modal.getInstance(signatureModalElement);
-  
+
     if (signatureModal) {
       signatureModal.hide();
     }
-  
+
     signatureModalElement.addEventListener('hidden.bs.modal', () => {
       document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
       document.body.style.overflow = 'auto';
-  
+
       emptyCanvas.classList.remove('d-block');
       emptyCanvas.classList.add('d-none');
 
       canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
     }, { once: true });
-  
+
     // preview image 
     const previewArea = document.getElementById('signature-preview');
     const uploadSignBtn = document.getElementById('uploadSignBtn');
     const signPadBtn = document.getElementById('signPadBtn');
     const previewContainer = document.getElementById('previewContainer');
-  
+
     uploadSignBtn.style.display = 'none';
     signPadBtn.style.display = 'none';
     previewContainer.style.display = 'block';
-  
+
     previewArea.innerHTML = '';
     previewArea.appendChild(imgElement);
   }
@@ -1760,9 +1859,66 @@ document.getElementById('signPadBtn').addEventListener('click', () => {
 
 // save/send form
 document.getElementById('sendBtn').addEventListener('click', () => {
-  window.location.href = "/request-quotation";
+  handleRFQSubmit("Pending");
 });
 
 document.getElementById('saveDraftBtn').addEventListener('click', () => {
-  window.location.href = "/request-quotation";
+  handleRFQSubmit("Draft");
 });
+
+function handleRFQSubmit(status) {
+  const form = document.getElementById('rfqForm');
+  const formData = new FormData(form);
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const userID = storedUser?.userID;
+
+  // Sample: Add data manually if not already in inputs
+  formData.append("requestStatus", status);
+  formData.append("userID", userID); // assuming you store it here
+  formData.append("RFQNo", document.getElementById("rfqNo")?.value?.trim() || "");
+  formData.append("requestDate", document.getElementById("rfqDate")?.value?.trim() || "");
+  formData.append("validity", document.getElementById("validUntil")?.value?.trim() || "");
+  formData.append("totalBudget", document.getElementById("abc")?.value?.trim() || "");
+
+
+  const details = {
+    conditions: quill.getText(),
+    note: quill2.getText(),
+    signaturePath: "",
+    reprename: document.getElementById('repreName')?.value || ""
+  };
+  formData.append("details", JSON.stringify(details));
+
+  const items = [];
+  document.querySelectorAll('#itemTable tbody tr').forEach((row) => {
+    const item = {
+      itemno: row.querySelector('.itemno').value,
+      itemname: row.querySelector('.itemname').value,
+      description: row.querySelector('.description').value,
+      unit: row.querySelector('.unit').value || "",
+      quantity: row.querySelector('.quantity').value,
+      specialrequest: row.querySelector('.specialrequest').value
+    };
+    items.push(item);
+  });
+  formData.append("items", JSON.stringify(items));
+
+  const attachmentInput = document.getElementById('fileUpload');
+  if (attachmentInput.files.length > 0) {
+    formData.append("attachment", attachmentInput.files[0]);
+  }
+
+  fetch("/save-rfq", {
+    method: "POST",
+    body: formData
+  }).then(res => res.json())
+    .then(data => {
+      alert(data.message);
+      if (data.success) {
+        window.location.href = "/request-quotation";
+      }
+    }).catch(err => {
+      console.error("RFQ save error:", err.message || err);
+      alert("An error occurred.");
+    });
+}

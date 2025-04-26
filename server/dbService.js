@@ -160,8 +160,6 @@ function updateRepNames(userID, repIndex, repData, callback) {
     });
 }
 
-
-
 function addSubRepresentative(userID, rep, callback) {
     const getQuery = 'SELECT repNames FROM users WHERE userID = ?';
     connection.query(getQuery, [userID], (err, result) => {
@@ -239,7 +237,7 @@ function deleteSubRepresentative(userID, repIndex, callback) {
 }
 
 function updateUserProfile(data) {
-    const {userID, username, companyName, companyAddress, email, phoneNumber, profilepic} = data;
+    const { userID, username, companyName, companyAddress, email, phoneNumber, profilepic } = data;
 
     let sql = `UPDATE users SET username = ?, companyName = ?, companyAddress = ?, companyEmail = ?, repNum = ?`;
 
@@ -264,9 +262,81 @@ function updateUserProfile(data) {
     });
 }
 
+async function deleteUserProfilePic(userID) {
+    const sql = `UPDATE users SET profilepic = NULL WHERE userID = ?`;
+    return new Promise((resolve, reject) => {
+        connection.query(sql, [userID], (err, result) => {
+            if (err) {
+                console.error('Error deleting profile pic in DB:', err);
+                reject({ success: false, error: err });
+            } else {
+                resolve({ success: result.affectedRows > 0 });
+            }
+        });
+    });
+}
+
+function updateUserPassword(userID, currentPassword, newHashedPassword) {
+    return new Promise((resolve, reject) => {
+
+        const sqlGetUser = "SELECT * FROM users WHERE userID = ?";
+        connection.query(sqlGetUser, [userID], (err, results) => {
+            if (err) return reject(err);
+            if (results.length === 0) {
+                return resolve({ success: false, message: "User not found." });
+            }
+            const user = results[0];
+            bcrypt.compare(currentPassword, user.password, (compareErr, isMatch) => {
+                if (compareErr) return reject(compareErr);
+                if (!isMatch) {
+                    return resolve({ success: false, message: "Current password is incorrect." });
+                }
+                const sqlUpdate = "UPDATE users SET password = ? WHERE userID = ?";
+                connection.query(sqlUpdate, [newHashedPassword, userID], (updateErr, updateResult) => {
+                    if (updateErr) return reject(updateErr);
+                    resolve({ success: updateResult.affectedRows > 0 });
+                });
+            });
+        });
+    });
+}
+
+
+function saveRFQRequest(data) {
+    return new Promise((resolve, reject) => {
+        const query = `
+        INSERT INTO REQUESTS 
+        (requestID, userID, RFQNo, requestDate, validity, totalBudget, details, items, requestStatus, attachment)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+        const values = [
+            data.requestID,
+            data.userID,
+            data.RFQNo,
+            data.requestDate,
+            data.validity,
+            data.totalBudget,
+            data.details,
+            data.items,
+            data.requestStatus,
+            data.attachment
+        ];
+
+        connection.query(query, values, (err, result) => {
+            if (err) {
+                return reject(err);
+            }
+            resolve(result);
+        });
+    });
+}
+
+
 
 
 module.exports = {
     registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames,
-    addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateUserProfile
+    addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateUserProfile, deleteUserProfilePic,
+    updateUserPassword, saveRFQRequest
 };

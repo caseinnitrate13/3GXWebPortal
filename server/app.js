@@ -193,6 +193,69 @@ app.get('/request-for-quotation-form', (req, res) => {
     res.send(template.replace('{{content}}', requestForm));
 });
 
+app.post('/save-rfq', async (req, res, next) => {
+    try {
+        console.log("📥 [1] Received RFQ POST request.");
+        res.locals.requestID = await nanoid();
+        next();
+    } catch (err) {
+        console.error("❌ [Error generating requestID]:", err);
+        return res.status(500).json({ success: false, message: "Server error" });
+    }
+}, upload.single('attachment'), async (req, res) => {
+    const requestID = res.locals.requestID;
+    const userID = req.body.userID;
+
+    console.log("🆔 [2] Generated requestID:", requestID);
+    console.log("👤 [3] UserID:", userID);
+
+    const basePath = path.join(__dirname, "uploads", "requests", userID, requestID);
+    fs.mkdirSync(basePath, { recursive: true });
+    console.log("📁 [4] Upload path created:", basePath);
+
+    let attachmentPath = null;
+
+    try {
+        if (req.file) {
+            const filename = `${Date.now()}-${req.file.originalname}`;
+            const filePath = path.join(basePath, filename);
+            await fs.promises.writeFile(filePath, req.file.buffer);
+            attachmentPath = `uploads/requests/${userID}/${requestID}/${filename}`;
+            console.log("📎 [5] File uploaded:", attachmentPath);
+        } else {
+            console.log("📎 [5] No file uploaded.");
+        }
+
+        const rfqData = {
+            requestID,
+            userID,
+            RFQNo: req.body.RFQNo,
+            requestDate: req.body.requestDate,
+            validity: req.body.validity,
+            totalBudget: req.body.totalBudget,
+            details: JSON.stringify(JSON.parse(req.body.details)),
+            items: JSON.stringify(JSON.parse(req.body.items)),
+            requestStatus: req.body.requestStatus,
+            attachment: attachmentPath
+        };
+
+        console.log("📦 [6] RFQ Data to be saved:", rfqData);
+
+        try {
+            const result = await dbService.saveRFQRequest(rfqData);
+            console.log("✅ [7] RFQ saved successfully.");
+            res.json({ success: true, message: "Request saved successfully!" });
+        } catch (err) {
+            console.error("❌ [DB Insert error]:", err);
+            res.status(500).json({ success: false, message: "Failed to save request" });
+        }
+    } catch (error) {
+        console.error("❌ [RFQ Save error]:", error);
+        res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+});
+
+
 
 //ACCOUNT
 
@@ -359,6 +422,53 @@ app.post('/update-profile', upload.fields([
     } catch (error) {
         console.error("Profile update error:", error);
         res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+
+app.post('/delete-profile-pic', async (req, res) => {
+    const { userID } = req.body;
+
+    if (!userID) {
+        return res.status(400).json({ success: false, message: 'Missing userID' });
+    }
+
+    try {
+        const profilePicPath = path.join(__dirname, 'uploads', 'users', userID, 'profile_pic', 'profile.jpg');
+
+        if (fs.existsSync(profilePicPath)) {
+            fs.unlinkSync(profilePicPath);
+        }
+
+        const result = await dbService.deleteUserProfilePic(userID);
+
+        res.json({ success: result.success, message: 'Profile picture deleted' });
+    } catch (error) {
+        console.error('Delete profile pic error:', error);
+        res.status(500).json({ success: false, message: 'Server error deleting profile picture' });
+    }
+});
+
+app.post("/change-password", async (req, res) => {
+    const { userID, currentPassword, newPassword } = req.body;
+
+    if (!userID || !currentPassword || !newPassword) {
+        return res.status(400).json({ success: false, message: "Missing fields." });
+    }
+
+    try {
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+        const result = await dbService.updateUserPassword(userID, currentPassword, hashedNewPassword);
+
+        if (result.success) {
+            return res.json({ success: true, message: "Password updated successfully." });
+        } else {
+            return res.status(400).json({ success: false, message: result.message });
+        }
+
+    } catch (error) {
+        console.error("Error changing password:", error);
+        return res.status(500).json({ success: false, message: "Server error." });
     }
 });
 
