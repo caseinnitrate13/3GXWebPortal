@@ -10,12 +10,12 @@
 
   <div class="card mt-4">
     <div class="card-body">
-        <form class="m-4">
+        <form id="rfqForm" class="m-4">
             <div class="row ">
                 <div class="row">
                     <label for="rfqNumber" class="col-sm-2 col-form-label ">RFQ No. :</label>
                     <div class="col-sm-3">
-                        <input type="text" class="form-control-plaintext border-bottom-custom" id="rfqNumber">
+                        <input type="text" class="form-control-plaintext border-bottom-custom" id="rfqNo">
                     </div>
                </div>
                 <div class="row">
@@ -43,7 +43,7 @@
                 <p>TERMS AND CONDITIONS</p>
             </div>
 
-            <div id="editor">
+            <div id="conditions">
                 <!--terms and condition here -->
             </div>
 
@@ -89,7 +89,7 @@
                 <p>NOTE</p>
             </div>
 
-            <div id="editor2">
+            <div id="note">
                 <!--note here -->
             </div>
 
@@ -116,7 +116,7 @@
             </div>
             
             <div class="repName-container">
-                <input type="text" class="form-control-plaintext border-bottom-custom text-center" 
+                <input id="repreName" type="text" class="form-control-plaintext border-bottom-custom text-center" 
                        name="representative-name" 
                        placeholder="Enter Your Name">
                 <p class="text-center">Representative's Name</p>
@@ -196,7 +196,6 @@
         </div>
     </div>
 </div>
-
 
 
 <!-- signature pad modal -->

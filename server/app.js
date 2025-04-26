@@ -193,6 +193,69 @@ app.get('/request-for-quotation-form', (req, res) => {
     res.send(template.replace('{{content}}', requestForm));
 });
 
+app.post('/save-rfq', async (req, res, next) => {
+    try {
+        console.log("📥 [1] Received RFQ POST request.");
+        res.locals.requestID = await nanoid();
+        next();
+    } catch (err) {
+        console.error("❌ [Error generating requestID]:", err);
+        return res.status(500).json({ success: false, message: "Server error" });
+    }
+}, upload.single('attachment'), async (req, res) => {
+    const requestID = res.locals.requestID;
+    const userID = req.body.userID;
+
+    console.log("🆔 [2] Generated requestID:", requestID);
+    console.log("👤 [3] UserID:", userID);
+
+    const basePath = path.join(__dirname, "uploads", "requests", userID, requestID);
+    fs.mkdirSync(basePath, { recursive: true });
+    console.log("📁 [4] Upload path created:", basePath);
+
+    let attachmentPath = null;
+
+    try {
+        if (req.file) {
+            const filename = `${Date.now()}-${req.file.originalname}`;
+            const filePath = path.join(basePath, filename);
+            await fs.promises.writeFile(filePath, req.file.buffer);
+            attachmentPath = `uploads/requests/${userID}/${requestID}/${filename}`;
+            console.log("📎 [5] File uploaded:", attachmentPath);
+        } else {
+            console.log("📎 [5] No file uploaded.");
+        }
+
+        const rfqData = {
+            requestID,
+            userID,
+            RFQNo: req.body.RFQNo,
+            requestDate: req.body.requestDate,
+            validity: req.body.validity,
+            totalBudget: req.body.totalBudget,
+            details: JSON.stringify(JSON.parse(req.body.details)),
+            items: JSON.stringify(JSON.parse(req.body.items)),
+            requestStatus: req.body.requestStatus,
+            attachment: attachmentPath
+        };
+
+        console.log("📦 [6] RFQ Data to be saved:", rfqData);
+
+        try {
+            const result = await dbService.saveRFQRequest(rfqData);
+            console.log("✅ [7] RFQ saved successfully.");
+            res.json({ success: true, message: "Request saved successfully!" });
+        } catch (err) {
+            console.error("❌ [DB Insert error]:", err);
+            res.status(500).json({ success: false, message: "Failed to save request" });
+        }
+    } catch (error) {
+        console.error("❌ [RFQ Save error]:", error);
+        res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+});
+
+
 
 //ACCOUNT
 

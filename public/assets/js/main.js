@@ -1164,6 +1164,8 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
+
+
 // QUOTATION
 document.addEventListener("DOMContentLoaded", function () {
   // card/table dropdown
@@ -1188,8 +1190,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   });
-
-
 
   // VIEW QUOTATION
   const purchaseOrderPreview = document.getElementById("purchaseOrderPreview");
@@ -1417,9 +1417,9 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-// RFQ
+// REQUEST FOR QUOTATION
 // T&C textarea
-const quill = new Quill('#editor', {
+const quill = new Quill('#conditions', {
   modules: {
     toolbar: [
       ['bold', 'italic'],
@@ -1431,7 +1431,7 @@ const quill = new Quill('#editor', {
 });
 
 // note textares
-const quill2 = new Quill('#editor2', {
+const quill2 = new Quill('#note', {
   modules: {
     toolbar: [
       ['bold', 'italic'],
@@ -1859,9 +1859,66 @@ document.getElementById('signPadBtn').addEventListener('click', () => {
 
 // save/send form
 document.getElementById('sendBtn').addEventListener('click', () => {
-  window.location.href = "/request-quotation";
+  handleRFQSubmit("Pending");
 });
 
 document.getElementById('saveDraftBtn').addEventListener('click', () => {
-  window.location.href = "/request-quotation";
+  handleRFQSubmit("Draft");
 });
+
+function handleRFQSubmit(status) {
+  const form = document.getElementById('rfqForm');
+  const formData = new FormData(form);
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const userID = storedUser?.userID;
+
+  // Sample: Add data manually if not already in inputs
+  formData.append("requestStatus", status);
+  formData.append("userID", userID); // assuming you store it here
+  formData.append("RFQNo", document.getElementById("rfqNo")?.value?.trim() || "");
+  formData.append("requestDate", document.getElementById("rfqDate")?.value?.trim() || "");
+  formData.append("validity", document.getElementById("validUntil")?.value?.trim() || "");
+  formData.append("totalBudget", document.getElementById("abc")?.value?.trim() || "");
+
+
+  const details = {
+    conditions: quill.getText(),
+    note: quill2.getText(),
+    signaturePath: "",
+    reprename: document.getElementById('repreName')?.value || ""
+  };
+  formData.append("details", JSON.stringify(details));
+
+  const items = [];
+  document.querySelectorAll('#itemTable tbody tr').forEach((row) => {
+    const item = {
+      itemno: row.querySelector('.itemno').value,
+      itemname: row.querySelector('.itemname').value,
+      description: row.querySelector('.description').value,
+      unit: row.querySelector('.unit').value || "",
+      quantity: row.querySelector('.quantity').value,
+      specialrequest: row.querySelector('.specialrequest').value
+    };
+    items.push(item);
+  });
+  formData.append("items", JSON.stringify(items));
+
+  const attachmentInput = document.getElementById('fileUpload');
+  if (attachmentInput.files.length > 0) {
+    formData.append("attachment", attachmentInput.files[0]);
+  }
+
+  fetch("/save-rfq", {
+    method: "POST",
+    body: formData
+  }).then(res => res.json())
+    .then(data => {
+      alert(data.message);
+      if (data.success) {
+        window.location.href = "/request-quotation";
+      }
+    }).catch(err => {
+      console.error("RFQ save error:", err.message || err);
+      alert("An error occurred.");
+    });
+}

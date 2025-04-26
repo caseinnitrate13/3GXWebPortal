@@ -160,8 +160,6 @@ function updateRepNames(userID, repIndex, repData, callback) {
     });
 }
 
-
-
 function addSubRepresentative(userID, rep, callback) {
     const getQuery = 'SELECT repNames FROM users WHERE userID = ?';
     connection.query(getQuery, [userID], (err, result) => {
@@ -304,9 +302,41 @@ function updateUserPassword(userID, currentPassword, newHashedPassword) {
 }
 
 
+function saveRFQRequest(data) {
+    return new Promise((resolve, reject) => {
+        const query = `
+        INSERT INTO REQUESTS 
+        (requestID, userID, RFQNo, requestDate, validity, totalBudget, details, items, requestStatus, attachment)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+        const values = [
+            data.requestID,
+            data.userID,
+            data.RFQNo,
+            data.requestDate,
+            data.validity,
+            data.totalBudget,
+            data.details,
+            data.items,
+            data.requestStatus,
+            data.attachment
+        ];
+
+        connection.query(query, values, (err, result) => {
+            if (err) {
+                return reject(err);
+            }
+            resolve(result);
+        });
+    });
+}
+
+
+
 
 module.exports = {
     registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames,
     addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateUserProfile, deleteUserProfilePic,
-    updateUserPassword
+    updateUserPassword, saveRFQRequest
 };
