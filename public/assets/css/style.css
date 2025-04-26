@@ -1319,6 +1319,13 @@ h6 {
   border-radius: 10px;
 }
 
+.table-responsive-scroll {
+  max-height: 400px;           /* Adjust as needed */
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+
 .table thead {
 border-top-left-radius: 10px;  
 border-top-right-radius: 10px; 
