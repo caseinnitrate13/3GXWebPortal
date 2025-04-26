@@ -1455,7 +1455,6 @@ $(document).ready(function () {
             <td><input type="text" class="form-control-plaintext border-bottom-custom" name="unit"></td>
             <td><input type="number" class="form-control-plaintext border-bottom-custom" name="quantity"></td>
             <td><input type="text" class="form-control-plaintext border-bottom-custom" name="special_request"></td>
-            <td><input type="text" class="form-control-plaintext border-bottom-custom" name="unit_price"></td>
             <td>
                 <button type="button" class="btn btn-danger btn-sm remove-row"><i class="bi bi-trash3"></i></button>
             </td>
