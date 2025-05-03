@@ -195,35 +195,45 @@ app.get('/request-for-quotation-form', (req, res) => {
 
 app.post('/save-rfq', async (req, res, next) => {
     try {
-        console.log("📥 [1] Received RFQ POST request.");
         res.locals.requestID = await nanoid();
         next();
     } catch (err) {
-        console.error("❌ [Error generating requestID]:", err);
         return res.status(500).json({ success: false, message: "Server error" });
     }
-}, upload.single('attachment'), async (req, res) => {
+}, upload.fields([
+    { name: 'attachment', maxCount: 1 },
+    { name: 'signature', maxCount: 1 }
+]), async (req, res) => {
     const requestID = res.locals.requestID;
     const userID = req.body.userID;
-
-    console.log("🆔 [2] Generated requestID:", requestID);
-    console.log("👤 [3] UserID:", userID);
-
     const basePath = path.join(__dirname, "uploads", "requests", userID, requestID);
     fs.mkdirSync(basePath, { recursive: true });
     console.log("📁 [4] Upload path created:", basePath);
 
     let attachmentPath = null;
+    let signaturePath = null;
 
     try {
-        if (req.file) {
-            const filename = `${Date.now()}-${req.file.originalname}`;
+        // File attachment
+        if (req.files?.attachment?.[0]) {
+            const file = req.files.attachment[0];
+            const filename = `${Date.now()}-${file.originalname}`;
             const filePath = path.join(basePath, filename);
-            await fs.promises.writeFile(filePath, req.file.buffer);
+            await fs.promises.writeFile(filePath, file.buffer);
             attachmentPath = `uploads/requests/${userID}/${requestID}/${filename}`;
-            console.log("📎 [5] File uploaded:", attachmentPath);
         } else {
-            console.log("📎 [5] No file uploaded.");
+            console.log("No attachment uploaded.");
+        }
+
+        // Signature
+        if (req.files?.signature?.[0]) {
+            const sig = req.files.signature[0];
+            const sigFilename = `clientsignature_${Date.now()}.png`;
+            const sigPath = path.join(basePath, sigFilename);
+            await fs.promises.writeFile(sigPath, sig.buffer);
+            signaturePath = `uploads/requests/${userID}/${requestID}/${sigFilename}`;
+        } else {
+            console.log("No signature uploaded.");
         }
 
         const rfqData = {
@@ -233,24 +243,27 @@ app.post('/save-rfq', async (req, res, next) => {
             requestDate: req.body.requestDate,
             validity: req.body.validity,
             totalBudget: req.body.totalBudget,
-            details: JSON.stringify(JSON.parse(req.body.details)),
+            details: JSON.stringify({
+                ...JSON.parse(req.body.details),
+                signaturePath: signaturePath || ""
+            }),
             items: JSON.stringify(JSON.parse(req.body.items)),
             requestStatus: req.body.requestStatus,
             attachment: attachmentPath
         };
 
-        console.log("📦 [6] RFQ Data to be saved:", rfqData);
+        console.log("RFQ Data to be saved:", rfqData);
 
         try {
             const result = await dbService.saveRFQRequest(rfqData);
-            console.log("✅ [7] RFQ saved successfully.");
+            console.log("RFQ saved successfully.");
             res.json({ success: true, message: "Request saved successfully!" });
         } catch (err) {
-            console.error("❌ [DB Insert error]:", err);
+            console.error("[DB Insert error]:", err);
             res.status(500).json({ success: false, message: "Failed to save request" });
         }
     } catch (error) {
-        console.error("❌ [RFQ Save error]:", error);
+        console.error("[RFQ Save error]:", error);
         res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 });

@@ -1474,6 +1474,7 @@ $(document).ready(function () {
 // Add Attachment
 let uploadedFileName = null;
 let fileSaved = false;
+let uploadedFile = null;
 document.addEventListener("DOMContentLoaded", function () {
   const fileUploadPreview = document.getElementById("fileUploadPreview");
   const fileUpload = document.getElementById("fileUpload");
@@ -1514,6 +1515,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Function to handle the file display
   function handleFile(file) {
     if (file) {
+      uploadedFile = file;
       uploadedFileName = file.name;
       fileUploadPreview.innerHTML = `
               <div class="file-preview">
@@ -1582,36 +1584,51 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Add file signature
 // Ensure clicking the attach button always reopens the file chooser
+let uploadedSignatureFile = null;
 let uploadedImage = null;
 let imageSaved = false;
-document.addEventListener("DOMContentLoaded", function () {
-  attachBtn.addEventListener("click", function () {
-    const signatureModalElement = document.getElementById('attachmentModal')
-    // Remove lingering backdrops (if any)
-    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-    const signatureModal = new bootstrap.Modal(signatureModalElement);
-    signatureModal.show();
-  });
 
-  // upload signature
+document.addEventListener("DOMContentLoaded", function () {
+  const attachBtn = document.getElementById("attachBtn");
+  const signatureModalElement = document.getElementById('signatureModal');
+  const signatureModal = new bootstrap.Modal(signatureModalElement);
   const uploadSignPreview = document.getElementById("uploadSignPreview");
   const fileInput = document.getElementById("fileInput");
   const uploadImgBtn = document.getElementById("uploadImgBtn");
   const saveButton = document.getElementById("saveButton");
   const signaturePreview = document.getElementById("signature-preview");
+  const noSignatureUploaded = document.getElementById('noSignatureUploaded');
+  const uploadSignBtn = document.getElementById('uploadSignBtn');
+  const signPadBtn = document.getElementById('signPadBtn');
+  const previewContainer = document.getElementById('previewContainer');
 
+  // Open modal
+  uploadSignBtn.addEventListener("click", function () {
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+    signatureModal.show();
+  });
+
+  // Trigger file input
   uploadImgBtn.addEventListener("click", function () {
     fileInput.click();
   });
 
   // Handle file selection
   fileInput.addEventListener("change", function (event) {
-    if (event.target.files.length > 0) {
-      handleFile(event.target.files[0]);
+    const file = event.target.files[0];
+    if (file && file.type.startsWith("image/")) {
+      uploadedSignatureFile = file;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        uploadedImage = e.target.result;
+        uploadSignPreview.innerHTML = `<img src="${uploadedImage}" class="img-fluid rounded" style="max-height: 200px;">`;
+      };
+      reader.readAsDataURL(file);
+      noSignatureUploaded.classList.add("d-none");
     }
   });
 
-  // Handle drag & drop
+  // Drag & drop support
   uploadSignPreview.addEventListener("dragover", function (event) {
     event.preventDefault();
     uploadSignPreview.classList.add("drag-over");
@@ -1624,77 +1641,58 @@ document.addEventListener("DOMContentLoaded", function () {
   uploadSignPreview.addEventListener("drop", function (event) {
     event.preventDefault();
     uploadSignPreview.classList.remove("drag-over");
-    if (event.dataTransfer.files.length > 0) {
-      handleFile(event.dataTransfer.files[0]);
-    }
-  });
-
-  // Handle image display
-  function handleFile(file) {
+    const file = event.dataTransfer.files[0];
     if (file && file.type.startsWith("image/")) {
+      uploadedSignatureFile = file;
       const reader = new FileReader();
       reader.onload = function (e) {
         uploadedImage = e.target.result;
-        uploadSignPreview.innerHTML = `<img src="${uploadedImage}" class="img-fluid">`;
+        uploadSignPreview.innerHTML = `<img src="${uploadedImage}" class="img-fluid rounded" style="max-height: 200px;">`;
       };
       reader.readAsDataURL(file);
+      noSignatureUploaded.classList.add("d-none");
     }
-  }
-
-  // save uploaded image to previewContainer
-  const noSignatureUploaded = document.getElementById('noSignatureUploaded');
-  saveButton.addEventListener("click", function () {
-    if (uploadedImage) {
-      imageSaved = true;
-      noSignatureUploaded.classList.remove('d-block');
-      noSignatureUploaded.classList.add('d-none');
-
-      const signatureModalElement = document.getElementById('signatureModal');
-      const signatureModal = bootstrap.Modal.getInstance(signatureModalElement);
-
-      if (signatureModal) {
-        signatureModal.hide();
-      }
-
-      signatureModalElement.addEventListener('hidden.bs.modal', () => {
-        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-        document.body.style.overflow = 'auto';
-
-        noSignatureUploaded.classList.remove('d-block');
-        noSignatureUploaded.classList.add('d-none');
-      }, { once: true });
-
-      const uploadSignBtn = document.getElementById('uploadSignBtn');
-      const previewContainer = document.getElementById('previewContainer');
-
-      uploadSignBtn.style.display = 'none';
-      signPadBtn.style.display = 'none';
-
-      signaturePreview.innerHTML = `<img src="${uploadedImage}" class="img-fluid">`;
-      previewContainer.style.display = "block";
-      document.getElementById("signatureModal").classList.remove("show");
-      document.body.classList.remove("modal-open");
-    } else {
-      noSignatureUploaded.classList.remove('d-none');
-      noSignatureUploaded.classList.add('d-block');
-    }
-
   });
 
-  // Reset modal content when closed
-  document.getElementById("signatureModal").addEventListener("hidden.bs.modal", function () {
-    if (!fileSaved) {
+  // Save image and close modal
+  saveButton.addEventListener("click", function () {
+    if (!uploadedImage || !uploadedSignatureFile) {
+      noSignatureUploaded.classList.remove('d-none');
+      return;
+    }
+
+    imageSaved = true;
+    noSignatureUploaded.classList.add('d-none');
+
+    signatureModal.hide();
+
+    signatureModalElement.addEventListener('hidden.bs.modal', () => {
+      document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+      document.body.style.overflow = 'auto';
+    }, { once: true });
+
+    uploadSignBtn.style.display = 'none';
+    if (signPadBtn) signPadBtn.style.display = 'none';
+
+    signaturePreview.innerHTML = `<img src="${uploadedImage}" class="img-fluid">`;
+    previewContainer.style.display = "block";
+    document.body.classList.remove("modal-open");
+  });
+
+  // Reset modal on close
+  signatureModalElement.addEventListener("hidden.bs.modal", function () {
+    if (!imageSaved) {
+      uploadedSignatureFile = null;
       uploadedImage = null;
     }
     imageSaved = false;
 
-    document.body.style.overflow = "auto";
-    document.body.style.paddingRight = "0px";
     uploadSignPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
     fileInput.value = "";
-
     noSignatureUploaded.classList.remove('d-block');
     noSignatureUploaded.classList.add('d-none');
+    document.body.style.overflow = "auto";
+    document.body.style.paddingRight = "0px";
   });
 
 
@@ -1869,7 +1867,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-
+  //Send to Supplier
   const sendSupplierBtn = document.getElementById('sendSupplierBtn');
   // const canvas = document.getElementById('signature-pad');
   // const ctx = canvas.getContext('2d');
@@ -1952,14 +1950,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     const userID = storedUser?.userID;
 
-    // Sample: Add data manually if not already in inputs
     formData.append("requestStatus", status);
-    formData.append("userID", userID); // assuming you store it here
+    formData.append("userID", userID);
     formData.append("RFQNo", document.getElementById("rfqNo")?.value?.trim() || "");
     formData.append("requestDate", document.getElementById("rfqDate")?.value?.trim() || "");
     formData.append("validity", document.getElementById("validUntil")?.value?.trim() || "");
     formData.append("totalBudget", document.getElementById("abc")?.value?.trim() || "");
-
 
     const details = {
       conditions: quill.getText(),
@@ -1970,23 +1966,41 @@ document.addEventListener("DOMContentLoaded", function () {
     formData.append("details", JSON.stringify(details));
 
     const items = [];
-    document.querySelectorAll('#itemTable tbody tr').forEach((row) => {
+    document.querySelectorAll('#tableBody tr').forEach((row, index) => {
       const item = {
-        itemname: row.querySelector('.item_name').value,
-        description: row.querySelector('.description').value,
-        unit: row.querySelector('.unit').value || "",
-        quantity: row.querySelector('.quantity').value,
-        specialrequest: row.querySelector('.specialrequest').value
+        itemno: `ITEM${(index + 1).toString().padStart(3, '0')}`,
+        itemname: row.querySelector('input[name="item_name"]')?.value || "",
+        description: row.querySelector('input[name="description"]')?.value || "",
+        unit: row.querySelector('input[name="unit"]')?.value || "",
+        quantity: row.querySelector('input[name="quantity"]')?.value || "",
+        specialrequest: row.querySelector('input[name="special_request"]')?.value || "",
+        price: ""
       };
       items.push(item);
     });
     formData.append("items", JSON.stringify(items));
 
-    const attachmentInput = uploadedFileName;
-    if (attachmentInput.files.length > 0) {
-      formData.append("attachment", attachmentInput.files[0]);
+    if (uploadedFile) {
+      formData.append("attachment", uploadedFile);
     }
+    const canvas = document.getElementById('signature-pad');
+    if (!uploadedSignatureFile && canvas && !isCanvasBlank(canvas)) {
+      canvas.toBlob(function (blob) {
+        if (blob) {
+          const filename = `signature_${Date.now()}.png`;
+          formData.append("signature", blob, filename);
+        }
+        submitRFQForm(formData);
+      }, 'image/png');
+    } else {
+      if (uploadedSignatureFile) {
+        formData.append("signature", uploadedSignatureFile);
+      }
+      submitRFQForm(formData);
+    }
+  }
 
+  function submitRFQForm(formData) {
     fetch("/save-rfq", {
       method: "POST",
       body: formData
