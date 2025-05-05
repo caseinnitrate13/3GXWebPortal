@@ -22,6 +22,26 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.get('/get-request', (req, res) => {
+    const requestID = req.query.id; // changed from rfq to id
+    console.log("Backend received requestID:", requestID); // Log received requestID
+
+    dbService.getRequestByID(requestID)
+        .then(data => {
+            if (data.length > 0) {
+                res.json({ success: true, request: data[0] });
+            } else {
+                res.status(404).json({ success: false, message: "Request not found" });
+            }
+        })
+        .catch(err => {
+            console.error("Database error:", err);
+            res.status(500).json({ success: false, message: "Server error" });
+        });
+});
+
+
+
 // Serve static files from the "public" folder
 app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -208,7 +228,6 @@ app.post('/save-rfq', async (req, res, next) => {
     const userID = req.body.userID;
     const basePath = path.join(__dirname, "uploads", "requests", userID, requestID);
     fs.mkdirSync(basePath, { recursive: true });
-    console.log("📁 [4] Upload path created:", basePath);
 
     let attachmentPath = null;
     let signaturePath = null;
@@ -268,6 +287,42 @@ app.post('/save-rfq', async (req, res, next) => {
     }
 });
 
+app.get('/request-counts', (req, res) => {
+    const { userID } = req.query;
+    console.log("📥 Received /request-counts request for userID:", userID); // ✅ Debug log
+
+    if (!userID) {
+        console.log("❌ Missing userID in request");
+        return res.status(400).json({ success: false, message: "Missing user ID" });
+    }
+
+    dbService.getRequestCountsByUser(userID, (err, counts) => {
+        if (err) {
+            console.error("❌ Database error:", err); // ✅ Log any SQL errors
+            return res.status(500).json({ success: false, message: err });
+        }
+
+        console.log("✅ Counts fetched:", counts); // ✅ Show result
+        res.json({ success: true, counts });
+    });
+});
+
+app.get('/requests-by-status', (req, res) => {
+    const { userID, status } = req.query;
+
+    if (!userID || !status) {
+        console.log("❌ Missing userID or status in request");
+        return res.status(400).json({ success: false, message: "Missing user ID or status" });
+    }
+
+    dbService.getRequestsByStatus(userID, status, (err, requests) => {
+        if (err) {
+            return res.status(500).json({ success: false, message: err });
+        }
+
+        res.json({ success: true, requests });
+    });
+});
 
 
 //ACCOUNT

@@ -1362,8 +1362,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     });
 
-
-
     // Reset modal content when closed
     const approveQuotationModal = document.getElementById("approveQuotationModal");
     if (approveQuotationModal) {
@@ -1416,8 +1414,283 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const userID = storedUser?.userID;
+  if (!userID) {
+    console.error("User ID not found");
+    return;
+  }
 
-// REQUEST FOR QUOTATION
+  // Fetch and populate counts
+  fetch(`/request-counts?userID=${userID}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) {
+        throw new Error(data.message);
+      }
+
+      const { Draft = 0, Pending = 0 } = data.counts;
+
+      document.querySelector('#draftCard .card-body').innerHTML = `
+        <i class="bi bi-pencil-square fs-1"></i>
+        <h2 class="w800">DRAFTS</h2> 
+        ${Draft}
+      `;
+
+      document.querySelector('#pendingCard .card-body').innerHTML = `
+        <i class="bi bi-hourglass-split fs-1"></i>
+        <h2 class="w800">PENDINGS</h2> 
+        ${Pending}
+      `;
+      
+      fetchRequestsForStatus(userID, 'Draft');
+      fetchRequestsForStatus(userID, 'Pending');
+    })
+    .catch(err => {
+      console.error("Failed to load request counts:", err.message || err);
+    });
+
+
+  $('#draftCardModal').on('show.bs.modal', function () {
+    fetchRequestsForStatus(userID, 'Draft');
+  });
+
+  $('#pendingCardModal').on('show.bs.modal', function () {
+    fetchRequestsForStatus(userID, 'Pending');
+  });
+
+  function fetchRequestsForStatus(userID, status) {
+    fetch(`/requests-by-status?userID=${userID}&status=${status}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success) {
+          throw new Error(data.message);
+        }
+
+        populateModalTable(status, data.requests);
+      })
+      .catch(err => {
+        console.error(`Failed to load ${status} requests:`, err.message || err);
+      });
+  }
+
+  function populateModalTable(status, requests) {
+    const modalTableBody = document.querySelector(
+      status === 'Draft' ? '#draftModalTable tbody' : '#pendingModalTable tbody'
+    );
+    const mainTableBody = document.querySelector(
+      status === 'Draft' ? '#draftTable tbody' : '#pendingTable tbody'
+    );
+
+    modalTableBody.innerHTML = '';
+    mainTableBody.innerHTML = '';
+
+    requests.forEach(request => {
+      const actionHTML =
+        status === 'Draft'
+          ? `
+            <div class="d-flex justify-content-center align-items-center gap-3 h-100">
+              <div data-bs-toggle="modal" data-bs-target="#deleteRowModal">
+                <i id="deleteReq" class="bi bi-trash text-danger remove-row pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete"></i>
+              </div>
+              <div>
+                <a href="/request-for-quotation-form">
+                  <i id="editReq" class="bi bi-pencil-square text-primary pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"></i>
+                </a>
+              </div>
+            </div>`
+          : `
+            <a href="/request-for-quotation-form?mode=view&requestID=${request.requestID}">
+            <i class="bi bi-eye me-1 text-primary pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="View"></i>
+          </a>`;
+
+      const rowHTML = `
+        <tr>
+          <td>${request.RFQNo}</td>
+          <td>${request.totalBudget}</td>
+          <td>${isNaN(new Date(request.requestDate))
+          ? ''
+          : new Date(request.requestDate).toLocaleDateString()
+        }</td>
+          <td>${actionHTML}</td>
+        </tr>`;
+
+      modalTableBody.insertAdjacentHTML('beforeend', rowHTML);
+      mainTableBody.insertAdjacentHTML('beforeend', rowHTML);
+    });
+  }
+});
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  const mode = params.get("mode");
+  const requestID = params.get("requestID");
+
+  if (mode === 'view' && requestID) {
+    loadRequestForQuotation(requestID, mode);
+  }
+
+  // You can also add:
+  // if (mode === 'add') {
+  //   // leave the form blank (default behavior)
+  // }
+});
+
+function loadRequestForQuotation(requestID, mode) {
+  fetch(`/get-request?id=${encodeURIComponent(requestID)}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) throw new Error(data.message);
+
+      const request = data.request;
+      console.log(request)
+      const requestDate = new Date(request.requestDate);
+      const validUntilDate = new Date(request.validity);
+      const localDateStr = (date) => new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+
+      document.querySelector("#rfqNo").value = request.RFQNo || "";
+      document.querySelector("#abc").value = request.totalBudget || "";
+      document.querySelector("#rfqDate").value = localDateStr(requestDate) || "";
+      document.querySelector("#validUntil").value = localDateStr(validUntilDate) || "";
+
+  
+      const filePath = request.attachment;
+      const fileNameWithExtension = filePath.split("/").pop(); 
+      const fileName = fileNameWithExtension.split("-").slice(1).join("-"); 
+      const attachBtn = document.getElementById("attachBtn");
+      if (attachBtn) {
+        attachBtn.innerHTML = `<i class="bi bi-paperclip me-1"></i>${fileName}`;
+      }
+
+
+      if (request.details) {
+        let detailsObj;
+        try {
+          detailsObj = JSON.parse(request.details);
+        } catch (e) {
+          console.error("Invalid JSON in 'details':", e);
+          detailsObj = {};
+        }
+
+        quill.root.innerHTML = detailsObj.conditions || "";
+        quill2.root.innerHTML = detailsObj.note || "";
+        quill.root.style.fontSize = "16px";
+        quill2.root.style.fontSize = "16px";
+
+        document.querySelector("#repreName").value = detailsObj.reprename || "";
+
+        const signaturePreview = document.getElementById("signature-preview");
+        const previewContainer = document.getElementById("previewContainer");
+        const uploadBtn = document.getElementById("uploadSignBtn");
+        const padBtn = document.getElementById("signPadBtn");
+
+        if (detailsObj.signaturePath) {
+          document.getElementById("uploadSignBtn")?.classList.add("d-none");
+          document.getElementById("signPadBtn")?.classList.add("d-none");
+          document.getElementById("previewContainer")?.classList.add("d-none");
+
+          const adminSignWrapper = document.createElement("div");
+          adminSignWrapper.className = "d-flex justify-content-end align-content-end mt-3";
+          adminSignWrapper.innerHTML = `
+            <div id="adminSignContainer">
+              <div id="adminSignature" class="d-flex justify-content-center align-content-center">
+                <img src="${detailsObj.signaturePath}" alt="Admin Signature" style="max-width: 300px; height: auto;" />
+              </div>
+            </div>
+          `;
+
+          const previewContainer = document.getElementById("previewContainer");
+          previewContainer?.parentNode?.insertBefore(adminSignWrapper, previewContainer.nextSibling);
+        }
+
+      }
+
+      if (request.items) {
+        let itemsArray;
+        try {
+          itemsArray = JSON.parse(request.items);
+        } catch (e) {
+          console.error("Failed to parse items JSON:", e);
+          return;
+        }
+
+        if (Array.isArray(itemsArray)) {
+          const tableBody = document.querySelector("#itemtableBody");
+          if (tableBody) {
+            tableBody.innerHTML = "";
+
+            itemsArray.forEach(item => {
+              const row = document.createElement("tr");
+              row.innerHTML = `
+                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="item_name" value="${item.itemname || ''}"></td>
+                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="description" value="${item.description || ''}"></td>
+                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="unit" value="${item.unit || ''}"></td>
+                <td><input type="number" class="form-control-plaintext border-bottom-custom" name="quantity" value="${item.quantity || ''}"></td>
+                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="special_request" value="${item.specialrequest || ''}"></td>
+                <td><button type="button" class="btn btn-danger btn-sm remove-row"><i class="bi bi-trash3"></i></button></td>
+              `;
+              tableBody.appendChild(row);
+            });
+          } else {
+            console.warn("Element with selector '#itemtableBody' not found.");
+          }
+        }
+      }
+
+
+      if (mode === "view") {
+        document.querySelectorAll("input, textarea, select").forEach(el => {
+          el.setAttribute("disabled", true);
+        });
+
+        quill.enable(false);
+        quill2.enable(false);
+        quill.getModule('toolbar').container.style.display = 'none';
+        quill2.getModule('toolbar').container.style.display = 'none';
+        quill.root.style.border = "none";
+        quill2.root.style.border = "none";
+        quill.container.style.border = "none";
+        quill2.container.style.border = "none";
+
+        const addRowBtn = document.querySelector("#addRowBtn");
+        if (addRowBtn) addRowBtn.style.display = "none";
+
+        document.querySelectorAll(".remove-row").forEach(btn => {
+          btn.style.display = "none";
+        });
+
+        document.querySelectorAll("th").forEach(th => {
+          if (th.textContent.trim() === "Action") {
+            th.style.display = "none";
+          }
+        });
+
+        document.querySelectorAll("tbody tr").forEach(row => {
+          const cells = row.querySelectorAll("td");
+          if (cells.length > 0) {
+            cells[cells.length - 1].style.display = "none";
+          }
+        });
+
+        ["#uploadSignBtn", "#signPadBtn"].forEach(selector => {
+          const btn = document.querySelector(selector);
+          if (btn) btn.style.display = "none";
+        });
+
+        document.querySelector("#saveDraftBtn")?.classList.add("d-none");
+        document.querySelector("#sendSupplierBtn")?.classList.add("d-none");
+      }
+    })
+    .catch(err => {
+      console.error("Failed to load request:", err);
+    });
+}
+
+
+
+// RFQ FORM
 // T&C textarea
 const quill = new Quill('#conditions', {
   modules: {
@@ -2015,5 +2288,4 @@ document.addEventListener("DOMContentLoaded", function () {
         alert("An error occurred.");
       });
   }
-
-}); 
+});

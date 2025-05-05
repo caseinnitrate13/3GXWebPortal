@@ -332,11 +332,55 @@ function saveRFQRequest(data) {
     });
 }
 
+function getRequestCountsByUser(userID, callback) {
+    const sql = `
+      SELECT requestStatus AS status, COUNT(*) AS count
+      FROM requests
+      WHERE userID = ? AND requestStatus IN ('Draft', 'Pending')
+      GROUP BY requestStatus
+    `;
+
+    connection.query(sql, [userID], (err, results) => {
+        if (err) {
+            return callback("Database error: " + err, null);
+        }
+        const counts = {};
+        results.forEach(row => {
+            counts[row.status] = row.count;
+        });
+
+        callback(null, counts);
+    });
+}
+
+function getRequestsByStatus(userID, status, callback) {
+    const sql = `
+      SELECT requestID, RFQNo, totalBudget, requestDate
+      FROM requests
+      WHERE userID = ? AND requestStatus = ?
+    `;
+    connection.query(sql, [userID, status], (err, results) => {
+        if (err) {
+            return callback("Database error: " + err, null);
+        }
+        callback(null, results);
+    });
+}
+
+function getRequestByID(requestID) {
+    return new Promise((resolve, reject) => {
+        const query = "SELECT * FROM requests WHERE requestID = ?";
+        connection.query(query, [requestID], (err, results) => {
+            if (err) reject(err);
+            else resolve(results);
+        });
+    });
+}
 
 
 
 module.exports = {
     registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames,
     addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateUserProfile, deleteUserProfilePic,
-    updateUserPassword, saveRFQRequest
+    updateUserPassword, saveRFQRequest, getRequestCountsByUser, getRequestsByStatus, getRequestByID
 };
