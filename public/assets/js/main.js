@@ -1492,7 +1492,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ? `
             <div class="d-flex justify-content-center align-items-center gap-3 h-100">
               <div data-bs-toggle="modal" data-bs-target="#deleteRowModal">
-                <i id="deleteReq" class="bi bi-trash text-danger remove-row pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete"></i>
+                <i class="bi bi-trash text-danger remove-row pointer deleteReqIcon" data-id="${request.requestID}"></i>
               </div>
               <div>
                 <a href="/request-for-quotation-form?mode=edit&requestID=${request.requestID}">
@@ -1551,10 +1551,10 @@ function loadRequestForQuotation(requestID, mode) {
       };
       const requestDate = new Date(request.requestDate);
       const validUntilDate = new Date(request.validity);
-      
+
       document.querySelector("#rfqDate").value = localDateStr(requestDate);
       document.querySelector("#validUntil").value = localDateStr(validUntilDate);
-      
+
       document.querySelector("#rfqNo").value = request.RFQNo || "";
       document.querySelector("#abc").value = request.totalBudget || "";
       document.querySelector("#rfqDate").value = localDateStr(requestDate) || "";
@@ -1773,6 +1773,52 @@ function loadRequestForQuotation(requestID, mode) {
       console.error("Failed to load request:", err);
     });
 }
+
+let selectedRequestID = null;
+document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("click", function (e) {
+    if (e.target && e.target.classList.contains("deleteReqIcon")) {
+      selectedRequestID = e.target.getAttribute("data-id");
+      console.log("Selected ID to delete:", selectedRequestID);
+    }
+  });
+
+  // When Delete button in modal is clicked
+  document.getElementById("deleteRow").addEventListener("click", async () => {
+    console.log("Trying to delete:", selectedRequestID);
+    if (!selectedRequestID) return;
+
+    try {
+      const res = await fetch("/delete-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requestID: selectedRequestID }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        window.location.href = data.redirect || "/request-quotation";
+
+        // Remove the corresponding row (optional based on structure)
+        const icon = document.querySelector(`.deleteReqIcon[data-id="${selectedRequestID}"]`);
+        icon?.closest("tr")?.remove();
+
+        // Hide the modal
+        bootstrap.Modal.getInstance(document.getElementById('deleteRowModal')).hide();
+      } else {
+        alert("Failed to delete: " + data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Server error occurred.");
+    }
+
+    selectedRequestID = null;
+  });
+});
+
+
 
 
 

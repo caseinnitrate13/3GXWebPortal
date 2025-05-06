@@ -393,8 +393,22 @@ async function updateRFQRequest(requestID, data) {
     }
 }
 
+function deleteRequest(requestID) {
+    return new Promise((resolve, reject) => {
+        const query = "DELETE FROM requests WHERE requestID = ?";
+        connection.query(query, [requestID], (err, result) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(result);
+            }
+        });
+    });
+}
+
+
 module.exports = {
     registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames,
     addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateUserProfile, deleteUserProfilePic,
-    updateUserPassword, saveRFQRequest, getRequestCountsByUser, getRequestsByStatus, getRequestByID, updateRFQRequest
+    updateUserPassword, saveRFQRequest, getRequestCountsByUser, getRequestsByStatus, getRequestByID, updateRFQRequest, deleteRequest
 };

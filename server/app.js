@@ -333,6 +333,23 @@ app.get('/requests-by-status', (req, res) => {
     });
 });
 
+app.post("/delete-request", async (req, res) => {
+  const { requestID } = req.body;
+  if (!requestID) return res.json({ success: false, message: "Missing request ID." });
+
+  try {
+    const result = await dbService.deleteRequest(requestID);
+    if (result.affectedRows > 0) {
+      res.json({ success: true });
+    } else {
+      res.json({ success: false, message: "No matching request found." });
+    }
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: "Error deleting request." });
+  }
+});
+
 
 //ACCOUNT
 
