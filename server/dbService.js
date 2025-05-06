@@ -377,10 +377,24 @@ function getRequestByID(requestID) {
     });
 }
 
+async function updateRFQRequest(requestID, data) {
+    const fields = Object.keys(data).filter(k => k !== 'requestID');
+    const values = fields.map(field => data[field]);
+    const sql = `UPDATE requests SET ${fields.map(f => `${f} = ?`).join(', ')} WHERE requestID = ?`;
 
+    values.push(requestID); // Add the WHERE clause value
+
+    try {
+        const result = await connection.query(sql, values); // Remove destructuring
+        return result; // Just return whatever it gives
+    } catch (err) {
+        console.error("DB Update Error:", err);
+        throw err;
+    }
+}
 
 module.exports = {
     registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames,
     addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateUserProfile, deleteUserProfilePic,
-    updateUserPassword, saveRFQRequest, getRequestCountsByUser, getRequestsByStatus, getRequestByID
+    updateUserPassword, saveRFQRequest, getRequestCountsByUser, getRequestsByStatus, getRequestByID, updateRFQRequest
 };

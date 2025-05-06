@@ -42,6 +42,8 @@ app.get('/get-request', (req, res) => {
 
 
 
+
+
 // Serve static files from the "public" folder
 app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -224,7 +226,8 @@ app.post('/save-rfq', async (req, res, next) => {
     { name: 'attachment', maxCount: 1 },
     { name: 'signature', maxCount: 1 }
 ]), async (req, res) => {
-    const requestID = res.locals.requestID;
+    const isUpdate = !!req.body.requestID;
+    const requestID = isUpdate ? req.body.requestID : await nanoid();
     const userID = req.body.userID;
     const basePath = path.join(__dirname, "uploads", "requests", userID, requestID);
     fs.mkdirSync(basePath, { recursive: true });
@@ -240,20 +243,27 @@ app.post('/save-rfq', async (req, res, next) => {
             const filePath = path.join(basePath, filename);
             await fs.promises.writeFile(filePath, file.buffer);
             attachmentPath = `uploads/requests/${userID}/${requestID}/${filename}`;
+        } else if (req.body.existingAttachment) {
+            attachmentPath = req.body.existingAttachment;
         } else {
             console.log("No attachment uploaded.");
         }
 
         // Signature
-        if (req.files?.signature?.[0]) {
+        if (req.body.currentsignPath && req.body.currentsignPath !== "null" && req.body.currentsignPath !== "") {
+            signaturePath = req.body.currentsignPath;
+            console.log("Using currentsignPath:", signaturePath);
+        } else if (req.files?.signature?.[0]) {
             const sig = req.files.signature[0];
             const sigFilename = `clientsignature_${Date.now()}.png`;
             const sigPath = path.join(basePath, sigFilename);
             await fs.promises.writeFile(sigPath, sig.buffer);
             signaturePath = `uploads/requests/${userID}/${requestID}/${sigFilename}`;
+            console.log("New signature uploaded:", signaturePath);
         } else {
-            console.log("No signature uploaded.");
+            console.log("No signature uploaded or provided.");
         }
+
 
         const rfqData = {
             requestID,
@@ -264,22 +274,21 @@ app.post('/save-rfq', async (req, res, next) => {
             totalBudget: req.body.totalBudget,
             details: JSON.stringify({
                 ...JSON.parse(req.body.details),
-                signaturePath: signaturePath || ""
+                signaturePath: signaturePath || JSON.parse(req.body.details)?.signaturePath || ""
             }),
             items: JSON.stringify(JSON.parse(req.body.items)),
             requestStatus: req.body.requestStatus,
             attachment: attachmentPath
         };
 
-        console.log("RFQ Data to be saved:", rfqData);
+        console.log(isUpdate ? "[Updating RFQ]:" : "[Creating new RFQ]:", rfqData);
 
-        try {
-            const result = await dbService.saveRFQRequest(rfqData);
-            console.log("RFQ saved successfully.");
+        if (isUpdate) {
+            await dbService.updateRFQRequest(requestID, rfqData);
+            res.json({ success: true, message: "Request updated successfully!" });
+        } else {
+            await dbService.saveRFQRequest(rfqData);
             res.json({ success: true, message: "Request saved successfully!" });
-        } catch (err) {
-            console.error("[DB Insert error]:", err);
-            res.status(500).json({ success: false, message: "Failed to save request" });
         }
     } catch (error) {
         console.error("[RFQ Save error]:", error);
@@ -556,5 +565,5 @@ app.use((req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server started at http://127.0.0.1:${port}`);
+    console.log(`Server started at http://192.168.254.131:${port}`);
 });

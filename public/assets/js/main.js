@@ -1443,7 +1443,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <h2 class="w800">PENDINGS</h2> 
         ${Pending}
       `;
-      
+
       fetchRequestsForStatus(userID, 'Draft');
       fetchRequestsForStatus(userID, 'Pending');
     })
@@ -1495,7 +1495,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <i id="deleteReq" class="bi bi-trash text-danger remove-row pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete"></i>
               </div>
               <div>
-                <a href="/request-for-quotation-form">
+                <a href="/request-for-quotation-form?mode=edit&requestID=${request.requestID}">
                   <i id="editReq" class="bi bi-pencil-square text-primary pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"></i>
                 </a>
               </div>
@@ -1528,16 +1528,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const mode = params.get("mode");
   const requestID = params.get("requestID");
 
-  if (mode === 'view' && requestID) {
+  if ((mode === 'view' || mode === 'edit') && requestID) {
     loadRequestForQuotation(requestID, mode);
   }
-
-  // You can also add:
-  // if (mode === 'add') {
-  //   // leave the form blank (default behavior)
-  // }
 });
 
+let currentRequest = null;
+let currentSignPath = null;
 function loadRequestForQuotation(requestID, mode) {
   fetch(`/get-request?id=${encodeURIComponent(requestID)}`)
     .then(res => res.json())
@@ -1545,25 +1542,35 @@ function loadRequestForQuotation(requestID, mode) {
       if (!data.success) throw new Error(data.message);
 
       const request = data.request;
+      currentRequest = request;
       console.log(request)
+
+      const localDateStr = (date) => {
+        if (!date || isNaN(date.getTime())) return "";
+        return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+      };
       const requestDate = new Date(request.requestDate);
       const validUntilDate = new Date(request.validity);
-      const localDateStr = (date) => new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
-
+      
+      document.querySelector("#rfqDate").value = localDateStr(requestDate);
+      document.querySelector("#validUntil").value = localDateStr(validUntilDate);
+      
       document.querySelector("#rfqNo").value = request.RFQNo || "";
       document.querySelector("#abc").value = request.totalBudget || "";
       document.querySelector("#rfqDate").value = localDateStr(requestDate) || "";
       document.querySelector("#validUntil").value = localDateStr(validUntilDate) || "";
 
-  
-      const filePath = request.attachment;
-      const fileNameWithExtension = filePath.split("/").pop(); 
-      const fileName = fileNameWithExtension.split("-").slice(1).join("-"); 
-      const attachBtn = document.getElementById("attachBtn");
-      if (attachBtn) {
-        attachBtn.innerHTML = `<i class="bi bi-paperclip me-1"></i>${fileName}`;
-      }
 
+      const filePath = request.attachment;
+      if (filePath) {
+        fileSaved = true;
+        const fileNameWithExtension = filePath.split("/").pop();
+        const fileName = fileNameWithExtension.split("-").slice(1).join("-");
+        const attachBtn = document.getElementById("attachBtn");
+        if (attachBtn) {
+          attachBtn.innerHTML = `<i class="bi bi-paperclip me-1"></i>${fileName}`;
+        }
+      }
 
       if (request.details) {
         let detailsObj;
@@ -1587,22 +1594,52 @@ function loadRequestForQuotation(requestID, mode) {
         const padBtn = document.getElementById("signPadBtn");
 
         if (detailsObj.signaturePath) {
-          document.getElementById("uploadSignBtn")?.classList.add("d-none");
-          document.getElementById("signPadBtn")?.classList.add("d-none");
-          document.getElementById("previewContainer")?.classList.add("d-none");
+          if (mode === "view") {
+            document.getElementById("uploadSignBtn")?.classList.add("d-none");
+            document.getElementById("signPadBtn")?.classList.add("d-none");
+            document.getElementById("previewContainer")?.classList.add("d-none");
 
-          const adminSignWrapper = document.createElement("div");
-          adminSignWrapper.className = "d-flex justify-content-end align-content-end mt-3";
-          adminSignWrapper.innerHTML = `
-            <div id="adminSignContainer">
-              <div id="adminSignature" class="d-flex justify-content-center align-content-center">
-                <img src="${detailsObj.signaturePath}" alt="Admin Signature" style="max-width: 300px; height: auto;" />
+            const adminSignWrapper = document.createElement("div");
+            adminSignWrapper.className = "d-flex justify-content-end align-content-end mt-3";
+            adminSignWrapper.innerHTML = `
+              <div id="adminSignContainer">
+                <div id="adminSignature" class="d-flex justify-content-center align-content-center">
+                  <img src="${detailsObj.signaturePath}" alt="Admin Signature" />
+                </div>
               </div>
-            </div>
-          `;
+            `;
 
-          const previewContainer = document.getElementById("previewContainer");
-          previewContainer?.parentNode?.insertBefore(adminSignWrapper, previewContainer.nextSibling);
+            const previewContainer = document.getElementById("previewContainer");
+            previewContainer?.parentNode?.insertBefore(adminSignWrapper, previewContainer.nextSibling);
+          }
+          if (mode === "edit") {
+            const hasSignature = !!detailsObj.signaturePath;
+            const signaturePreview = document.getElementById("signature-preview");
+            const previewContainer = document.getElementById("previewContainer");
+            currentSignPath = detailsObj.signaturePath;
+
+            if (!hasSignature || hasSignature === "null") {
+              document.getElementById("uploadSignBtn")?.classList.remove("d-none");
+              document.getElementById("signPadBtn")?.classList.remove("d-none");
+              previewContainer.style.display = "none";
+            }
+
+            if (signaturePreview && hasSignature) {
+              signaturePreview.innerHTML = `<img src="${detailsObj.signaturePath}" alt="Signature Preview" />`;
+              previewContainer.style.display = "block";
+
+              document.getElementById("uploadSignBtn")?.classList.add("d-none");
+              document.getElementById("signPadBtn")?.classList.add("d-none");
+            }
+
+            const closePreviewButton = document.getElementById("closePreview");
+            closePreviewButton?.addEventListener("click", function () {
+              previewContainer.style.display = "none";
+              document.getElementById("uploadSignBtn")?.classList.remove("d-none");
+              document.getElementById("signPadBtn")?.classList.remove("d-none");
+            });
+          }
+
         }
 
       }
@@ -1617,7 +1654,7 @@ function loadRequestForQuotation(requestID, mode) {
         }
 
         if (Array.isArray(itemsArray)) {
-          const tableBody = document.querySelector("#itemtableBody");
+          const tableBody = document.querySelector("#tableBody");
           if (tableBody) {
             tableBody.innerHTML = "";
 
@@ -1657,6 +1694,7 @@ function loadRequestForQuotation(requestID, mode) {
         const addRowBtn = document.querySelector("#addRowBtn");
         if (addRowBtn) addRowBtn.style.display = "none";
 
+
         document.querySelectorAll(".remove-row").forEach(btn => {
           btn.style.display = "none";
         });
@@ -1679,9 +1717,57 @@ function loadRequestForQuotation(requestID, mode) {
           if (btn) btn.style.display = "none";
         });
 
+        const attachBtn = document.querySelector("#attachBtn");
+        if (attachBtn) {
+          attachBtn.setAttribute("disabled", true);
+          attachBtn.classList.add("disabled");
+          attachBtn.removeAttribute("data-bs-toggle");
+          attachBtn.removeAttribute("data-bs-target");
+        }
+
         document.querySelector("#saveDraftBtn")?.classList.add("d-none");
         document.querySelector("#sendSupplierBtn")?.classList.add("d-none");
       }
+
+      if (mode === "edit") {
+
+        document.querySelectorAll("input, textarea, select").forEach(el => {
+          el.removeAttribute("disabled");
+        });
+
+        quill.enable(true);
+        quill2.enable(true);
+        quill.getModule('toolbar').container.style.display = 'block';
+        quill2.getModule('toolbar').container.style.display = 'block';
+        quill.root.style.border = "1px solid #ced4da";
+        quill2.root.style.border = "1px solid #ced4da";
+        quill.container.style.border = "1px solid #ced4da";
+        quill2.container.style.border = "1px solid #ced4da";
+
+        document.querySelector("#saveDraftBtn")?.classList.remove("d-none");
+        document.querySelector("#sendSupplierBtn")?.classList.remove("d-none");
+
+        document.querySelectorAll(".remove-row").forEach(btn => {
+          btn.style.display = "inline-block";
+        });
+
+        const addRowBtn = document.querySelector("#addRowBtn");
+        if (addRowBtn) addRowBtn.style.display = "inline-block";
+
+        document.querySelectorAll("th").forEach(th => {
+          if (th.textContent.trim() === "Action") {
+            th.style.display = "table-cell";
+          }
+        });
+
+        document.querySelectorAll("tbody tr").forEach(row => {
+          const cells = row.querySelectorAll("td");
+          if (cells.length > 0) {
+            cells[cells.length - 1].style.display = "table-cell";
+          }
+        });
+      }
+
     })
     .catch(err => {
       console.error("Failed to load request:", err);
@@ -1860,7 +1946,6 @@ document.addEventListener("DOMContentLoaded", function () {
 let uploadedSignatureFile = null;
 let uploadedImage = null;
 let imageSaved = false;
-
 document.addEventListener("DOMContentLoaded", function () {
   const attachBtn = document.getElementById("attachBtn");
   const signatureModalElement = document.getElementById('signatureModal');
@@ -2169,6 +2254,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const validUntil = document.getElementById('validUntil').value;
     const abc = document.getElementById('abc').value.trim();
     const repreName = document.getElementById('repreName').value.trim();
+    const hasExistingFile = currentRequest?.attachment;
+    const hasExistingSign = currentSignPath;
 
     const rfqNoValid = rfqNo !== '';
     const rfqDateValid = rfqDate !== '';
@@ -2177,10 +2264,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const conditionsValid = quill.root.innerHTML.trim() !== '<p><br></p>';
     const itemInputs = document.querySelectorAll('input[name="item_name"]');
     const itemsValid = Array.from(itemInputs).some(input => input.value.trim() !== '');
-    const documentUploaded = !!uploadedFileName;
+    const documentUploaded = !!uploadedFileName || hasExistingFile;
     const previewContainer = document.getElementById('previewContainer');
     const signatureUploaded = previewContainer.style.display === 'block' &&
-      previewContainer.querySelector('img, canvas');
+      previewContainer.querySelector('img, canvas') || hasExistingSign;
     const repreNameValid = repreName !== '';
 
     if (
@@ -2222,6 +2309,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const formData = new FormData(form);
     const storedUser = JSON.parse(localStorage.getItem("user"));
     const userID = storedUser?.userID;
+    const requestID = new URLSearchParams(window.location.search).get("requestID");
+    if (requestID) {
+      formData.append("requestID", requestID);
+    }
 
     formData.append("requestStatus", status);
     formData.append("userID", userID);
@@ -2237,6 +2328,7 @@ document.addEventListener("DOMContentLoaded", function () {
       reprename: document.getElementById('repreName')?.value || ""
     };
     formData.append("details", JSON.stringify(details));
+    formData.append("currentsignPath", currentSignPath);
 
     const items = [];
     document.querySelectorAll('#tableBody tr').forEach((row, index) => {
@@ -2255,7 +2347,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (uploadedFile) {
       formData.append("attachment", uploadedFile);
+    } if (!uploadedFile && currentRequest?.attachment) {
+      formData.append("existingAttachment", currentRequest.attachment);
     }
+
+
     const canvas = document.getElementById('signature-pad');
     if (!uploadedSignatureFile && canvas && !isCanvasBlank(canvas)) {
       canvas.toBlob(function (blob) {
