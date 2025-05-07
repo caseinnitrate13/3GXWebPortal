@@ -70,9 +70,12 @@ app.post('/login', (req, res) => {
         let redirectUrl = "/request-quotation";
         if (result.accountStatus === "Pending") {
             redirectUrl = "/initial-registration";
-        } else if (result.accountStatus === "Rejected") {
+        } else if (result.accountStatus === "Declined") {
             redirectUrl = "/";
+        } else if (result.accountStatus === "Approved") {
+            redirectUrl = "/request-quotation";
         }
+
 
         res.status(200).json({
             success: true,
