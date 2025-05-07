@@ -1362,8 +1362,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     });
 
-
-
     // Reset modal content when closed
     const approveQuotationModal = document.getElementById("approveQuotationModal");
     if (approveQuotationModal) {
@@ -1416,8 +1414,415 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const userID = storedUser?.userID;
+  if (!userID) {
+    console.error("User ID not found");
+    return;
+  }
 
-// REQUEST FOR QUOTATION
+  // Fetch and populate counts
+  fetch(`/request-counts?userID=${userID}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) {
+        throw new Error(data.message);
+      }
+
+      const { Draft = 0, Pending = 0 } = data.counts;
+
+      document.querySelector('#draftCard .card-body').innerHTML = `
+        <i class="bi bi-pencil-square fs-1"></i>
+        <h2 class="w800">DRAFTS</h2> 
+        ${Draft}
+      `;
+
+      document.querySelector('#pendingCard .card-body').innerHTML = `
+        <i class="bi bi-hourglass-split fs-1"></i>
+        <h2 class="w800">PENDINGS</h2> 
+        ${Pending}
+      `;
+
+      fetchRequestsForStatus(userID, 'Draft');
+      fetchRequestsForStatus(userID, 'Pending');
+    })
+    .catch(err => {
+      console.error("Failed to load request counts:", err.message || err);
+    });
+
+
+  $('#draftCardModal').on('show.bs.modal', function () {
+    fetchRequestsForStatus(userID, 'Draft');
+  });
+
+  $('#pendingCardModal').on('show.bs.modal', function () {
+    fetchRequestsForStatus(userID, 'Pending');
+  });
+
+  function fetchRequestsForStatus(userID, status) {
+    fetch(`/requests-by-status?userID=${userID}&status=${status}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success) {
+          throw new Error(data.message);
+        }
+
+        populateModalTable(status, data.requests);
+      })
+      .catch(err => {
+        console.error(`Failed to load ${status} requests:`, err.message || err);
+      });
+  }
+
+  function populateModalTable(status, requests) {
+    const modalTableBody = document.querySelector(
+      status === 'Draft' ? '#draftModalTable tbody' : '#pendingModalTable tbody'
+    );
+    const mainTableBody = document.querySelector(
+      status === 'Draft' ? '#draftTable tbody' : '#pendingTable tbody'
+    );
+
+    modalTableBody.innerHTML = '';
+    mainTableBody.innerHTML = '';
+
+    requests.forEach(request => {
+      const actionHTML =
+        status === 'Draft'
+          ? `
+            <div class="d-flex justify-content-center align-items-center gap-3 h-100">
+              <div data-bs-toggle="modal" data-bs-target="#deleteRowModal">
+                <i class="bi bi-trash text-danger remove-row pointer deleteReqIcon" data-id="${request.requestID}"></i>
+              </div>
+              <div>
+                <a href="/request-for-quotation-form?mode=edit&requestID=${request.requestID}">
+                  <i id="editReq" class="bi bi-pencil-square text-primary pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"></i>
+                </a>
+              </div>
+            </div>`
+          : `
+            <a href="/request-for-quotation-form?mode=view&requestID=${request.requestID}">
+            <i class="bi bi-eye me-1 text-primary pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="View"></i>
+          </a>`;
+
+      const rowHTML = `
+        <tr>
+          <td>${request.RFQNo}</td>
+          <td>${request.totalBudget}</td>
+          <td>${isNaN(new Date(request.requestDate))
+          ? ''
+          : new Date(request.requestDate).toLocaleDateString()
+        }</td>
+          <td>${actionHTML}</td>
+        </tr>`;
+
+      modalTableBody.insertAdjacentHTML('beforeend', rowHTML);
+      mainTableBody.insertAdjacentHTML('beforeend', rowHTML);
+    });
+  }
+});
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  const mode = params.get("mode");
+  const requestID = params.get("requestID");
+
+  if ((mode === 'view' || mode === 'edit') && requestID) {
+    loadRequestForQuotation(requestID, mode);
+  }
+});
+
+let currentRequest = null;
+let currentSignPath = null;
+function loadRequestForQuotation(requestID, mode) {
+  fetch(`/get-request?id=${encodeURIComponent(requestID)}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) throw new Error(data.message);
+
+      const request = data.request;
+      currentRequest = request;
+      console.log(request)
+
+      const localDateStr = (date) => {
+        if (!date || isNaN(date.getTime())) return "";
+        return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+      };
+      const requestDate = new Date(request.requestDate);
+      const validUntilDate = new Date(request.validity);
+
+      document.querySelector("#rfqDate").value = localDateStr(requestDate);
+      document.querySelector("#validUntil").value = localDateStr(validUntilDate);
+
+      document.querySelector("#rfqNo").value = request.RFQNo || "";
+      document.querySelector("#abc").value = request.totalBudget || "";
+      document.querySelector("#rfqDate").value = localDateStr(requestDate) || "";
+      document.querySelector("#validUntil").value = localDateStr(validUntilDate) || "";
+
+
+      const filePath = request.attachment;
+      if (filePath) {
+        fileSaved = true;
+        const fileNameWithExtension = filePath.split("/").pop();
+        const fileName = fileNameWithExtension.split("-").slice(1).join("-");
+        const attachBtn = document.getElementById("attachBtn");
+        if (attachBtn) {
+          attachBtn.innerHTML = `<i class="bi bi-paperclip me-1"></i>${fileName}`;
+        }
+      }
+
+      if (request.details) {
+        let detailsObj;
+        try {
+          detailsObj = JSON.parse(request.details);
+        } catch (e) {
+          console.error("Invalid JSON in 'details':", e);
+          detailsObj = {};
+        }
+
+        quill.root.innerHTML = detailsObj.conditions || "";
+        quill2.root.innerHTML = detailsObj.note || "";
+        quill.root.style.fontSize = "16px";
+        quill2.root.style.fontSize = "16px";
+
+        document.querySelector("#repreName").value = detailsObj.reprename || "";
+
+        const signaturePreview = document.getElementById("signature-preview");
+        const previewContainer = document.getElementById("previewContainer");
+        const uploadBtn = document.getElementById("uploadSignBtn");
+        const padBtn = document.getElementById("signPadBtn");
+
+        if (detailsObj.signaturePath) {
+          if (mode === "view") {
+            document.getElementById("uploadSignBtn")?.classList.add("d-none");
+            document.getElementById("signPadBtn")?.classList.add("d-none");
+            document.getElementById("previewContainer")?.classList.add("d-none");
+
+            const adminSignWrapper = document.createElement("div");
+            adminSignWrapper.className = "d-flex justify-content-end align-content-end mt-3";
+            adminSignWrapper.innerHTML = `
+              <div id="adminSignContainer">
+                <div id="adminSignature" class="d-flex justify-content-center align-content-center">
+                  <img src="${detailsObj.signaturePath}" alt="Admin Signature" />
+                </div>
+              </div>
+            `;
+
+            const previewContainer = document.getElementById("previewContainer");
+            previewContainer?.parentNode?.insertBefore(adminSignWrapper, previewContainer.nextSibling);
+          }
+          if (mode === "edit") {
+            const hasSignature = !!detailsObj.signaturePath;
+            const signaturePreview = document.getElementById("signature-preview");
+            const previewContainer = document.getElementById("previewContainer");
+            currentSignPath = detailsObj.signaturePath;
+
+            if (!hasSignature || hasSignature === "null") {
+              document.getElementById("uploadSignBtn")?.classList.remove("d-none");
+              document.getElementById("signPadBtn")?.classList.remove("d-none");
+              previewContainer.style.display = "none";
+            }
+
+            if (signaturePreview && hasSignature) {
+              signaturePreview.innerHTML = `<img src="${detailsObj.signaturePath}" alt="Signature Preview" />`;
+              previewContainer.style.display = "block";
+
+              document.getElementById("uploadSignBtn")?.classList.add("d-none");
+              document.getElementById("signPadBtn")?.classList.add("d-none");
+            }
+
+            const closePreviewButton = document.getElementById("closePreview");
+            closePreviewButton?.addEventListener("click", function () {
+              previewContainer.style.display = "none";
+              document.getElementById("uploadSignBtn")?.classList.remove("d-none");
+              document.getElementById("signPadBtn")?.classList.remove("d-none");
+            });
+          }
+
+        }
+
+      }
+
+      if (request.items) {
+        let itemsArray;
+        try {
+          itemsArray = JSON.parse(request.items);
+        } catch (e) {
+          console.error("Failed to parse items JSON:", e);
+          return;
+        }
+
+        if (Array.isArray(itemsArray)) {
+          const tableBody = document.querySelector("#tableBody");
+          if (tableBody) {
+            tableBody.innerHTML = "";
+
+            itemsArray.forEach(item => {
+              const row = document.createElement("tr");
+              row.innerHTML = `
+                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="item_name" value="${item.itemname || ''}"></td>
+                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="description" value="${item.description || ''}"></td>
+                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="unit" value="${item.unit || ''}"></td>
+                <td><input type="number" class="form-control-plaintext border-bottom-custom" name="quantity" value="${item.quantity || ''}"></td>
+                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="special_request" value="${item.specialrequest || ''}"></td>
+                <td><button type="button" class="btn btn-danger btn-sm remove-row"><i class="bi bi-trash3"></i></button></td>
+              `;
+              tableBody.appendChild(row);
+            });
+          } else {
+            console.warn("Element with selector '#itemtableBody' not found.");
+          }
+        }
+      }
+
+
+      if (mode === "view") {
+        document.querySelectorAll("input, textarea, select").forEach(el => {
+          el.setAttribute("disabled", true);
+        });
+
+        quill.enable(false);
+        quill2.enable(false);
+        quill.getModule('toolbar').container.style.display = 'none';
+        quill2.getModule('toolbar').container.style.display = 'none';
+        quill.root.style.border = "none";
+        quill2.root.style.border = "none";
+        quill.container.style.border = "none";
+        quill2.container.style.border = "none";
+
+        const addRowBtn = document.querySelector("#addRowBtn");
+        if (addRowBtn) addRowBtn.style.display = "none";
+
+
+        document.querySelectorAll(".remove-row").forEach(btn => {
+          btn.style.display = "none";
+        });
+
+        document.querySelectorAll("th").forEach(th => {
+          if (th.textContent.trim() === "Action") {
+            th.style.display = "none";
+          }
+        });
+
+        document.querySelectorAll("tbody tr").forEach(row => {
+          const cells = row.querySelectorAll("td");
+          if (cells.length > 0) {
+            cells[cells.length - 1].style.display = "none";
+          }
+        });
+
+        ["#uploadSignBtn", "#signPadBtn"].forEach(selector => {
+          const btn = document.querySelector(selector);
+          if (btn) btn.style.display = "none";
+        });
+
+        const attachBtn = document.querySelector("#attachBtn");
+        if (attachBtn) {
+          attachBtn.setAttribute("disabled", true);
+          attachBtn.classList.add("disabled");
+          attachBtn.removeAttribute("data-bs-toggle");
+          attachBtn.removeAttribute("data-bs-target");
+        }
+
+        document.querySelector("#saveDraftBtn")?.classList.add("d-none");
+        document.querySelector("#sendSupplierBtn")?.classList.add("d-none");
+      }
+
+      if (mode === "edit") {
+
+        document.querySelectorAll("input, textarea, select").forEach(el => {
+          el.removeAttribute("disabled");
+        });
+
+        quill.enable(true);
+        quill2.enable(true);
+        quill.getModule('toolbar').container.style.display = 'block';
+        quill2.getModule('toolbar').container.style.display = 'block';
+        quill.root.style.border = "1px solid #ced4da";
+        quill2.root.style.border = "1px solid #ced4da";
+        quill.container.style.border = "1px solid #ced4da";
+        quill2.container.style.border = "1px solid #ced4da";
+
+        document.querySelector("#saveDraftBtn")?.classList.remove("d-none");
+        document.querySelector("#sendSupplierBtn")?.classList.remove("d-none");
+
+        document.querySelectorAll(".remove-row").forEach(btn => {
+          btn.style.display = "inline-block";
+        });
+
+        const addRowBtn = document.querySelector("#addRowBtn");
+        if (addRowBtn) addRowBtn.style.display = "inline-block";
+
+        document.querySelectorAll("th").forEach(th => {
+          if (th.textContent.trim() === "Action") {
+            th.style.display = "table-cell";
+          }
+        });
+
+        document.querySelectorAll("tbody tr").forEach(row => {
+          const cells = row.querySelectorAll("td");
+          if (cells.length > 0) {
+            cells[cells.length - 1].style.display = "table-cell";
+          }
+        });
+      }
+
+    })
+    .catch(err => {
+      console.error("Failed to load request:", err);
+    });
+}
+
+let selectedRequestID = null;
+document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("click", function (e) {
+    if (e.target && e.target.classList.contains("deleteReqIcon")) {
+      selectedRequestID = e.target.getAttribute("data-id");
+      console.log("Selected ID to delete:", selectedRequestID);
+    }
+  });
+
+  // When Delete button in modal is clicked
+  document.getElementById("deleteRow").addEventListener("click", async () => {
+    console.log("Trying to delete:", selectedRequestID);
+    if (!selectedRequestID) return;
+
+    try {
+      const res = await fetch("/delete-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requestID: selectedRequestID }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        window.location.href = data.redirect || "/request-quotation";
+
+        // Remove the corresponding row (optional based on structure)
+        const icon = document.querySelector(`.deleteReqIcon[data-id="${selectedRequestID}"]`);
+        icon?.closest("tr")?.remove();
+
+        // Hide the modal
+        bootstrap.Modal.getInstance(document.getElementById('deleteRowModal')).hide();
+      } else {
+        alert("Failed to delete: " + data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Server error occurred.");
+    }
+
+    selectedRequestID = null;
+  });
+});
+
+
+
+
+
+// RFQ FORM
 // T&C textarea
 const quill = new Quill('#conditions', {
   modules: {
@@ -1470,7 +1875,11 @@ $(document).ready(function () {
   });
 });
 
-// file upload
+
+// Add Attachment
+let uploadedFileName = null;
+let fileSaved = false;
+let uploadedFile = null;
 document.addEventListener("DOMContentLoaded", function () {
   const fileUploadPreview = document.getElementById("fileUploadPreview");
   const fileUpload = document.getElementById("fileUpload");
@@ -1511,6 +1920,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Function to handle the file display
   function handleFile(file) {
     if (file) {
+      uploadedFile = file;
       uploadedFileName = file.name;
       fileUploadPreview.innerHTML = `
               <div class="file-preview">
@@ -1570,7 +1980,6 @@ document.addEventListener("DOMContentLoaded", function () {
     noUploadedFile.classList.add('d-none');
   });
 
-
   // Ensure clicking the attach button always reopens the file chooser
   attachBtn.addEventListener("click", function () {
     const signatureModalElement = document.getElementById('attachmentModal')
@@ -1583,27 +1992,52 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-// upload signature
+// Add file signature
+// Ensure clicking the attach button always reopens the file chooser
+let uploadedSignatureFile = null;
+let uploadedImage = null;
+let imageSaved = false;
 document.addEventListener("DOMContentLoaded", function () {
+  const attachBtn = document.getElementById("attachBtn");
+  const signatureModalElement = document.getElementById('signatureModal');
+  const signatureModal = new bootstrap.Modal(signatureModalElement);
   const uploadSignPreview = document.getElementById("uploadSignPreview");
   const fileInput = document.getElementById("fileInput");
   const uploadImgBtn = document.getElementById("uploadImgBtn");
   const saveButton = document.getElementById("saveButton");
   const signaturePreview = document.getElementById("signature-preview");
-  let uploadedImage = null;
+  const noSignatureUploaded = document.getElementById('noSignatureUploaded');
+  const uploadSignBtn = document.getElementById('uploadSignBtn');
+  const signPadBtn = document.getElementById('signPadBtn');
+  const previewContainer = document.getElementById('previewContainer');
 
+  // Open modal
+  uploadSignBtn.addEventListener("click", function () {
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+    signatureModal.show();
+  });
+
+  // Trigger file input
   uploadImgBtn.addEventListener("click", function () {
     fileInput.click();
   });
 
   // Handle file selection
   fileInput.addEventListener("change", function (event) {
-    if (event.target.files.length > 0) {
-      handleFile(event.target.files[0]);
+    const file = event.target.files[0];
+    if (file && file.type.startsWith("image/")) {
+      uploadedSignatureFile = file;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        uploadedImage = e.target.result;
+        uploadSignPreview.innerHTML = `<img src="${uploadedImage}" class="img-fluid rounded" style="max-height: 200px;">`;
+      };
+      reader.readAsDataURL(file);
+      noSignatureUploaded.classList.add("d-none");
     }
   });
 
-  // Handle drag & drop
+  // Drag & drop support
   uploadSignPreview.addEventListener("dragover", function (event) {
     event.preventDefault();
     uploadSignPreview.classList.add("drag-over");
@@ -1616,25 +2050,21 @@ document.addEventListener("DOMContentLoaded", function () {
   uploadSignPreview.addEventListener("drop", function (event) {
     event.preventDefault();
     uploadSignPreview.classList.remove("drag-over");
-    if (event.dataTransfer.files.length > 0) {
-      handleFile(event.dataTransfer.files[0]);
-    }
-  });
-
-  // Handle image display
-  function handleFile(file) {
+    const file = event.dataTransfer.files[0];
     if (file && file.type.startsWith("image/")) {
+      uploadedSignatureFile = file;
       const reader = new FileReader();
       reader.onload = function (e) {
         uploadedImage = e.target.result;
-        uploadSignPreview.innerHTML = `<img src="${uploadedImage}" class="img-fluid">`;
+        uploadSignPreview.innerHTML = `<img src="${uploadedImage}" class="img-fluid rounded" style="max-height: 200px;">`;
       };
       reader.readAsDataURL(file);
+      noSignatureUploaded.classList.add("d-none");
     }
-  }
+  });
 
   // save uploaded image to previewContainer
-  const noSignatureUploaded = document.getElementById('noSignatureUploaded');
+  // const noSignatureUploaded = document.getElementById('noSignatureUploaded');
   saveButton.addEventListener("click", function () {
 
     if (uploadedImage) {
@@ -1679,11 +2109,50 @@ document.addEventListener("DOMContentLoaded", function () {
     uploadSignPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
     uploadedImage = null;
 
-    noSignatureUploaded.classList.remove('d-block');
-    noSignatureUploaded.classList.add('d-none');
   });
 
-});
+  // Save image and close modal
+  saveButton.addEventListener("click", function () {
+    if (!uploadedImage || !uploadedSignatureFile) {
+      noSignatureUploaded.classList.remove('d-none');
+      return;
+    }
+
+    imageSaved = true;
+    noSignatureUploaded.classList.add('d-none');
+
+    signatureModal.hide();
+
+    signatureModalElement.addEventListener('hidden.bs.modal', () => {
+      document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+      document.body.style.overflow = 'auto';
+    }, { once: true });
+
+    uploadSignBtn.style.display = 'none';
+    if (signPadBtn) signPadBtn.style.display = 'none';
+
+    signaturePreview.innerHTML = `<img src="${uploadedImage}" class="img-fluid">`;
+    previewContainer.style.display = "block";
+    document.body.classList.remove("modal-open");
+  });
+
+  // Reset modal on close
+  signatureModalElement.addEventListener("hidden.bs.modal", function () {
+    if (!imageSaved) {
+      uploadedSignatureFile = null;
+      uploadedImage = null;
+    }
+    imageSaved = false;
+
+    uploadSignPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
+    fileInput.value = "";
+    noSignatureUploaded.classList.remove('d-block');
+    noSignatureUploaded.classList.add('d-none');
+    document.body.style.overflow = "auto";
+    document.body.style.paddingRight = "0px";
+  });
+
+
 
 
 // signature pad
@@ -1845,6 +2314,75 @@ document.getElementById('signPadBtn').addEventListener('click', () => {
   signatureModal.show();
 });
 
+//Send to Supplier
+const sendSupplierBtn = document.getElementById('sendSupplierBtn');
+// const canvas = document.getElementById('signature-pad');
+// const ctx = canvas.getContext('2d');
+
+function isCanvasBlank(canvas) {
+  const ctx = canvas.getContext('2d');
+  const pixelBuffer = new Uint32Array(
+    ctx.getImageData(0, 0, canvas.width, canvas.height).data.buffer
+  );
+
+  return !pixelBuffer.some(color => color !== 0);
+}
+
+sendSupplierBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+
+  const form = document.getElementById('rfqForm');
+  const errorContainer = document.getElementById('error-container');
+  if (!errorContainer) return console.error('Missing #errorContainer in HTML');
+
+  errorContainer.classList.add('d-none');
+  errorContainer.innerHTML = '';
+
+  const rfqNo = document.getElementById('rfqNo').value.trim();
+  const rfqDate = document.getElementById('rfqDate').value;
+  const validUntil = document.getElementById('validUntil').value;
+  const abc = document.getElementById('abc').value.trim();
+  const repreName = document.getElementById('repreName').value.trim();
+  const hasExistingFile = currentRequest?.attachment;
+  const hasExistingSign = currentSignPath;
+
+  const rfqNoValid = rfqNo !== '';
+  const rfqDateValid = rfqDate !== '';
+  const validUntilValid = validUntil !== '';
+  const abcValid = abc !== '';
+  const conditionsValid = quill.root.innerHTML.trim() !== '<p><br></p>';
+  const itemInputs = document.querySelectorAll('input[name="item_name"]');
+  const itemsValid = Array.from(itemInputs).some(input => input.value.trim() !== '');
+  const documentUploaded = !!uploadedFileName || hasExistingFile;
+  const previewContainer = document.getElementById('previewContainer');
+  const signatureUploaded = previewContainer.style.display === 'block' &&
+    previewContainer.querySelector('img, canvas') || hasExistingSign;
+  const repreNameValid = repreName !== '';
+
+  if (
+    !conditionsValid || !itemsValid || !documentUploaded || !signatureUploaded ||
+    !rfqNoValid || !rfqDateValid || !validUntilValid || !abcValid || !repreNameValid
+  ) {
+    errorContainer.classList.remove('d-none');
+    errorContainer.innerHTML = `
+      <ul>
+      ${!rfqNoValid ? '<li>RFQ No. is required.</li>' : ''}
+        ${!rfqDateValid ? '<li>RFQ Date is required.</li>' : ''}
+        ${!validUntilValid ? '<li>Valid Until date is required.</li>' : ''}
+        ${!abcValid ? '<li>ABC is required.</li>' : ''}
+        ${!conditionsValid ? '<li>Please fill in the Terms and Conditions.</li>' : ''}
+        ${!itemsValid ? '<li>Please add at least one item.</li>' : ''}
+        ${!documentUploaded ? '<li>Please upload an attachment or provide a file.</li>' : ''}
+        ${!signatureUploaded ? '<li>Please provide a signature.</li>' : ''}
+        ${!repreNameValid ? '<li>Representative Name is required.</li>' : ''}
+      </ul>
+    `;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    const sendSupplierModal = new bootstrap.Modal(document.getElementById('sendSupplierModal'));
+    sendSupplierModal.show();
+  }
+});
 
 // save/send form
 document.getElementById('sendBtn').addEventListener('click', () => {
@@ -1860,15 +2398,17 @@ function handleRFQSubmit(status) {
   const formData = new FormData(form);
   const storedUser = JSON.parse(localStorage.getItem("user"));
   const userID = storedUser?.userID;
+  const requestID = new URLSearchParams(window.location.search).get("requestID");
+  if (requestID) {
+    formData.append("requestID", requestID);
+  }
 
-  // Sample: Add data manually if not already in inputs
   formData.append("requestStatus", status);
-  formData.append("userID", userID); // assuming you store it here
+  formData.append("userID", userID);
   formData.append("RFQNo", document.getElementById("rfqNo")?.value?.trim() || "");
   formData.append("requestDate", document.getElementById("rfqDate")?.value?.trim() || "");
   formData.append("validity", document.getElementById("validUntil")?.value?.trim() || "");
   formData.append("totalBudget", document.getElementById("abc")?.value?.trim() || "");
-
 
   const details = {
     conditions: quill.getText(),
@@ -1877,26 +2417,48 @@ function handleRFQSubmit(status) {
     reprename: document.getElementById('repreName')?.value || ""
   };
   formData.append("details", JSON.stringify(details));
+  formData.append("currentsignPath", currentSignPath);
 
   const items = [];
-  document.querySelectorAll('#itemTable tbody tr').forEach((row) => {
+  document.querySelectorAll('#tableBody tr').forEach((row, index) => {
     const item = {
-      itemno: row.querySelector('.itemno').value,
-      itemname: row.querySelector('.itemname').value,
-      description: row.querySelector('.description').value,
-      unit: row.querySelector('.unit').value || "",
-      quantity: row.querySelector('.quantity').value,
-      specialrequest: row.querySelector('.specialrequest').value
+      itemno: `ITEM${(index + 1).toString().padStart(3, '0')}`,
+      itemname: row.querySelector('input[name="item_name"]')?.value || "",
+      description: row.querySelector('input[name="description"]')?.value || "",
+      unit: row.querySelector('input[name="unit"]')?.value || "",
+      quantity: row.querySelector('input[name="quantity"]')?.value || "",
+      specialrequest: row.querySelector('input[name="special_request"]')?.value || "",
+      price: ""
     };
     items.push(item);
   });
   formData.append("items", JSON.stringify(items));
 
-  const attachmentInput = document.getElementById('fileUpload');
-  if (attachmentInput.files.length > 0) {
-    formData.append("attachment", attachmentInput.files[0]);
+  if (uploadedFile) {
+    formData.append("attachment", uploadedFile);
+  } if (!uploadedFile && currentRequest?.attachment) {
+    formData.append("existingAttachment", currentRequest.attachment);
   }
 
+
+  const canvas = document.getElementById('signature-pad');
+  if (!uploadedSignatureFile && canvas && !isCanvasBlank(canvas)) {
+    canvas.toBlob(function (blob) {
+      if (blob) {
+        const filename = `signature_${Date.now()}.png`;
+        formData.append("signature", blob, filename);
+      }
+      submitRFQForm(formData);
+    }, 'image/png');
+  } else {
+    if (uploadedSignatureFile) {
+      formData.append("signature", uploadedSignatureFile);
+    }
+    submitRFQForm(formData);
+  }
+}
+
+function submitRFQForm(formData) {
   fetch("/save-rfq", {
     method: "POST",
     body: formData
@@ -1911,3 +2473,157 @@ function handleRFQSubmit(status) {
       alert("An error occurred.");
     });
 }
+});
+
+// // save/send form
+// document.getElementById('sendBtn').addEventListener('click', () => {
+//   handleRFQSubmit("Pending");
+// });
+
+// document.getElementById('saveDraftBtn').addEventListener('click', () => {
+//   handleRFQSubmit("Draft");
+// });
+
+// function handleRFQSubmit(status) {
+//   const form = document.getElementById('rfqForm');
+//   const formData = new FormData(form);
+//   const storedUser = JSON.parse(localStorage.getItem("user"));
+//   const userID = storedUser?.userID;
+
+//   // Sample: Add data manually if not already in inputs
+//   formData.append("requestStatus", status);
+//   formData.append("userID", userID); // assuming you store it here
+//   formData.append("RFQNo", document.getElementById("rfqNo")?.value?.trim() || "");
+//   formData.append("requestDate", document.getElementById("rfqDate")?.value?.trim() || "");
+//   formData.append("validity", document.getElementById("validUntil")?.value?.trim() || "");
+//   formData.append("totalBudget", document.getElementById("abc")?.value?.trim() || "");
+
+
+//   const details = {
+//     conditions: quill.getText(),
+//     note: quill2.getText(),
+//     signaturePath: "",
+//     reprename: document.getElementById('repreName')?.value || ""
+//   };
+//   formData.append("details", JSON.stringify(details));
+
+//   const items = [];
+//   document.querySelectorAll('#itemTable tbody tr').forEach((row) => {
+//     const item = {
+//       itemno: row.querySelector('.itemno').value,
+//       itemname: row.querySelector('.itemname').value,
+//       description: row.querySelector('.description').value,
+//       unit: row.querySelector('.unit').value || "",
+//       quantity: row.querySelector('.quantity').value,
+//       specialrequest: row.querySelector('.specialrequest').value
+//     };
+//     items.push(item);
+//   });
+//   formData.append("items", JSON.stringify(items));
+
+//   const attachmentInput = document.getElementById('fileUpload');
+//   if (attachmentInput.files.length > 0) {
+//     formData.append("attachment", attachmentInput.files[0]);
+//   }
+
+//   fetch("/save-rfq", {
+//     method: "POST",
+//     body: formData
+//   }).then(res => res.json())
+//     .then(data => {
+//       alert(data.message);
+//       if (data.success) {
+//         window.location.href = "/request-quotation";
+//       }
+//     }).catch(err => {
+//       console.error("RFQ save error:", err.message || err);
+//       alert("An error occurred.");
+//     });
+// }
+// =======
+//   document.getElementById('saveDraftBtn').addEventListener('click', () => {
+//     handleRFQSubmit("Draft");
+//   });
+
+//   function handleRFQSubmit(status) {
+//     const form = document.getElementById('rfqForm');
+//     const formData = new FormData(form);
+//     const storedUser = JSON.parse(localStorage.getItem("user"));
+//     const userID = storedUser?.userID;
+//     const requestID = new URLSearchParams(window.location.search).get("requestID");
+//     if (requestID) {
+//       formData.append("requestID", requestID);
+//     }
+
+//     formData.append("requestStatus", status);
+//     formData.append("userID", userID);
+//     formData.append("RFQNo", document.getElementById("rfqNo")?.value?.trim() || "");
+//     formData.append("requestDate", document.getElementById("rfqDate")?.value?.trim() || "");
+//     formData.append("validity", document.getElementById("validUntil")?.value?.trim() || "");
+//     formData.append("totalBudget", document.getElementById("abc")?.value?.trim() || "");
+
+//     const details = {
+//       conditions: quill.getText(),
+//       note: quill2.getText(),
+//       signaturePath: "",
+//       reprename: document.getElementById('repreName')?.value || ""
+//     };
+//     formData.append("details", JSON.stringify(details));
+//     formData.append("currentsignPath", currentSignPath);
+
+//     const items = [];
+//     document.querySelectorAll('#tableBody tr').forEach((row, index) => {
+//       const item = {
+//         itemno: `ITEM${(index + 1).toString().padStart(3, '0')}`,
+//         itemname: row.querySelector('input[name="item_name"]')?.value || "",
+//         description: row.querySelector('input[name="description"]')?.value || "",
+//         unit: row.querySelector('input[name="unit"]')?.value || "",
+//         quantity: row.querySelector('input[name="quantity"]')?.value || "",
+//         specialrequest: row.querySelector('input[name="special_request"]')?.value || "",
+//         price: ""
+//       };
+//       items.push(item);
+//     });
+//     formData.append("items", JSON.stringify(items));
+
+//     if (uploadedFile) {
+//       formData.append("attachment", uploadedFile);
+//     } if (!uploadedFile && currentRequest?.attachment) {
+//       formData.append("existingAttachment", currentRequest.attachment);
+//     }
+
+
+//     const canvas = document.getElementById('signature-pad');
+//     if (!uploadedSignatureFile && canvas && !isCanvasBlank(canvas)) {
+//       canvas.toBlob(function (blob) {
+//         if (blob) {
+//           const filename = `signature_${Date.now()}.png`;
+//           formData.append("signature", blob, filename);
+//         }
+//         submitRFQForm(formData);
+//       }, 'image/png');
+//     } else {
+//       if (uploadedSignatureFile) {
+//         formData.append("signature", uploadedSignatureFile);
+//       }
+//       submitRFQForm(formData);
+//     }
+//   }
+
+//   function submitRFQForm(formData) {
+//     fetch("/save-rfq", {
+//       method: "POST",
+//       body: formData
+//     }).then(res => res.json())
+//       .then(data => {
+//         alert(data.message);
+//         if (data.success) {
+//           window.location.href = "/request-quotation";
+//         }
+//       }).catch(err => {
+//         console.error("RFQ save error:", err.message || err);
+//         alert("An error occurred.");
+//       });
+//   }
+// });
+// >>>>>>> 35133a95635e4f6b9b814da67cd10166692fd93f

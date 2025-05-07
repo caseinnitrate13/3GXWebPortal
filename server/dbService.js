@@ -332,11 +332,83 @@ function saveRFQRequest(data) {
     });
 }
 
+function getRequestCountsByUser(userID, callback) {
+    const sql = `
+      SELECT requestStatus AS status, COUNT(*) AS count
+      FROM requests
+      WHERE userID = ? AND requestStatus IN ('Draft', 'Pending')
+      GROUP BY requestStatus
+    `;
 
+    connection.query(sql, [userID], (err, results) => {
+        if (err) {
+            return callback("Database error: " + err, null);
+        }
+        const counts = {};
+        results.forEach(row => {
+            counts[row.status] = row.count;
+        });
+
+        callback(null, counts);
+    });
+}
+
+function getRequestsByStatus(userID, status, callback) {
+    const sql = `
+      SELECT requestID, RFQNo, totalBudget, requestDate
+      FROM requests
+      WHERE userID = ? AND requestStatus = ?
+    `;
+    connection.query(sql, [userID, status], (err, results) => {
+        if (err) {
+            return callback("Database error: " + err, null);
+        }
+        callback(null, results);
+    });
+}
+
+function getRequestByID(requestID) {
+    return new Promise((resolve, reject) => {
+        const query = "SELECT * FROM requests WHERE requestID = ?";
+        connection.query(query, [requestID], (err, results) => {
+            if (err) reject(err);
+            else resolve(results);
+        });
+    });
+}
+
+async function updateRFQRequest(requestID, data) {
+    const fields = Object.keys(data).filter(k => k !== 'requestID');
+    const values = fields.map(field => data[field]);
+    const sql = `UPDATE requests SET ${fields.map(f => `${f} = ?`).join(', ')} WHERE requestID = ?`;
+
+    values.push(requestID); // Add the WHERE clause value
+
+    try {
+        const result = await connection.query(sql, values); // Remove destructuring
+        return result; // Just return whatever it gives
+    } catch (err) {
+        console.error("DB Update Error:", err);
+        throw err;
+    }
+}
+
+function deleteRequest(requestID) {
+    return new Promise((resolve, reject) => {
+        const query = "DELETE FROM requests WHERE requestID = ?";
+        connection.query(query, [requestID], (err, result) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(result);
+            }
+        });
+    });
+}
 
 
 module.exports = {
     registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames,
     addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateUserProfile, deleteUserProfilePic,
-    updateUserPassword, saveRFQRequest
+    updateUserPassword, saveRFQRequest, getRequestCountsByUser, getRequestsByStatus, getRequestByID, updateRFQRequest, deleteRequest
 };

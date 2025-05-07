@@ -22,6 +22,28 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.get('/get-request', (req, res) => {
+    const requestID = req.query.id; // changed from rfq to id
+    console.log("Backend received requestID:", requestID); // Log received requestID
+
+    dbService.getRequestByID(requestID)
+        .then(data => {
+            if (data.length > 0) {
+                res.json({ success: true, request: data[0] });
+            } else {
+                res.status(404).json({ success: false, message: "Request not found" });
+            }
+        })
+        .catch(err => {
+            console.error("Database error:", err);
+            res.status(500).json({ success: false, message: "Server error" });
+        });
+});
+
+
+
+
+
 // Serve static files from the "public" folder
 app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -195,36 +217,53 @@ app.get('/request-for-quotation-form', (req, res) => {
 
 app.post('/save-rfq', async (req, res, next) => {
     try {
-        console.log("📥 [1] Received RFQ POST request.");
         res.locals.requestID = await nanoid();
         next();
     } catch (err) {
-        console.error("❌ [Error generating requestID]:", err);
         return res.status(500).json({ success: false, message: "Server error" });
     }
-}, upload.single('attachment'), async (req, res) => {
-    const requestID = res.locals.requestID;
+}, upload.fields([
+    { name: 'attachment', maxCount: 1 },
+    { name: 'signature', maxCount: 1 }
+]), async (req, res) => {
+    const isUpdate = !!req.body.requestID;
+    const requestID = isUpdate ? req.body.requestID : await nanoid();
     const userID = req.body.userID;
-
-    console.log("🆔 [2] Generated requestID:", requestID);
-    console.log("👤 [3] UserID:", userID);
-
     const basePath = path.join(__dirname, "uploads", "requests", userID, requestID);
     fs.mkdirSync(basePath, { recursive: true });
-    console.log("📁 [4] Upload path created:", basePath);
 
     let attachmentPath = null;
+    let signaturePath = null;
 
     try {
-        if (req.file) {
-            const filename = `${Date.now()}-${req.file.originalname}`;
+        // File attachment
+        if (req.files?.attachment?.[0]) {
+            const file = req.files.attachment[0];
+            const filename = `${Date.now()}-${file.originalname}`;
             const filePath = path.join(basePath, filename);
-            await fs.promises.writeFile(filePath, req.file.buffer);
+            await fs.promises.writeFile(filePath, file.buffer);
             attachmentPath = `uploads/requests/${userID}/${requestID}/${filename}`;
-            console.log("📎 [5] File uploaded:", attachmentPath);
+        } else if (req.body.existingAttachment) {
+            attachmentPath = req.body.existingAttachment;
         } else {
-            console.log("📎 [5] No file uploaded.");
+            console.log("No attachment uploaded.");
         }
+
+        // Signature
+        if (req.body.currentsignPath && req.body.currentsignPath !== "null" && req.body.currentsignPath !== "") {
+            signaturePath = req.body.currentsignPath;
+            console.log("Using currentsignPath:", signaturePath);
+        } else if (req.files?.signature?.[0]) {
+            const sig = req.files.signature[0];
+            const sigFilename = `clientsignature_${Date.now()}.png`;
+            const sigPath = path.join(basePath, sigFilename);
+            await fs.promises.writeFile(sigPath, sig.buffer);
+            signaturePath = `uploads/requests/${userID}/${requestID}/${sigFilename}`;
+            console.log("New signature uploaded:", signaturePath);
+        } else {
+            console.log("No signature uploaded or provided.");
+        }
+
 
         const rfqData = {
             requestID,
@@ -233,28 +272,83 @@ app.post('/save-rfq', async (req, res, next) => {
             requestDate: req.body.requestDate,
             validity: req.body.validity,
             totalBudget: req.body.totalBudget,
-            details: JSON.stringify(JSON.parse(req.body.details)),
+            details: JSON.stringify({
+                ...JSON.parse(req.body.details),
+                signaturePath: signaturePath || JSON.parse(req.body.details)?.signaturePath || ""
+            }),
             items: JSON.stringify(JSON.parse(req.body.items)),
             requestStatus: req.body.requestStatus,
             attachment: attachmentPath
         };
 
-        console.log("📦 [6] RFQ Data to be saved:", rfqData);
+        console.log(isUpdate ? "[Updating RFQ]:" : "[Creating new RFQ]:", rfqData);
 
-        try {
-            const result = await dbService.saveRFQRequest(rfqData);
-            console.log("✅ [7] RFQ saved successfully.");
+        if (isUpdate) {
+            await dbService.updateRFQRequest(requestID, rfqData);
+            res.json({ success: true, message: "Request updated successfully!" });
+        } else {
+            await dbService.saveRFQRequest(rfqData);
             res.json({ success: true, message: "Request saved successfully!" });
-        } catch (err) {
-            console.error("❌ [DB Insert error]:", err);
-            res.status(500).json({ success: false, message: "Failed to save request" });
         }
     } catch (error) {
-        console.error("❌ [RFQ Save error]:", error);
+        console.error("[RFQ Save error]:", error);
         res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 });
 
+app.get('/request-counts', (req, res) => {
+    const { userID } = req.query;
+    console.log("📥 Received /request-counts request for userID:", userID); // ✅ Debug log
+
+    if (!userID) {
+        console.log("❌ Missing userID in request");
+        return res.status(400).json({ success: false, message: "Missing user ID" });
+    }
+
+    dbService.getRequestCountsByUser(userID, (err, counts) => {
+        if (err) {
+            console.error("❌ Database error:", err); // ✅ Log any SQL errors
+            return res.status(500).json({ success: false, message: err });
+        }
+
+        console.log("✅ Counts fetched:", counts); // ✅ Show result
+        res.json({ success: true, counts });
+    });
+});
+
+app.get('/requests-by-status', (req, res) => {
+    const { userID, status } = req.query;
+
+    if (!userID || !status) {
+        console.log("❌ Missing userID or status in request");
+        return res.status(400).json({ success: false, message: "Missing user ID or status" });
+    }
+
+    dbService.getRequestsByStatus(userID, status, (err, requests) => {
+        if (err) {
+            return res.status(500).json({ success: false, message: err });
+        }
+
+        res.json({ success: true, requests });
+    });
+});
+
+app.post("/delete-request", async (req, res) => {
+  const { requestID } = req.body;
+  if (!requestID) return res.json({ success: false, message: "Missing request ID." });
+
+  try {
+    const result = await dbService.deleteRequest(requestID);
+    if (result.affectedRows > 0) {
+      res.json({ success: true });
+    } else {
+      res.json({ success: false, message: "No matching request found." });
+    }
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: "Error deleting request." });
+  }
+});
 
 
 //ACCOUNT
@@ -488,5 +582,5 @@ app.use((req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server started at http://127.0.0.1:${port}`);
+    console.log(`Server started at http://192.168.254.131:${port}`);
 });
