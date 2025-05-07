@@ -1166,8 +1166,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-// QUOTATION
 document.addEventListener("DOMContentLoaded", function () {
+  // REQUEST  QUOTATION
   // card/table dropdown
   const cardView = document.getElementById("card-view");
   const tableView = document.getElementById("table-view");
@@ -1277,6 +1277,7 @@ document.addEventListener("DOMContentLoaded", function () {
             validIdError.classList.add('d-none');
           }, { once: true });
           approveBtn.disabled = true;
+          window.location.href = '/quotations';
         } else if (approveConfirmationModal) {
           if (selectedRow) {
             const remarksCell = selectedRow.querySelector('.remarks-cell');
