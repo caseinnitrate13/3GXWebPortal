@@ -510,51 +510,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("DOMContentLoaded", function () {
 
-  //MAIN REPRESENTATIVE
-  document.getElementById("saveMainRep").addEventListener("click", async () => {
-    const name = document.getElementById("mainRepNameInput").value.trim();
-    const position = document.getElementById("mainRepDeptInput").value.trim();
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    const userID = storedUser?.userID;
-
-    if (!name || !position) {
-      alert("Please fill in both name and department.");
-      return;
-    }
-
-    try {
-      const response = await fetch('/update-representative', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userID,
-          repIndex: 0,
-          repData: { name, position }
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        document.getElementById("mainRepName").textContent = name;
-        document.getElementById("mainRepDept").textContent = position;
-        document.getElementById("representative").textContent = name;
-
-        const modal = bootstrap.Modal.getInstance(document.getElementById("editMainRepModal"));
-        modal.hide();
-        alert("Representative updated successfully!");
-      } else {
-        alert("Failed to update representative.");
-      }
-    } catch (err) {
-      console.error("Update error:", err);
-      alert("Something went wrong.");
-    }
-  });
-
-
   // EDIT MAIN REPRESENTATIVE
   const mainRepNameInput = document.getElementById('mainRepNameInput');
   const mainRepDeptInput = document.getElementById('mainRepDeptInput');
@@ -564,7 +519,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const mainForm = document.getElementById("editMainRepForm");
   const saveMainRep = document.getElementById('saveMainRep');
 
-  saveMainRep.addEventListener('click', function () {
+  saveMainRep.addEventListener('click', async () => {
     let isValid = true;
 
     // Validation function
@@ -587,11 +542,51 @@ document.addEventListener("DOMContentLoaded", function () {
     validateField(mainRepDeptInput, /^[A-Za-z0-9\s]+$/);
 
     if (isValid) {
-      const newMainName = mainRepNameInput.value.trim();
-      const newMainDept = mainRepDeptInput.value.trim();
+      const name = mainRepNameInput.value.trim();
+      const position = mainRepDeptInput.value.trim();
 
-      mainRepName.textContent = newMainName;
-      mainRepDept.textContent = newMainDept;
+      mainRepName.textContent = name;
+      mainRepDept.textContent = position;
+
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      const userID = storedUser?.userID;
+  
+      if (!name || !position) {
+        alert("Please fill in both name and department.");
+        return;
+      }
+  
+      try {
+        const response = await fetch('/update-representative', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userID,
+            repIndex: 0,
+            repData: { name, position }
+          }),
+        });
+  
+        const result = await response.json();
+  
+        if (result.success) {
+          document.getElementById("mainRepName").textContent = name;
+          document.getElementById("mainRepDept").textContent = position;
+          document.getElementById("representative").textContent = name;
+  
+          const modal = bootstrap.Modal.getInstance(document.getElementById("editMainRepModal"));
+          modal.hide();
+          alert("Representative updated successfully!");
+        } else {
+          alert("Failed to update representative.");
+        }
+      } catch (err) {
+        console.error("Update error:", err);
+        alert("Something went wrong.");
+      }
+
 
       const editMainRepModal = document.getElementById('editMainRepModal');
       const editMainModal = bootstrap.Modal.getInstance(editMainRepModal);
@@ -1829,7 +1824,7 @@ const quill = new Quill('#conditions', {
   modules: {
     toolbar: [
       ['bold', 'italic'],
-      ['link', 'blockquote', 'code-block', 'image'],
+      ['link', 'blockquote', 'code-block'],
       [{ list: 'ordered' }, { list: 'bullet' }],
     ],
   },
@@ -1841,7 +1836,7 @@ const quill2 = new Quill('#note', {
   modules: {
     toolbar: [
       ['bold', 'italic'],
-      ['link', 'blockquote', 'code-block', 'image'],
+      ['link', 'blockquote', 'code-block'],
       [{ list: 'ordered' }, { list: 'bullet' }],
     ],
   },
