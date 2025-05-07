@@ -1332,7 +1332,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
           }, { once: true });
           declineBtn.disabled = true;
-
+          window.location.href = '/quotations';
+        
+          
         } else if (declineTableModal) {
           if (selectedRow) {
             const remarksCell = selectedRow.querySelector('.remarks-cell');
@@ -1980,6 +1982,7 @@ document.addEventListener("DOMContentLoaded", function () {
     noUploadedFile.classList.add('d-none');
   });
 
+
   // Ensure clicking the attach button always reopens the file chooser
   attachBtn.addEventListener("click", function () {
     const signatureModalElement = document.getElementById('attachmentModal')
@@ -1990,7 +1993,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
 });
-
 
 // Add file signature
 // Ensure clicking the attach button always reopens the file chooser
@@ -2013,7 +2015,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Open modal
   uploadSignBtn.addEventListener("click", function () {
-    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
     signatureModal.show();
   });
 
@@ -2064,7 +2065,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // save uploaded image to previewContainer
-  // const noSignatureUploaded = document.getElementById('noSignatureUploaded');
   saveButton.addEventListener("click", function () {
 
     if (uploadedImage) {
@@ -2314,6 +2314,7 @@ document.getElementById('signPadBtn').addEventListener('click', () => {
   signatureModal.show();
 });
 
+
 //Send to Supplier
 const sendSupplierBtn = document.getElementById('sendSupplierBtn');
 // const canvas = document.getElementById('signature-pad');
@@ -2473,157 +2474,5 @@ function submitRFQForm(formData) {
       alert("An error occurred.");
     });
 }
+
 });
-
-// // save/send form
-// document.getElementById('sendBtn').addEventListener('click', () => {
-//   handleRFQSubmit("Pending");
-// });
-
-// document.getElementById('saveDraftBtn').addEventListener('click', () => {
-//   handleRFQSubmit("Draft");
-// });
-
-// function handleRFQSubmit(status) {
-//   const form = document.getElementById('rfqForm');
-//   const formData = new FormData(form);
-//   const storedUser = JSON.parse(localStorage.getItem("user"));
-//   const userID = storedUser?.userID;
-
-//   // Sample: Add data manually if not already in inputs
-//   formData.append("requestStatus", status);
-//   formData.append("userID", userID); // assuming you store it here
-//   formData.append("RFQNo", document.getElementById("rfqNo")?.value?.trim() || "");
-//   formData.append("requestDate", document.getElementById("rfqDate")?.value?.trim() || "");
-//   formData.append("validity", document.getElementById("validUntil")?.value?.trim() || "");
-//   formData.append("totalBudget", document.getElementById("abc")?.value?.trim() || "");
-
-
-//   const details = {
-//     conditions: quill.getText(),
-//     note: quill2.getText(),
-//     signaturePath: "",
-//     reprename: document.getElementById('repreName')?.value || ""
-//   };
-//   formData.append("details", JSON.stringify(details));
-
-//   const items = [];
-//   document.querySelectorAll('#itemTable tbody tr').forEach((row) => {
-//     const item = {
-//       itemno: row.querySelector('.itemno').value,
-//       itemname: row.querySelector('.itemname').value,
-//       description: row.querySelector('.description').value,
-//       unit: row.querySelector('.unit').value || "",
-//       quantity: row.querySelector('.quantity').value,
-//       specialrequest: row.querySelector('.specialrequest').value
-//     };
-//     items.push(item);
-//   });
-//   formData.append("items", JSON.stringify(items));
-
-//   const attachmentInput = document.getElementById('fileUpload');
-//   if (attachmentInput.files.length > 0) {
-//     formData.append("attachment", attachmentInput.files[0]);
-//   }
-
-//   fetch("/save-rfq", {
-//     method: "POST",
-//     body: formData
-//   }).then(res => res.json())
-//     .then(data => {
-//       alert(data.message);
-//       if (data.success) {
-//         window.location.href = "/request-quotation";
-//       }
-//     }).catch(err => {
-//       console.error("RFQ save error:", err.message || err);
-//       alert("An error occurred.");
-//     });
-// }
-// =======
-//   document.getElementById('saveDraftBtn').addEventListener('click', () => {
-//     handleRFQSubmit("Draft");
-//   });
-
-//   function handleRFQSubmit(status) {
-//     const form = document.getElementById('rfqForm');
-//     const formData = new FormData(form);
-//     const storedUser = JSON.parse(localStorage.getItem("user"));
-//     const userID = storedUser?.userID;
-//     const requestID = new URLSearchParams(window.location.search).get("requestID");
-//     if (requestID) {
-//       formData.append("requestID", requestID);
-//     }
-
-//     formData.append("requestStatus", status);
-//     formData.append("userID", userID);
-//     formData.append("RFQNo", document.getElementById("rfqNo")?.value?.trim() || "");
-//     formData.append("requestDate", document.getElementById("rfqDate")?.value?.trim() || "");
-//     formData.append("validity", document.getElementById("validUntil")?.value?.trim() || "");
-//     formData.append("totalBudget", document.getElementById("abc")?.value?.trim() || "");
-
-//     const details = {
-//       conditions: quill.getText(),
-//       note: quill2.getText(),
-//       signaturePath: "",
-//       reprename: document.getElementById('repreName')?.value || ""
-//     };
-//     formData.append("details", JSON.stringify(details));
-//     formData.append("currentsignPath", currentSignPath);
-
-//     const items = [];
-//     document.querySelectorAll('#tableBody tr').forEach((row, index) => {
-//       const item = {
-//         itemno: `ITEM${(index + 1).toString().padStart(3, '0')}`,
-//         itemname: row.querySelector('input[name="item_name"]')?.value || "",
-//         description: row.querySelector('input[name="description"]')?.value || "",
-//         unit: row.querySelector('input[name="unit"]')?.value || "",
-//         quantity: row.querySelector('input[name="quantity"]')?.value || "",
-//         specialrequest: row.querySelector('input[name="special_request"]')?.value || "",
-//         price: ""
-//       };
-//       items.push(item);
-//     });
-//     formData.append("items", JSON.stringify(items));
-
-//     if (uploadedFile) {
-//       formData.append("attachment", uploadedFile);
-//     } if (!uploadedFile && currentRequest?.attachment) {
-//       formData.append("existingAttachment", currentRequest.attachment);
-//     }
-
-
-//     const canvas = document.getElementById('signature-pad');
-//     if (!uploadedSignatureFile && canvas && !isCanvasBlank(canvas)) {
-//       canvas.toBlob(function (blob) {
-//         if (blob) {
-//           const filename = `signature_${Date.now()}.png`;
-//           formData.append("signature", blob, filename);
-//         }
-//         submitRFQForm(formData);
-//       }, 'image/png');
-//     } else {
-//       if (uploadedSignatureFile) {
-//         formData.append("signature", uploadedSignatureFile);
-//       }
-//       submitRFQForm(formData);
-//     }
-//   }
-
-//   function submitRFQForm(formData) {
-//     fetch("/save-rfq", {
-//       method: "POST",
-//       body: formData
-//     }).then(res => res.json())
-//       .then(data => {
-//         alert(data.message);
-//         if (data.success) {
-//           window.location.href = "/request-quotation";
-//         }
-//       }).catch(err => {
-//         console.error("RFQ save error:", err.message || err);
-//         alert("An error occurred.");
-//       });
-//   }
-// });
-// >>>>>>> 35133a95635e4f6b9b814da67cd10166692fd93f
