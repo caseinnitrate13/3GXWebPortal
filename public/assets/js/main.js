@@ -1450,7 +1450,7 @@ $(document).ready(function () {
 
     let newRow = `
           <tr>
-            <td><input type="text" class="form-control-plaintext border-bottom-custom" id="item_name" name="item_name"></td>
+            <td><input type="text" class="form-control-plaintext border-bottom-custom" name="item_name"></td>
             <td><input type="text" class="form-control-plaintext border-bottom-custom" name="description"></td>
             <td><input type="text" class="form-control-plaintext border-bottom-custom" name="unit"></td>
             <td><input type="number" class="form-control-plaintext border-bottom-custom" name="quantity"></td>
@@ -1470,17 +1470,14 @@ $(document).ready(function () {
   });
 });
 
-
-// Add Attachment
-let uploadedFileName = null;
-let fileSaved = false;
+// file upload
 document.addEventListener("DOMContentLoaded", function () {
   const fileUploadPreview = document.getElementById("fileUploadPreview");
   const fileUpload = document.getElementById("fileUpload");
   const fileUploadBtn = document.getElementById("fileUploadBtn");
   const uploadSaveBtn = document.getElementById("uploadSaveBtn");
   const attachBtn = document.getElementById("attachBtn");
-
+  let uploadedFileName = null;
 
   fileUploadBtn.addEventListener("click", function () {
     fileUpload.click();
@@ -1528,7 +1525,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const noUploadedFile = document.getElementById('noUploadedFile');
   uploadSaveBtn.addEventListener("click", function () {
     if (uploadedFileName) {
-      fileSaved = true;
       noUploadedFile.classList.remove('d-block');
       noUploadedFile.classList.add('d-none');
 
@@ -1562,29 +1558,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Reset modal content when closed
   document.getElementById("attachmentModal").addEventListener("hidden.bs.modal", function () {
-    if (!fileSaved) {
-      uploadedFileName = null;
-    }
-    fileSaved = false;
-
     document.body.style.overflow = "auto";
     document.body.style.paddingRight = "0px";
 
     fileUploadPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
+
+    uploadedFileName = null;
     fileUpload.value = "";
 
     noUploadedFile.classList.remove('d-block');
     noUploadedFile.classList.add('d-none');
   });
 
-});
 
-
-// Add file signature
-// Ensure clicking the attach button always reopens the file chooser
-let uploadedImage = null;
-let imageSaved = false;
-document.addEventListener("DOMContentLoaded", function () {
+  // Ensure clicking the attach button always reopens the file chooser
   attachBtn.addEventListener("click", function () {
     const signatureModalElement = document.getElementById('attachmentModal')
     // Remove lingering backdrops (if any)
@@ -1593,12 +1580,17 @@ document.addEventListener("DOMContentLoaded", function () {
     signatureModal.show();
   });
 
-  // upload signature
+});
+
+
+// upload signature
+document.addEventListener("DOMContentLoaded", function () {
   const uploadSignPreview = document.getElementById("uploadSignPreview");
   const fileInput = document.getElementById("fileInput");
   const uploadImgBtn = document.getElementById("uploadImgBtn");
   const saveButton = document.getElementById("saveButton");
   const signaturePreview = document.getElementById("signature-preview");
+  let uploadedImage = null;
 
   uploadImgBtn.addEventListener("click", function () {
     fileInput.click();
@@ -1644,8 +1636,8 @@ document.addEventListener("DOMContentLoaded", function () {
   // save uploaded image to previewContainer
   const noSignatureUploaded = document.getElementById('noSignatureUploaded');
   saveButton.addEventListener("click", function () {
+
     if (uploadedImage) {
-      imageSaved = true;
       noSignatureUploaded.classList.remove('d-block');
       noSignatureUploaded.classList.add('d-none');
 
@@ -1678,328 +1670,244 @@ document.addEventListener("DOMContentLoaded", function () {
       noSignatureUploaded.classList.remove('d-none');
       noSignatureUploaded.classList.add('d-block');
     }
-
   });
 
   // Reset modal content when closed
   document.getElementById("signatureModal").addEventListener("hidden.bs.modal", function () {
-    if (!fileSaved) {
-      uploadedImage = null;
-    }
-    imageSaved = false;
-
     document.body.style.overflow = "auto";
     document.body.style.paddingRight = "0px";
     uploadSignPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
-    fileInput.value = "";
+    uploadedImage = null;
 
     noSignatureUploaded.classList.remove('d-block');
     noSignatureUploaded.classList.add('d-none');
   });
 
+});
 
-  // Ensure modal resets properly when reopening
-  // document.getElementById('uploadSignBtn').addEventListener('click', () => {
-  //   const signatureModalElement = document.getElementById('signatureModal');
-  //   document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
 
-  //   const signatureModal = new bootstrap.Modal(signatureModalElement);
-  //   signatureModal.show();
-  // });
+// signature pad
+const canvas = document.getElementById('signature-pad');
+const ctx = canvas.getContext('2d');
+const clearButton = document.getElementById('clear');
+const submitButton = document.getElementById('submit');
 
-  // signature pad
-  const canvas = document.getElementById('signature-pad');
+let writingMode = false;
+
+canvas.width = 420;
+canvas.height = 200;
+
+ctx.lineWidth = 2;
+ctx.lineJoin = ctx.lineCap = 'round';
+
+let lastX, lastY, lastMidX, lastMidY;
+
+canvas.addEventListener('pointerdown', (event) => {
+  const { offsetX, offsetY } = getCanvasOffset(event);
+  writingMode = true;
+  lastX = offsetX;
+  lastY = offsetY;
+  lastMidX = offsetX;
+  lastMidY = offsetY;
+  ctx.beginPath();
+  ctx.moveTo(lastX, lastY);
+});
+
+canvas.addEventListener('pointerup', () => {
+  writingMode = false;
+});
+
+canvas.addEventListener('pointermove', (event) => {
+  if (!writingMode) return;
+
+  const { offsetX, offsetY } = getCanvasOffset(event);
+
+  // Quadratic Bézier curve to draw a smooth line
+  const midX = (lastX + offsetX) / 2;
+  const midY = (lastY + offsetY) / 2;
+
+  // Smoothing the line using quadratic Bézier curve
+  ctx.quadraticCurveTo(lastX, lastY, midX, midY);
+  ctx.stroke();
+
+  lastX = offsetX;
+  lastY = offsetY;
+});
+
+canvas.addEventListener('pointerout', () => {
+  writingMode = false;
+});
+
+// Function to get canvas offset relative to the canvas itself
+function getCanvasOffset(event) {
+  const rect = canvas.getBoundingClientRect();
+  const offsetX = event.clientX - rect.left;
+  const offsetY = event.clientY - rect.top;
+  return { offsetX, offsetY };
+}
+
+// refresh button
+clearButton.addEventListener('click', (event) => {
+  event.preventDefault();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+});
+
+function isCanvasBlank(canvas) {
   const ctx = canvas.getContext('2d');
-  const clearButton = document.getElementById('clear');
-  const submitButton = document.getElementById('submit');
+  const pixelData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 
-  let writingMode = false;
-
-  canvas.width = 420;
-  canvas.height = 200;
-
-  // Initialize the drawing context properties
-  ctx.lineWidth = 2;
-  ctx.lineJoin = ctx.lineCap = 'round';
-
-  let lastX, lastY, lastMidX, lastMidY;
-
-  canvas.addEventListener('pointerdown', (event) => {
-    const { offsetX, offsetY } = getCanvasOffset(event);
-    writingMode = true;
-    lastX = offsetX;
-    lastY = offsetY;
-    lastMidX = offsetX;
-    lastMidY = offsetY;
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-  });
-
-  canvas.addEventListener('pointerup', () => {
-    writingMode = false;
-  });
-
-  canvas.addEventListener('pointermove', (event) => {
-    if (!writingMode) return;
-
-    const { offsetX, offsetY } = getCanvasOffset(event);
-
-    // Quadratic Bézier curve to draw a smooth line
-    const midX = (lastX + offsetX) / 2;
-    const midY = (lastY + offsetY) / 2;
-
-    // Smoothing the line using quadratic Bézier curve
-    ctx.quadraticCurveTo(lastX, lastY, midX, midY);
-    ctx.stroke();
-
-    lastX = offsetX;
-    lastY = offsetY;
-  });
-
-  canvas.addEventListener('pointerout', () => {
-    writingMode = false;
-  });
-
-  // Function to get canvas offset relative to the canvas itself
-  function getCanvasOffset(event) {
-    const rect = canvas.getBoundingClientRect();
-    const offsetX = event.clientX - rect.left;
-    const offsetY = event.clientY - rect.top;
-    return { offsetX, offsetY };
-  }
-
-  // refresh button
-  clearButton.addEventListener('click', (event) => {
-    event.preventDefault();
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  });
-
-  function isCanvasBlank(canvas) {
-    const ctx = canvas.getContext('2d');
-    const pixelData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-
-    for (let i = 0; i < pixelData.length; i += 4) {
-      if (pixelData[i + 3] !== 0) { // Alpha channel is not transparent
-        return false; // Canvas is NOT blank
-      }
+  for (let i = 0; i < pixelData.length; i += 4) {
+    if (pixelData[i + 3] !== 0) { // Alpha channel is not transparent
+      return false; // Canvas is NOT blank
     }
-    return true; // Canvas is blank
   }
+  return true; // Canvas is blank
+}
 
-  const emptyCanvas = document.getElementById('emptyCanvas');
+const emptyCanvas = document.getElementById('emptyCanvas');
 
-  // submit
-  submitButton.addEventListener('click', () => {
+// submit
+submitButton.addEventListener('click', () => {
 
-    if (isCanvasBlank(canvas)) {
-      emptyCanvas.classList.remove('d-none');
-      emptyCanvas.classList.add('d-block');
-    } else {
-      emptyCanvas.classList.remove('d-block');
-      emptyCanvas.classList.add('d-none');
-
-      const imageURL = canvas.toDataURL();
-      const imgElement = document.createElement('img');
-      imgElement.src = imageURL;
-      imgElement.style.display = 'block';
-
-      const signatureModalElement = document.getElementById('signaturePadModal');
-      const signatureModal = bootstrap.Modal.getInstance(signatureModalElement);
-
-      if (signatureModal) {
-        signatureModal.hide();
-      }
-
-      signatureModalElement.addEventListener('hidden.bs.modal', () => {
-        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-        document.body.style.overflow = 'auto';
-
-        emptyCanvas.classList.remove('d-block');
-        emptyCanvas.classList.add('d-none');
-
-        // canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-      }, { once: true });
-
-      // preview image 
-      const previewArea = document.getElementById('signature-preview');
-      const uploadSignBtn = document.getElementById('uploadSignBtn');
-      const signPadBtn = document.getElementById('signPadBtn');
-      const previewContainer = document.getElementById('previewContainer');
-
-      uploadSignBtn.style.display = 'none';
-      signPadBtn.style.display = 'none';
-      previewContainer.style.display = 'block';
-
-      previewArea.innerHTML = '';
-      previewArea.appendChild(imgElement);
-    }
-  });
-
-  // restore scrolling 
-  document.getElementById("signaturePadModal").addEventListener("hidden.bs.modal", function () {
-    document.body.style.overflow = "auto";
-    document.body.style.paddingRight = "0px";
-  });
-
-
-  const closePreview = document.getElementById('closePreview');
-  closePreview.addEventListener('click', () => {
-    const previewContainer = document.getElementById('previewContainer');
-    const uploadSignBtn = document.getElementById('uploadSignBtn');
-    const signPadBtn = document.getElementById('signPadBtn');
-
-    previewContainer.style.display = 'none';
-    uploadSignBtn.style.display = 'block';
-    signPadBtn.style.display = 'block';
-  });
-
-  // Ensure modal resets properly when reopening
-  document.getElementById('signPadBtn').addEventListener('click', () => {
-    const signatureModalElement = document.getElementById('signaturePadModal');
-    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-
+  if (isCanvasBlank(canvas)) {
+    emptyCanvas.classList.remove('d-none');
+    emptyCanvas.classList.add('d-block');
+  } else {
     emptyCanvas.classList.remove('d-block');
     emptyCanvas.classList.add('d-none');
 
-    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    const imageURL = canvas.toDataURL();
+    const imgElement = document.createElement('img');
+    imgElement.src = imageURL;
+    imgElement.style.display = 'block';
 
-    const signatureModal = new bootstrap.Modal(signatureModalElement);
-    signatureModal.show();
-  });
+    const signatureModalElement = document.getElementById('signaturePadModal');
+    const signatureModal = bootstrap.Modal.getInstance(signatureModalElement);
 
+    if (signatureModal) {
+      signatureModal.hide();
+    }
 
+    signatureModalElement.addEventListener('hidden.bs.modal', () => {
+      document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+      document.body.style.overflow = 'auto';
 
+      emptyCanvas.classList.remove('d-block');
+      emptyCanvas.classList.add('d-none');
 
-  const sendSupplierBtn = document.getElementById('sendSupplierBtn');
-  // const canvas = document.getElementById('signature-pad');
-  // const ctx = canvas.getContext('2d');
+      canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    }, { once: true });
 
-  function isCanvasBlank(canvas) {
-    const ctx = canvas.getContext('2d');
-    const pixelBuffer = new Uint32Array(
-      ctx.getImageData(0, 0, canvas.width, canvas.height).data.buffer
-    );
-
-    return !pixelBuffer.some(color => color !== 0);
-  }
-
-  sendSupplierBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-
-    const form = document.getElementById('rfqForm');
-    const errorContainer = document.getElementById('error-container');
-    if (!errorContainer) return console.error('Missing #errorContainer in HTML');
-
-    errorContainer.classList.add('d-none');
-    errorContainer.innerHTML = '';
-
-    const rfqNo = document.getElementById('rfqNo').value.trim();
-    const rfqDate = document.getElementById('rfqDate').value;
-    const validUntil = document.getElementById('validUntil').value;
-    const abc = document.getElementById('abc').value.trim();
-    const repreName = document.getElementById('repreName').value.trim();
-
-    const rfqNoValid = rfqNo !== '';
-    const rfqDateValid = rfqDate !== '';
-    const validUntilValid = validUntil !== '';
-    const abcValid = abc !== '';
-    const conditionsValid = quill.root.innerHTML.trim() !== '<p><br></p>';
-    const itemInputs = document.querySelectorAll('input[name="item_name"]');
-    const itemsValid = Array.from(itemInputs).some(input => input.value.trim() !== '');
-    const documentUploaded = !!uploadedFileName;
+    // preview image 
+    const previewArea = document.getElementById('signature-preview');
+    const uploadSignBtn = document.getElementById('uploadSignBtn');
+    const signPadBtn = document.getElementById('signPadBtn');
     const previewContainer = document.getElementById('previewContainer');
-    const signatureUploaded = previewContainer.style.display === 'block' &&
-      previewContainer.querySelector('img, canvas');
-    const repreNameValid = repreName !== '';
 
-    if (
-      !conditionsValid || !itemsValid || !documentUploaded || !signatureUploaded ||
-      !rfqNoValid || !rfqDateValid || !validUntilValid || !abcValid || !repreNameValid
-    ) {
-      errorContainer.classList.remove('d-none');
-      errorContainer.innerHTML = `
-        <ul>
-        ${!rfqNoValid ? '<li>RFQ No. is required.</li>' : ''}
-          ${!rfqDateValid ? '<li>RFQ Date is required.</li>' : ''}
-          ${!validUntilValid ? '<li>Valid Until date is required.</li>' : ''}
-          ${!abcValid ? '<li>ABC is required.</li>' : ''}
-          ${!conditionsValid ? '<li>Please fill in the Terms and Conditions.</li>' : ''}
-          ${!itemsValid ? '<li>Please add at least one item.</li>' : ''}
-          ${!documentUploaded ? '<li>Please upload an attachment or provide a file.</li>' : ''}
-          ${!signatureUploaded ? '<li>Please provide a signature.</li>' : ''}
-          ${!repreNameValid ? '<li>Representative Name is required.</li>' : ''}
-        </ul>
-      `;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      const sendSupplierModal = new bootstrap.Modal(document.getElementById('sendSupplierModal'));
-      sendSupplierModal.show();
-    }
-  });
+    uploadSignBtn.style.display = 'none';
+    signPadBtn.style.display = 'none';
+    previewContainer.style.display = 'block';
 
-  // save/send form
-  document.getElementById('sendBtn').addEventListener('click', () => {
-    handleRFQSubmit("Pending");
-  });
+    previewArea.innerHTML = '';
+    previewArea.appendChild(imgElement);
+  }
+});
 
-  document.getElementById('saveDraftBtn').addEventListener('click', () => {
-    handleRFQSubmit("Draft");
-  });
-
-  function handleRFQSubmit(status) {
-    const form = document.getElementById('rfqForm');
-    const formData = new FormData(form);
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    const userID = storedUser?.userID;
-
-    // Sample: Add data manually if not already in inputs
-    formData.append("requestStatus", status);
-    formData.append("userID", userID); // assuming you store it here
-    formData.append("RFQNo", document.getElementById("rfqNo")?.value?.trim() || "");
-    formData.append("requestDate", document.getElementById("rfqDate")?.value?.trim() || "");
-    formData.append("validity", document.getElementById("validUntil")?.value?.trim() || "");
-    formData.append("totalBudget", document.getElementById("abc")?.value?.trim() || "");
+// restore scrolling 
+document.getElementById("signaturePadModal").addEventListener("hidden.bs.modal", function () {
+  document.body.style.overflow = "auto";
+  document.body.style.paddingRight = "0px";
+});
 
 
-    const details = {
-      conditions: quill.getText(),
-      note: quill2.getText(),
-      signaturePath: "",
-      reprename: document.getElementById('repreName')?.value || ""
+const closePreview = document.getElementById('closePreview');
+closePreview.addEventListener('click', () => {
+  const previewContainer = document.getElementById('previewContainer');
+  const uploadSignBtn = document.getElementById('uploadSignBtn');
+  const signPadBtn = document.getElementById('signPadBtn');
+
+  previewContainer.style.display = 'none';
+  uploadSignBtn.style.display = 'block';
+  signPadBtn.style.display = 'block';
+});
+
+// Ensure modal resets properly when reopening
+document.getElementById('signPadBtn').addEventListener('click', () => {
+  const signatureModalElement = document.getElementById('signaturePadModal');
+  document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+
+  emptyCanvas.classList.remove('d-block');
+  emptyCanvas.classList.add('d-none');
+
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+
+  const signatureModal = new bootstrap.Modal(signatureModalElement);
+  signatureModal.show();
+});
+
+
+// save/send form
+document.getElementById('sendBtn').addEventListener('click', () => {
+  handleRFQSubmit("Pending");
+});
+
+document.getElementById('saveDraftBtn').addEventListener('click', () => {
+  handleRFQSubmit("Draft");
+});
+
+function handleRFQSubmit(status) {
+  const form = document.getElementById('rfqForm');
+  const formData = new FormData(form);
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const userID = storedUser?.userID;
+
+  // Sample: Add data manually if not already in inputs
+  formData.append("requestStatus", status);
+  formData.append("userID", userID); // assuming you store it here
+  formData.append("RFQNo", document.getElementById("rfqNo")?.value?.trim() || "");
+  formData.append("requestDate", document.getElementById("rfqDate")?.value?.trim() || "");
+  formData.append("validity", document.getElementById("validUntil")?.value?.trim() || "");
+  formData.append("totalBudget", document.getElementById("abc")?.value?.trim() || "");
+
+
+  const details = {
+    conditions: quill.getText(),
+    note: quill2.getText(),
+    signaturePath: "",
+    reprename: document.getElementById('repreName')?.value || ""
+  };
+  formData.append("details", JSON.stringify(details));
+
+  const items = [];
+  document.querySelectorAll('#itemTable tbody tr').forEach((row) => {
+    const item = {
+      itemno: row.querySelector('.itemno').value,
+      itemname: row.querySelector('.itemname').value,
+      description: row.querySelector('.description').value,
+      unit: row.querySelector('.unit').value || "",
+      quantity: row.querySelector('.quantity').value,
+      specialrequest: row.querySelector('.specialrequest').value
     };
-    formData.append("details", JSON.stringify(details));
+    items.push(item);
+  });
+  formData.append("items", JSON.stringify(items));
 
-    const items = [];
-    document.querySelectorAll('#itemTable tbody tr').forEach((row) => {
-      const item = {
-        itemname: row.querySelector('.item_name').value,
-        description: row.querySelector('.description').value,
-        unit: row.querySelector('.unit').value || "",
-        quantity: row.querySelector('.quantity').value,
-        specialrequest: row.querySelector('.specialrequest').value
-      };
-      items.push(item);
-    });
-    formData.append("items", JSON.stringify(items));
-
-    const attachmentInput = uploadedFileName;
-    if (attachmentInput.files.length > 0) {
-      formData.append("attachment", attachmentInput.files[0]);
-    }
-
-    fetch("/save-rfq", {
-      method: "POST",
-      body: formData
-    }).then(res => res.json())
-      .then(data => {
-        alert(data.message);
-        if (data.success) {
-          window.location.href = "/request-quotation";
-        }
-      }).catch(err => {
-        console.error("RFQ save error:", err.message || err);
-        alert("An error occurred.");
-      });
+  const attachmentInput = document.getElementById('fileUpload');
+  if (attachmentInput.files.length > 0) {
+    formData.append("attachment", attachmentInput.files[0]);
   }
 
-}); 
+  fetch("/save-rfq", {
+    method: "POST",
+    body: formData
+  }).then(res => res.json())
+    .then(data => {
+      alert(data.message);
+      if (data.success) {
+        window.location.href = "/request-quotation";
+      }
+    }).catch(err => {
+      console.error("RFQ save error:", err.message || err);
+      alert("An error occurred.");
+    });
+}
