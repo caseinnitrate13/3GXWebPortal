@@ -70,9 +70,12 @@ app.post('/login', (req, res) => {
         let redirectUrl = "/request-quotation";
         if (result.accountStatus === "Pending") {
             redirectUrl = "/initial-registration";
-        } else if (result.accountStatus === "Rejected") {
+        } else if (result.accountStatus === "Declined") {
             redirectUrl = "/";
+        } else if (result.accountStatus === "Approved") {
+            redirectUrl = "/request-quotation";
         }
+
 
         res.status(200).json({
             success: true,
@@ -582,5 +585,5 @@ app.use((req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server started at http://192.168.254.131:${port}`);
+    console.log(`Server started at http://127.0.0.1:${port}`);
 });
