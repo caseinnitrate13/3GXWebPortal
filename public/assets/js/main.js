@@ -1253,6 +1253,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
+
     // approve save 
     const validIdError = document.getElementById('validIdError');
     approveSaveBtn.addEventListener("click", function () {
@@ -1277,6 +1278,7 @@ document.addEventListener("DOMContentLoaded", function () {
             validIdError.classList.add('d-none');
           }, { once: true });
           approveBtn.disabled = true;
+          window.location.href = '/quotations';
         } else if (approveConfirmationModal) {
           if (selectedRow) {
             const remarksCell = selectedRow.querySelector('.remarks-cell');
@@ -1822,8 +1824,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-
-
 // RFQ FORM
 // T&C textarea
 const quill = new Quill('#conditions', {
@@ -1857,7 +1857,7 @@ $(document).ready(function () {
 
     let newRow = `
           <tr>
-            <td><input type="text" class="form-control-plaintext border-bottom-custom" name="item_name"></td>
+            <td><input type="text" class="form-control-plaintext border-bottom-custom" id="item_name" name="item_name"></td>
             <td><input type="text" class="form-control-plaintext border-bottom-custom" name="description"></td>
             <td><input type="text" class="form-control-plaintext border-bottom-custom" name="unit"></td>
             <td><input type="number" class="form-control-plaintext border-bottom-custom" name="quantity"></td>
@@ -1888,7 +1888,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const fileUploadBtn = document.getElementById("fileUploadBtn");
   const uploadSaveBtn = document.getElementById("uploadSaveBtn");
   const attachBtn = document.getElementById("attachBtn");
-  let uploadedFileName = null;
+
 
   fileUploadBtn.addEventListener("click", function () {
     fileUpload.click();
@@ -1937,6 +1937,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const noUploadedFile = document.getElementById('noUploadedFile');
   uploadSaveBtn.addEventListener("click", function () {
     if (uploadedFileName) {
+      fileSaved = true;
       noUploadedFile.classList.remove('d-block');
       noUploadedFile.classList.add('d-none');
 
@@ -1970,27 +1971,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Reset modal content when closed
   document.getElementById("attachmentModal").addEventListener("hidden.bs.modal", function () {
+    if (!fileSaved) {
+      uploadedFileName = null;
+    }
+    fileSaved = false;
+
     document.body.style.overflow = "auto";
     document.body.style.paddingRight = "0px";
 
     fileUploadPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
-
-    uploadedFileName = null;
     fileUpload.value = "";
 
     noUploadedFile.classList.remove('d-block');
     noUploadedFile.classList.add('d-none');
   });
 
-
-  // Ensure clicking the attach button always reopens the file chooser
-  attachBtn.addEventListener("click", function () {
-    const signatureModalElement = document.getElementById('attachmentModal')
-    // Remove lingering backdrops (if any)
-    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-    const signatureModal = new bootstrap.Modal(signatureModalElement);
-    signatureModal.show();
-  });
 
 });
 
@@ -2153,311 +2148,318 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
 
+  // Ensure modal resets properly when reopening
+  // document.getElementById('uploadSignBtn').addEventListener('click', () => {
+  //   const signatureModalElement = document.getElementById('signatureModal');
+  //   document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
 
+  //   const signatureModal = new bootstrap.Modal(signatureModalElement);
+  //   signatureModal.show();
+  // });
 
-// signature pad
-const canvas = document.getElementById('signature-pad');
-const ctx = canvas.getContext('2d');
-const clearButton = document.getElementById('clear');
-const submitButton = document.getElementById('submit');
-
-let writingMode = false;
-
-canvas.width = 420;
-canvas.height = 200;
-
-ctx.lineWidth = 2;
-ctx.lineJoin = ctx.lineCap = 'round';
-
-let lastX, lastY, lastMidX, lastMidY;
-
-canvas.addEventListener('pointerdown', (event) => {
-  const { offsetX, offsetY } = getCanvasOffset(event);
-  writingMode = true;
-  lastX = offsetX;
-  lastY = offsetY;
-  lastMidX = offsetX;
-  lastMidY = offsetY;
-  ctx.beginPath();
-  ctx.moveTo(lastX, lastY);
-});
-
-canvas.addEventListener('pointerup', () => {
-  writingMode = false;
-});
-
-canvas.addEventListener('pointermove', (event) => {
-  if (!writingMode) return;
-
-  const { offsetX, offsetY } = getCanvasOffset(event);
-
-  // Quadratic Bézier curve to draw a smooth line
-  const midX = (lastX + offsetX) / 2;
-  const midY = (lastY + offsetY) / 2;
-
-  // Smoothing the line using quadratic Bézier curve
-  ctx.quadraticCurveTo(lastX, lastY, midX, midY);
-  ctx.stroke();
-
-  lastX = offsetX;
-  lastY = offsetY;
-});
-
-canvas.addEventListener('pointerout', () => {
-  writingMode = false;
-});
-
-// Function to get canvas offset relative to the canvas itself
-function getCanvasOffset(event) {
-  const rect = canvas.getBoundingClientRect();
-  const offsetX = event.clientX - rect.left;
-  const offsetY = event.clientY - rect.top;
-  return { offsetX, offsetY };
-}
-
-// refresh button
-clearButton.addEventListener('click', (event) => {
-  event.preventDefault();
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-});
-
-function isCanvasBlank(canvas) {
+  // signature pad
+  const canvas = document.getElementById('signature-pad');
   const ctx = canvas.getContext('2d');
-  const pixelData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  const clearButton = document.getElementById('clear');
+  const submitButton = document.getElementById('submit');
 
-  for (let i = 0; i < pixelData.length; i += 4) {
-    if (pixelData[i + 3] !== 0) { // Alpha channel is not transparent
-      return false; // Canvas is NOT blank
-    }
+  let writingMode = false;
+
+  canvas.width = 420;
+  canvas.height = 200;
+
+  // Initialize the drawing context properties
+  ctx.lineWidth = 2;
+  ctx.lineJoin = ctx.lineCap = 'round';
+
+  let lastX, lastY, lastMidX, lastMidY;
+
+  canvas.addEventListener('pointerdown', (event) => {
+    const { offsetX, offsetY } = getCanvasOffset(event);
+    writingMode = true;
+    lastX = offsetX;
+    lastY = offsetY;
+    lastMidX = offsetX;
+    lastMidY = offsetY;
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+  });
+
+  canvas.addEventListener('pointerup', () => {
+    writingMode = false;
+  });
+
+  canvas.addEventListener('pointermove', (event) => {
+    if (!writingMode) return;
+
+    const { offsetX, offsetY } = getCanvasOffset(event);
+
+    // Quadratic Bézier curve to draw a smooth line
+    const midX = (lastX + offsetX) / 2;
+    const midY = (lastY + offsetY) / 2;
+
+    // Smoothing the line using quadratic Bézier curve
+    ctx.quadraticCurveTo(lastX, lastY, midX, midY);
+    ctx.stroke();
+
+    lastX = offsetX;
+    lastY = offsetY;
+  });
+
+  canvas.addEventListener('pointerout', () => {
+    writingMode = false;
+  });
+
+  // Function to get canvas offset relative to the canvas itself
+  function getCanvasOffset(event) {
+    const rect = canvas.getBoundingClientRect();
+    const offsetX = event.clientX - rect.left;
+    const offsetY = event.clientY - rect.top;
+    return { offsetX, offsetY };
   }
-  return true; // Canvas is blank
-}
 
-const emptyCanvas = document.getElementById('emptyCanvas');
+  // refresh button
+  clearButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
 
-// submit
-submitButton.addEventListener('click', () => {
+  function isCanvasBlank(canvas) {
+    const ctx = canvas.getContext('2d');
+    const pixelData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 
-  if (isCanvasBlank(canvas)) {
-    emptyCanvas.classList.remove('d-none');
-    emptyCanvas.classList.add('d-block');
-  } else {
-    emptyCanvas.classList.remove('d-block');
-    emptyCanvas.classList.add('d-none');
-
-    const imageURL = canvas.toDataURL();
-    const imgElement = document.createElement('img');
-    imgElement.src = imageURL;
-    imgElement.style.display = 'block';
-
-    const signatureModalElement = document.getElementById('signaturePadModal');
-    const signatureModal = bootstrap.Modal.getInstance(signatureModalElement);
-
-    if (signatureModal) {
-      signatureModal.hide();
+    for (let i = 0; i < pixelData.length; i += 4) {
+      if (pixelData[i + 3] !== 0) { // Alpha channel is not transparent
+        return false; // Canvas is NOT blank
+      }
     }
+    return true; // Canvas is blank
+  }
 
-    signatureModalElement.addEventListener('hidden.bs.modal', () => {
-      document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-      document.body.style.overflow = 'auto';
+  const emptyCanvas = document.getElementById('emptyCanvas');
 
+  // submit
+  submitButton.addEventListener('click', () => {
+
+    if (isCanvasBlank(canvas)) {
+      emptyCanvas.classList.remove('d-none');
+      emptyCanvas.classList.add('d-block');
+    } else {
       emptyCanvas.classList.remove('d-block');
       emptyCanvas.classList.add('d-none');
 
-      canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-    }, { once: true });
+      const imageURL = canvas.toDataURL();
+      const imgElement = document.createElement('img');
+      imgElement.src = imageURL;
+      imgElement.style.display = 'block';
 
-    // preview image 
-    const previewArea = document.getElementById('signature-preview');
+      const signatureModalElement = document.getElementById('signaturePadModal');
+      const signatureModal = bootstrap.Modal.getInstance(signatureModalElement);
+
+      if (signatureModal) {
+        signatureModal.hide();
+      }
+
+      signatureModalElement.addEventListener('hidden.bs.modal', () => {
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+        document.body.style.overflow = 'auto';
+
+        emptyCanvas.classList.remove('d-block');
+        emptyCanvas.classList.add('d-none');
+
+        // canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+      }, { once: true });
+
+      // preview image 
+      const previewArea = document.getElementById('signature-preview');
+      const uploadSignBtn = document.getElementById('uploadSignBtn');
+      const signPadBtn = document.getElementById('signPadBtn');
+      const previewContainer = document.getElementById('previewContainer');
+
+      uploadSignBtn.style.display = 'none';
+      signPadBtn.style.display = 'none';
+      previewContainer.style.display = 'block';
+
+      previewArea.innerHTML = '';
+      previewArea.appendChild(imgElement);
+    }
+  });
+
+  // restore scrolling 
+  document.getElementById("signaturePadModal").addEventListener("hidden.bs.modal", function () {
+    document.body.style.overflow = "auto";
+    document.body.style.paddingRight = "0px";
+  });
+
+
+  const closePreview = document.getElementById('closePreview');
+  closePreview.addEventListener('click', () => {
+    const previewContainer = document.getElementById('previewContainer');
     const uploadSignBtn = document.getElementById('uploadSignBtn');
     const signPadBtn = document.getElementById('signPadBtn');
-    const previewContainer = document.getElementById('previewContainer');
 
-    uploadSignBtn.style.display = 'none';
-    signPadBtn.style.display = 'none';
-    previewContainer.style.display = 'block';
+    previewContainer.style.display = 'none';
+    uploadSignBtn.style.display = 'block';
+    signPadBtn.style.display = 'block';
+  });
 
-    previewArea.innerHTML = '';
-    previewArea.appendChild(imgElement);
-  }
-});
+  // Ensure modal resets properly when reopening
+  document.getElementById('signPadBtn').addEventListener('click', () => {
+    const signatureModalElement = document.getElementById('signaturePadModal');
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
 
-// restore scrolling 
-document.getElementById("signaturePadModal").addEventListener("hidden.bs.modal", function () {
-  document.body.style.overflow = "auto";
-  document.body.style.paddingRight = "0px";
-});
+    emptyCanvas.classList.remove('d-block');
+    emptyCanvas.classList.add('d-none');
 
-
-const closePreview = document.getElementById('closePreview');
-closePreview.addEventListener('click', () => {
-  const previewContainer = document.getElementById('previewContainer');
-  const uploadSignBtn = document.getElementById('uploadSignBtn');
-  const signPadBtn = document.getElementById('signPadBtn');
-
-  previewContainer.style.display = 'none';
-  uploadSignBtn.style.display = 'block';
-  signPadBtn.style.display = 'block';
-});
-
-// Ensure modal resets properly when reopening
-document.getElementById('signPadBtn').addEventListener('click', () => {
-  const signatureModalElement = document.getElementById('signaturePadModal');
-  document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-
-  emptyCanvas.classList.remove('d-block');
-  emptyCanvas.classList.add('d-none');
-
-  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
 
   const signatureModal = new bootstrap.Modal(signatureModalElement);
   signatureModal.show();
 });
 
+  //Send to Supplier
+  const sendSupplierBtn = document.getElementById('sendSupplierBtn');
+  // const canvas = document.getElementById('signature-pad');
+  // const ctx = canvas.getContext('2d');
 
-//Send to Supplier
-const sendSupplierBtn = document.getElementById('sendSupplierBtn');
-// const canvas = document.getElementById('signature-pad');
-// const ctx = canvas.getContext('2d');
+  function isCanvasBlank(canvas) {
+    const ctx = canvas.getContext('2d');
+    const pixelBuffer = new Uint32Array(
+      ctx.getImageData(0, 0, canvas.width, canvas.height).data.buffer
+    );
 
-function isCanvasBlank(canvas) {
-  const ctx = canvas.getContext('2d');
-  const pixelBuffer = new Uint32Array(
-    ctx.getImageData(0, 0, canvas.width, canvas.height).data.buffer
-  );
-
-  return !pixelBuffer.some(color => color !== 0);
-}
-
-sendSupplierBtn.addEventListener('click', (e) => {
-  e.preventDefault();
-
-  const form = document.getElementById('rfqForm');
-  const errorContainer = document.getElementById('error-container');
-  if (!errorContainer) return console.error('Missing #errorContainer in HTML');
-
-  errorContainer.classList.add('d-none');
-  errorContainer.innerHTML = '';
-
-  const rfqNo = document.getElementById('rfqNo').value.trim();
-  const rfqDate = document.getElementById('rfqDate').value;
-  const validUntil = document.getElementById('validUntil').value;
-  const abc = document.getElementById('abc').value.trim();
-  const repreName = document.getElementById('repreName').value.trim();
-  const hasExistingFile = currentRequest?.attachment;
-  const hasExistingSign = currentSignPath;
-
-  const rfqNoValid = rfqNo !== '';
-  const rfqDateValid = rfqDate !== '';
-  const validUntilValid = validUntil !== '';
-  const abcValid = abc !== '';
-  const conditionsValid = quill.root.innerHTML.trim() !== '<p><br></p>';
-  const itemInputs = document.querySelectorAll('input[name="item_name"]');
-  const itemsValid = Array.from(itemInputs).some(input => input.value.trim() !== '');
-  const documentUploaded = !!uploadedFileName || hasExistingFile;
-  const previewContainer = document.getElementById('previewContainer');
-  const signatureUploaded = previewContainer.style.display === 'block' &&
-    previewContainer.querySelector('img, canvas') || hasExistingSign;
-  const repreNameValid = repreName !== '';
-
-  if (
-    !conditionsValid || !itemsValid || !documentUploaded || !signatureUploaded ||
-    !rfqNoValid || !rfqDateValid || !validUntilValid || !abcValid || !repreNameValid
-  ) {
-    errorContainer.classList.remove('d-none');
-    errorContainer.innerHTML = `
-      <ul>
-      ${!rfqNoValid ? '<li>RFQ No. is required.</li>' : ''}
-        ${!rfqDateValid ? '<li>RFQ Date is required.</li>' : ''}
-        ${!validUntilValid ? '<li>Valid Until date is required.</li>' : ''}
-        ${!abcValid ? '<li>ABC is required.</li>' : ''}
-        ${!conditionsValid ? '<li>Please fill in the Terms and Conditions.</li>' : ''}
-        ${!itemsValid ? '<li>Please add at least one item.</li>' : ''}
-        ${!documentUploaded ? '<li>Please upload an attachment or provide a file.</li>' : ''}
-        ${!signatureUploaded ? '<li>Please provide a signature.</li>' : ''}
-        ${!repreNameValid ? '<li>Representative Name is required.</li>' : ''}
-      </ul>
-    `;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  } else {
-    const sendSupplierModal = new bootstrap.Modal(document.getElementById('sendSupplierModal'));
-    sendSupplierModal.show();
-  }
-});
-
-// save/send form
-document.getElementById('sendBtn').addEventListener('click', () => {
-  handleRFQSubmit("Pending");
-});
-
-document.getElementById('saveDraftBtn').addEventListener('click', () => {
-  handleRFQSubmit("Draft");
-});
-
-function handleRFQSubmit(status) {
-  const form = document.getElementById('rfqForm');
-  const formData = new FormData(form);
-  const storedUser = JSON.parse(localStorage.getItem("user"));
-  const userID = storedUser?.userID;
-  const requestID = new URLSearchParams(window.location.search).get("requestID");
-  if (requestID) {
-    formData.append("requestID", requestID);
+    return !pixelBuffer.some(color => color !== 0);
   }
 
-  formData.append("requestStatus", status);
-  formData.append("userID", userID);
-  formData.append("RFQNo", document.getElementById("rfqNo")?.value?.trim() || "");
-  formData.append("requestDate", document.getElementById("rfqDate")?.value?.trim() || "");
-  formData.append("validity", document.getElementById("validUntil")?.value?.trim() || "");
-  formData.append("totalBudget", document.getElementById("abc")?.value?.trim() || "");
+  sendSupplierBtn.addEventListener('click', (e) => {
+    e.preventDefault();
 
-  const details = {
-    conditions: quill.getText(),
-    note: quill2.getText(),
-    signaturePath: "",
-    reprename: document.getElementById('repreName')?.value || ""
-  };
-  formData.append("details", JSON.stringify(details));
-  formData.append("currentsignPath", currentSignPath);
+    const form = document.getElementById('rfqForm');
+    const errorContainer = document.getElementById('error-container');
+    if (!errorContainer) return console.error('Missing #errorContainer in HTML');
 
-  const items = [];
-  document.querySelectorAll('#tableBody tr').forEach((row, index) => {
-    const item = {
-      itemno: `ITEM${(index + 1).toString().padStart(3, '0')}`,
-      itemname: row.querySelector('input[name="item_name"]')?.value || "",
-      description: row.querySelector('input[name="description"]')?.value || "",
-      unit: row.querySelector('input[name="unit"]')?.value || "",
-      quantity: row.querySelector('input[name="quantity"]')?.value || "",
-      specialrequest: row.querySelector('input[name="special_request"]')?.value || "",
-      price: ""
-    };
-    items.push(item);
+    errorContainer.classList.add('d-none');
+    errorContainer.innerHTML = '';
+
+    const rfqNo = document.getElementById('rfqNo').value.trim();
+    const rfqDate = document.getElementById('rfqDate').value;
+    const validUntil = document.getElementById('validUntil').value;
+    const abc = document.getElementById('abc').value.trim();
+    const repreName = document.getElementById('repreName').value.trim();
+    const hasExistingFile = currentRequest?.attachment;
+    const hasExistingSign = currentSignPath;
+
+    const rfqNoValid = rfqNo !== '';
+    const rfqDateValid = rfqDate !== '';
+    const validUntilValid = validUntil !== '';
+    const abcValid = abc !== '';
+    const conditionsValid = quill.root.innerHTML.trim() !== '<p><br></p>';
+    const itemInputs = document.querySelectorAll('input[name="item_name"]');
+    const itemsValid = Array.from(itemInputs).some(input => input.value.trim() !== '');
+    const documentUploaded = !!uploadedFileName || hasExistingFile;
+    const previewContainer = document.getElementById('previewContainer');
+    const signatureUploaded = previewContainer.style.display === 'block' &&
+      previewContainer.querySelector('img, canvas') || hasExistingSign;
+    const repreNameValid = repreName !== '';
+
+    if (
+      !conditionsValid || !itemsValid || !documentUploaded || !signatureUploaded ||
+      !rfqNoValid || !rfqDateValid || !validUntilValid || !abcValid || !repreNameValid
+    ) {
+      errorContainer.classList.remove('d-none');
+      errorContainer.innerHTML = `
+        <ul>
+        ${!rfqNoValid ? '<li>RFQ No. is required.</li>' : ''}
+          ${!rfqDateValid ? '<li>RFQ Date is required.</li>' : ''}
+          ${!validUntilValid ? '<li>Valid Until date is required.</li>' : ''}
+          ${!abcValid ? '<li>ABC is required.</li>' : ''}
+          ${!conditionsValid ? '<li>Please fill in the Terms and Conditions.</li>' : ''}
+          ${!itemsValid ? '<li>Please add at least one item.</li>' : ''}
+          ${!documentUploaded ? '<li>Please upload an attachment or provide a file.</li>' : ''}
+          ${!signatureUploaded ? '<li>Please provide a signature.</li>' : ''}
+          ${!repreNameValid ? '<li>Representative Name is required.</li>' : ''}
+        </ul>
+      `;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      const sendSupplierModal = new bootstrap.Modal(document.getElementById('sendSupplierModal'));
+      sendSupplierModal.show();
+    }
   });
-  formData.append("items", JSON.stringify(items));
 
-  if (uploadedFile) {
-    formData.append("attachment", uploadedFile);
-  } if (!uploadedFile && currentRequest?.attachment) {
-    formData.append("existingAttachment", currentRequest.attachment);
-  }
+  // save/send form
+  document.getElementById('sendBtn').addEventListener('click', () => {
+    handleRFQSubmit("Pending");
+  });
+
+  document.getElementById('saveDraftBtn').addEventListener('click', () => {
+    handleRFQSubmit("Draft");
+  });
+
+  function handleRFQSubmit(status) {
+    const form = document.getElementById('rfqForm');
+    const formData = new FormData(form);
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const userID = storedUser?.userID;
+    const requestID = new URLSearchParams(window.location.search).get("requestID");
+    if (requestID) {
+      formData.append("requestID", requestID);
+    }
+
+    formData.append("requestStatus", status);
+    formData.append("userID", userID);
+    formData.append("RFQNo", document.getElementById("rfqNo")?.value?.trim() || "");
+    formData.append("requestDate", document.getElementById("rfqDate")?.value?.trim() || "");
+    formData.append("validity", document.getElementById("validUntil")?.value?.trim() || "");
+    formData.append("totalBudget", document.getElementById("abc")?.value?.trim() || "");
+
+    const details = {
+      conditions: quill.getText(),
+      note: quill2.getText(),
+      signaturePath: "",
+      reprename: document.getElementById('repreName')?.value || ""
+    };
+    formData.append("details", JSON.stringify(details));
+    formData.append("currentsignPath", currentSignPath);
+
+    const items = [];
+    document.querySelectorAll('#tableBody tr').forEach((row, index) => {
+      const item = {
+        itemno: `ITEM${(index + 1).toString().padStart(3, '0')}`,
+        itemname: row.querySelector('input[name="item_name"]')?.value || "",
+        description: row.querySelector('input[name="description"]')?.value || "",
+        unit: row.querySelector('input[name="unit"]')?.value || "",
+        quantity: row.querySelector('input[name="quantity"]')?.value || "",
+        specialrequest: row.querySelector('input[name="special_request"]')?.value || "",
+        price: ""
+      };
+      items.push(item);
+    });
+    formData.append("items", JSON.stringify(items));
+
+    if (uploadedFile) {
+      formData.append("attachment", uploadedFile);
+    } if (!uploadedFile && currentRequest?.attachment) {
+      formData.append("existingAttachment", currentRequest.attachment);
+    }
 
 
-  const canvas = document.getElementById('signature-pad');
-  if (!uploadedSignatureFile && canvas && !isCanvasBlank(canvas)) {
-    canvas.toBlob(function (blob) {
-      if (blob) {
-        const filename = `signature_${Date.now()}.png`;
-        formData.append("signature", blob, filename);
+    const canvas = document.getElementById('signature-pad');
+    if (!uploadedSignatureFile && canvas && !isCanvasBlank(canvas)) {
+      canvas.toBlob(function (blob) {
+        if (blob) {
+          const filename = `signature_${Date.now()}.png`;
+          formData.append("signature", blob, filename);
+        }
+        submitRFQForm(formData);
+      }, 'image/png');
+    } else {
+      if (uploadedSignatureFile) {
+        formData.append("signature", uploadedSignatureFile);
       }
       submitRFQForm(formData);
-    }, 'image/png');
-  } else {
-    if (uploadedSignatureFile) {
-      formData.append("signature", uploadedSignatureFile);
     }
-    submitRFQForm(formData);
   }
-}
 
 function submitRFQForm(formData) {
   fetch("/save-rfq", {
@@ -2474,5 +2476,4 @@ function submitRFQForm(formData) {
       alert("An error occurred.");
     });
 }
-
 });
