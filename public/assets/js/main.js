@@ -1334,8 +1334,8 @@ document.addEventListener("DOMContentLoaded", function () {
           }, { once: true });
           declineBtn.disabled = true;
           window.location.href = '/quotations';
-        
-          
+
+
         } else if (declineTableModal) {
           if (selectedRow) {
             const remarksCell = selectedRow.querySelector('.remarks-cell');
@@ -1416,6 +1416,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
 });
+
 
 document.addEventListener("DOMContentLoaded", () => {
   const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -1524,7 +1525,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
-
 
 document.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(window.location.search);
@@ -1822,6 +1822,79 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
+
+//QUOTATION
+
+document.addEventListener('DOMContentLoaded', () => {
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const userID = storedUser?.userID;
+  if (!userID) {
+    console.error("User ID not found");
+    return;
+  }
+
+  fetchRespondedRequests(userID);
+});
+
+function fetchRespondedRequests(userID) {
+  fetch(`/responded-requests?userID=${userID}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) {
+        throw new Error(data.message);
+      }
+
+      const requests = data.requests || [];
+      const tableBody = document.querySelector('#quotationTable tbody');
+      tableBody.innerHTML = '';
+
+      requests.forEach(item => {
+        const row = document.createElement('tr');
+
+        const localDateStr = (date) => {
+          if (!date || isNaN(date.getTime())) return "";
+          return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+        };
+        const quotationDate = new Date(item.quotationDate);
+
+        row.innerHTML = `
+          <td>${item.RFQNo}</td>
+          <td>${item.totalBudget}</td>
+          <td>${localDateStr(quotationDate)}</td>
+          <td>${item.quotationNo}</td>
+          <td>${item.totalValue}</td>
+          <td>
+            <div class="text-center d-flex justify-content-center align-content-center gap-2">
+              <a href="/view-quotation?requestID=${item.requestID}">
+                <i class="bi bi-eye me-1 text-primary" data-bs-toggle="tooltip" title="View"></i>
+              </a>
+              <div data-bs-toggle="tooltip" title="Approve">
+                <i class="bi bi-check-circle text-success pointer approve-icon" data-bs-toggle="modal" data-bs-target="#approveConfirmationModal"></i>
+              </div>
+              <div data-bs-toggle="tooltip" title="Decline">
+                <i class="bi bi-x-circle text-danger pointer decline-icon" data-bs-toggle="modal" data-bs-target="#declineTableModal"></i>
+              </div>
+            </div>
+          </td>
+          <td class="remarks-cell">${item.quotationStatus || ''}</td>
+          <td id="quotationCell">
+            ${item.quotationFile ? `<a href="/uploads/${item.quotationFile}" target="_blank">Download</a>` : ''}
+          </td>
+          <td id="purchaseOrderCell">
+            ${item.purchaseOrderFile ? `<a href="/uploads/${item.purchaseOrderFile}" target="_blank">Download</a>` : ''}
+          </td>
+          <td id="signedPOCell">
+            ${item.signedPOFile ? `<a href="/uploads/${item.signedPOFile}" target="_blank">Download</a>` : ''}
+          </td>
+        `;
+
+        tableBody.appendChild(row);
+      });
+    })
+    .catch(err => {
+      console.error("Failed to load responded requests:", err.message || err);
+    });
+}
 
 // RFQ FORM
 // T&C textarea
@@ -2312,9 +2385,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
 
-  const signatureModal = new bootstrap.Modal(signatureModalElement);
-  signatureModal.show();
-});
+    const signatureModal = new bootstrap.Modal(signatureModalElement);
+    signatureModal.show();
+  });
 
   //Send to Supplier
   const sendSupplierBtn = document.getElementById('sendSupplierBtn');
@@ -2442,6 +2515,17 @@ document.addEventListener("DOMContentLoaded", function () {
       formData.append("existingAttachment", currentRequest.attachment);
     }
 
+    const quotationStatus = {
+      status: "",
+      remarks: ""
+    };
+    formData.append("quotationStatus", JSON.stringify(quotationStatus));
+    
+    const purchaseOrder = {
+      client: "",
+      supplier: ""
+    };
+    formData.append("purchaseOrder", JSON.stringify(purchaseOrder));   
 
     const canvas = document.getElementById('signature-pad');
     if (!uploadedSignatureFile && canvas && !isCanvasBlank(canvas)) {
@@ -2457,22 +2541,23 @@ document.addEventListener("DOMContentLoaded", function () {
         formData.append("signature", uploadedSignatureFile);
       }
       submitRFQForm(formData);
-    }
+    } 
+    
   }
 
-function submitRFQForm(formData) {
-  fetch("/save-rfq", {
-    method: "POST",
-    body: formData
-  }).then(res => res.json())
-    .then(data => {
-      alert(data.message);
-      if (data.success) {
-        window.location.href = "/request-quotation";
-      }
-    }).catch(err => {
-      console.error("RFQ save error:", err.message || err);
-      alert("An error occurred.");
-    });
-}
+  function submitRFQForm(formData) {
+    fetch("/save-rfq", {
+      method: "POST",
+      body: formData
+    }).then(res => res.json())
+      .then(data => {
+        alert(data.message);
+        if (data.success) {
+          window.location.href = "/request-quotation";
+        }
+      }).catch(err => {
+        console.error("RFQ save error:", err.message || err);
+        alert("An error occurred.");
+      });
+  }
 });

@@ -306,8 +306,8 @@ function saveRFQRequest(data) {
     return new Promise((resolve, reject) => {
         const query = `
         INSERT INTO REQUESTS 
-        (requestID, userID, RFQNo, requestDate, validity, totalBudget, details, items, requestStatus, attachment)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (requestID, userID, RFQNo, requestDate, validity, totalBudget, details, items, requestStatus, attachment, quotationStatus, purchaseOrder)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
         const values = [
@@ -320,7 +320,10 @@ function saveRFQRequest(data) {
             data.details,
             data.items,
             data.requestStatus,
-            data.attachment
+            data.attachment,
+            data.quotationStatus,
+            data.purchaseOrder
+
         ];
 
         connection.query(query, values, (err, result) => {
@@ -406,9 +409,40 @@ function deleteRequest(requestID) {
     });
 }
 
+function getRespondedRequests(userID) {
+    return new Promise((resolve, reject) => {
+        const query = `
+            SELECT 
+                r.requestID,
+                r.RFQNo,
+                r.totalBudget,
+                r.attachment,
+                r.quotationStatus,
+                r.purchaseOrder,
+                res.quotationNo,
+                res.quotationDate,
+                res.totalValue
+            FROM requests r
+            JOIN response res ON r.requestID = res.requestID
+            WHERE r.requestStatus = 'Responded' AND r.userID = ?
+        `;
+
+        connection.query(query, [userID], (err, results) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(results);
+            }
+        });
+    });
+}
+
+
+
 
 module.exports = {
     registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames,
     addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateUserProfile, deleteUserProfilePic,
-    updateUserPassword, saveRFQRequest, getRequestCountsByUser, getRequestsByStatus, getRequestByID, updateRFQRequest, deleteRequest
+    updateUserPassword, saveRFQRequest, getRequestCountsByUser, getRequestsByStatus, getRequestByID, updateRFQRequest, deleteRequest,
+    getRespondedRequests
 };
