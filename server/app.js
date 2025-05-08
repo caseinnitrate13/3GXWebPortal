@@ -212,6 +212,22 @@ app.get('/quotations', (req, res) => {
     res.send(template.replace('{{content}}', quotaion));
 });
 
+app.get('/responded-requests', async (req, res) => {
+    const userID = req.query.userID;
+    if (!userID) {
+        return res.status(400).json({ success: false, message: 'Missing userID' });
+    }
+
+    try {
+        const requests = await dbService.getRespondedRequests(userID);
+        res.json({ success: true, requests });
+    } catch (error) {
+        console.error('Error fetching responded requests:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+
 
 app.get('/request-for-quotation-form', (req, res) => {
     const requestForm = fs.readFileSync(path.join(__dirname, '..', 'public', 'rfq-form.html'), 'utf-8');
@@ -281,7 +297,9 @@ app.post('/save-rfq', async (req, res, next) => {
             }),
             items: JSON.stringify(JSON.parse(req.body.items)),
             requestStatus: req.body.requestStatus,
-            attachment: attachmentPath
+            attachment: attachmentPath,
+            quotationStatus: JSON.stringify(JSON.parse(req.body.quotationStatus)),
+            purchaseOrder: JSON.stringify(JSON.parse(req.body.purchaseOrder))
         };
 
         console.log(isUpdate ? "[Updating RFQ]:" : "[Creating new RFQ]:", rfqData);
@@ -337,21 +355,39 @@ app.get('/requests-by-status', (req, res) => {
 });
 
 app.post("/delete-request", async (req, res) => {
-  const { requestID } = req.body;
-  if (!requestID) return res.json({ success: false, message: "Missing request ID." });
+    const { requestID } = req.body;
+    if (!requestID) return res.json({ success: false, message: "Missing request ID." });
 
-  try {
-    const result = await dbService.deleteRequest(requestID);
-    if (result.affectedRows > 0) {
-      res.json({ success: true });
-    } else {
-      res.json({ success: false, message: "No matching request found." });
+    try {
+        const requestDataArray = await dbService.getRequestByID(requestID);
+        const requestData = requestDataArray[0];
+
+        if (!requestData || !requestData.userID) {
+            return res.json({ success: false, message: "Request not found or missing user ID." });
+        }
+
+        const userID = requestData.userID;
+
+        const result = await dbService.deleteRequest(requestID);
+        if (result.affectedRows > 0) {
+            const folderPath = path.join(__dirname, "uploads", "requests", userID, requestID);
+            try {
+                await fs.promises.rm(folderPath, { recursive: true, force: true });
+                console.log("🧹 Folder deleted:", folderPath);
+            } catch (fsErr) {
+                console.error("⚠️ Failed to delete folder:", fsErr.message);
+            }
+
+            res.json({ success: true });
+        } else {
+            res.json({ success: false, message: "No matching request found." });
+        }
+    } catch (err) {
+        console.error(err);
+        res.json({ success: false, message: "Error deleting request." });
     }
-  } catch (err) {
-    console.error(err);
-    res.json({ success: false, message: "Error deleting request." });
-  }
 });
+
 
 
 //ACCOUNT

@@ -542,12 +542,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const storedUser = JSON.parse(localStorage.getItem("user"));
       const userID = storedUser?.userID;
-  
+
       if (!name || !position) {
         alert("Please fill in both name and department.");
         return;
       }
-  
+
       try {
         const response = await fetch('/update-representative', {
           method: 'POST',
@@ -560,14 +560,14 @@ document.addEventListener("DOMContentLoaded", function () {
             repData: { name, position }
           }),
         });
-  
+
         const result = await response.json();
-  
+
         if (result.success) {
           document.getElementById("mainRepName").textContent = name;
           document.getElementById("mainRepDept").textContent = position;
           document.getElementById("representative").textContent = name;
-  
+
           const modal = bootstrap.Modal.getInstance(document.getElementById("editMainRepModal"));
           modal.hide();
           alert("Representative updated successfully!");
@@ -1150,11 +1150,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
-
-
-
-document.addEventListener("DOMContentLoaded", function () {
-  // REQUEST  QUOTATION
+//REQUEST FOR QUOTATION
+document.addEventListener("DOMContentLoaded", () => {
   // card/table dropdown
   const cardView = document.getElementById("card-view");
   const tableView = document.getElementById("table-view");
@@ -1178,6 +1175,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  
   // QUOTATION
   const purchaseOrderPreview = document.getElementById("purchaseOrderPreview");
   const purchaseOrderUpload = document.getElementById("purchaseOrderUpload");
@@ -1414,7 +1412,10 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // Fetch and populate counts
+  const draftCard = document.querySelector('#draftCard');
+  const pendingCard = document.querySelector('#pendingCard');
+  if (!draftCard && !pendingCard) return;
+
   fetch(`/request-counts?userID=${userID}`)
     .then(res => res.json())
     .then(data => {
@@ -1521,7 +1522,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-
 document.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(window.location.search);
   const mode = params.get("mode");
@@ -1550,9 +1550,6 @@ function loadRequestForQuotation(requestID, mode) {
       };
       const requestDate = new Date(request.requestDate);
       const validUntilDate = new Date(request.validity);
-
-      document.querySelector("#rfqDate").value = localDateStr(requestDate);
-      document.querySelector("#validUntil").value = localDateStr(validUntilDate);
 
       document.querySelector("#rfqNo").value = request.RFQNo || "";
       document.querySelector("#abc").value = request.totalBudget || "";
@@ -1782,7 +1779,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // When Delete button in modal is clicked
   document.getElementById("deleteRow").addEventListener("click", async () => {
     console.log("Trying to delete:", selectedRequestID);
     if (!selectedRequestID) return;
@@ -1798,12 +1794,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (data.success) {
         window.location.href = data.redirect || "/request-quotation";
-
-        // Remove the corresponding row (optional based on structure)
         const icon = document.querySelector(`.deleteReqIcon[data-id="${selectedRequestID}"]`);
         icon?.closest("tr")?.remove();
-
-        // Hide the modal
         bootstrap.Modal.getInstance(document.getElementById('deleteRowModal')).hide();
       } else {
         alert("Failed to delete: " + data.message);
@@ -1816,6 +1808,307 @@ document.addEventListener("DOMContentLoaded", function () {
     selectedRequestID = null;
   });
 });
+
+
+
+//QUOTATION
+document.addEventListener("DOMContentLoaded", function () {
+  const quotationTable = document.querySelector('#quotationTable');
+  if (!quotationTable) return;
+
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const userID = storedUser?.userID;
+  if (!userID) {
+    console.error("User ID not found");
+    return;
+  }
+
+  fetchRespondedRequests(userID);
+
+  // VIEW QUOTATION
+  const purchaseOrderPreview = document.getElementById("purchaseOrderPreview");
+  const purchaseOrderUpload = document.getElementById("purchaseOrderUpload");
+  const purchaseOrderBtn = document.getElementById("purchaseOrderBtn");
+  const approveSaveBtn = document.getElementById("approveSaveBtn");
+  const declineSaveBtn = document.getElementById("declineSaveBtn");
+  const approveBtn = document.getElementById("approveBtn");
+  const declineBtn = document.getElementById("declineBtn");
+
+  let poFileName = null;
+  let selectedRow = null;
+
+
+  if (quotationTable) {
+    quotationTable.addEventListener('click', function (event) {
+      if (event.target.classList.contains('approve-icon') || event.target.classList.contains('decline-icon')) {
+        selectedRow = event.target.closest('tr');
+      }
+    });
+  }
+
+  if (purchaseOrderBtn && purchaseOrderUpload && purchaseOrderPreview) {
+    purchaseOrderBtn.addEventListener("click", function () {
+      purchaseOrderUpload.click();
+    });
+
+    purchaseOrderUpload.addEventListener("change", function (event) {
+      if (event.target.files.length > 0) {
+        handleFile(event.target.files[0]);
+      }
+    });
+
+    purchaseOrderPreview.addEventListener("dragover", function (event) {
+      event.preventDefault();
+      purchaseOrderPreview.classList.add("drag-over");
+    });
+
+    purchaseOrderPreview.addEventListener("dragleave", function () {
+      purchaseOrderPreview.classList.remove("drag-over");
+    });
+
+    purchaseOrderPreview.addEventListener("drop", function (event) {
+      event.preventDefault();
+      purchaseOrderPreview.classList.remove("drag-over");
+      if (event.dataTransfer.files.length > 0) {
+        handleFile(event.dataTransfer.files[0]);
+      }
+    });
+
+    function handleFile(file) {
+      if (file) {
+        poFileName = file.name;
+        purchaseOrderPreview.innerHTML = `
+          <div class="file-preview">
+            <i class="bi bi-file-earmark-text"></i>
+            <p>${poFileName}</p>
+          </div>
+        `;
+      }
+    }
+
+    // approve save 
+    const validIdError = document.getElementById('validIdError');
+    approveSaveBtn.addEventListener("click", function () {
+      if (poFileName) {
+        validIdError.classList.remove('d-block');
+        validIdError.classList.add('d-none');
+
+        const approveQuotationModal = document.getElementById('approveQuotationModal');
+        const approveConfirmationModal = document.getElementById('approveConfirmationModal');
+
+        if (approveQuotationModal) {
+          approveBtn.textContent = 'Approved';
+          declineBtn.style.display = 'none';
+          const approveModal = bootstrap.Modal.getInstance(approveQuotationModal);
+          if (approveModal) {
+            approveModal.hide();
+          }
+          approveQuotationModal.addEventListener('hidden.bs.modal', () => {
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+            document.body.style.overflow = 'auto';
+            validIdError.classList.remove('d-block');
+            validIdError.classList.add('d-none');
+          }, { once: true });
+          approveBtn.disabled = true;
+          window.location.href = '/quotations';
+        } else if (approveConfirmationModal) {
+          if (selectedRow) {
+            const remarksCell = selectedRow.querySelector('.remarks-cell');
+            if (remarksCell) {
+              remarksCell.textContent = 'Approved';
+            }
+          }
+
+          const approveConfirmation = bootstrap.Modal.getInstance(approveConfirmationModal);
+          if (approveConfirmation) {
+            approveConfirmation.hide();
+          }
+
+          approveConfirmationModal.addEventListener('hidden.bs.modal', () => {
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+            document.body.style.overflow = 'auto';
+            validIdError.classList.remove('d-block');
+            validIdError.classList.add('d-none');
+          }, { once: true });
+
+        }
+      } else {
+        validIdError.classList.remove('d-none');
+        validIdError.classList.add('d-block');
+      }
+    });
+
+
+    // decline PO modal save
+    const remarks = document.getElementById('remarks');
+    const noRemarksMessage = document.getElementById('noRemarks');
+
+    declineSaveBtn.addEventListener('click', function () {
+      if (remarks.value.trim() !== "") {
+        noRemarksMessage.classList.remove('d-block');
+        noRemarksMessage.classList.add('d-none');
+
+        if (declineQuotationModal) {
+          declineBtn.textContent = 'Declined';
+          approveBtn.style.display = 'none';
+
+          const declineModal = bootstrap.Modal.getInstance(declineQuotationModal);
+          if (declineModal) {
+            declineModal.hide();
+          }
+
+          declineQuotationModal.addEventListener('hidden.bs.modal', () => {
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+            document.body.style.overflow = 'auto';
+
+            noRemarksMessage.classList.remove('d-block');
+            noRemarksMessage.classList.add('d-none');
+
+          }, { once: true });
+          declineBtn.disabled = true;
+          window.location.href = '/quotations';
+
+
+        } else if (declineTableModal) {
+          if (selectedRow) {
+            const remarksCell = selectedRow.querySelector('.remarks-cell');
+            if (remarksCell) {
+              remarksCell.textContent = 'Declined';
+            }
+          }
+
+          const declineModal = bootstrap.Modal.getInstance(declineTableModal);
+          if (declineModal) {
+            declineModal.hide();
+          }
+
+          declineModal.addEventListener('hidden.bs.modal', () => {
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+            document.body.style.overflow = 'auto';
+
+            noRemarksMessage.classList.remove('d-block');
+            noRemarksMessage.classList.add('d-none');
+          }, { once: true });
+        }
+
+      } else {
+        noRemarksMessage.classList.remove('d-none');
+        noRemarksMessage.classList.add('d-block');
+      }
+
+    });
+
+    // Reset modal content when closed
+    const approveQuotationModal = document.getElementById("approveQuotationModal");
+    if (approveQuotationModal) {
+      approveQuotationModal.addEventListener("hidden.bs.modal", function () {
+        document.body.style.overflow = "auto";
+        document.body.style.paddingRight = "0px";
+        purchaseOrderPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
+        poFileName = null;
+
+        validIdError.classList.remove('d-block');
+        validIdError.classList.add('d-none');
+      });
+    }
+
+    const approveConfirmationModal = document.getElementById("approveConfirmationModal");
+    if (approveConfirmationModal) {
+      approveConfirmationModal.addEventListener("hidden.bs.modal", function () {
+        document.body.style.overflow = "auto";
+        document.body.style.paddingRight = "0px";
+        purchaseOrderPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
+        poFileName = null;
+
+        validIdError.classList.remove('d-block');
+        validIdError.classList.add('d-none');
+      });
+    }
+
+    const declineQuotationModal = document.getElementById("declineQuotationModal");
+    if (declineQuotationModal) {
+      declineQuotationModal.addEventListener("hidden.bs.modal", function () {
+        document.body.style.overflow = "auto";
+        document.body.style.paddingRight = "0px";
+
+        noRemarksMessage.classList.remove('d-block');
+        noRemarksMessage.classList.add('d-none');
+      });
+    }
+
+    const declineTableModal = document.getElementById("declineTableModal");
+    if (declineTableModal) {
+      declineTableModal.addEventListener("hidden.bs.modal", function () {
+        document.body.style.overflow = "auto";
+        document.body.style.paddingRight = "0px";
+
+        noRemarksMessage.classList.remove('d-block');
+        noRemarksMessage.classList.add('d-none');
+      });
+    }
+  }
+
+});
+
+function fetchRespondedRequests(userID) {
+  fetch(`/responded-requests?userID=${userID}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) {
+        throw new Error(data.message);
+      }
+
+      const requests = data.requests || [];
+      const tableBody = document.querySelector('#quotationTable tbody');
+      tableBody.innerHTML = '';
+
+      requests.forEach(item => {
+        const row = document.createElement('tr');
+
+        const localDateStr = (date) => {
+          if (!date || isNaN(date.getTime())) return "";
+          return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+        };
+        const quotationDate = new Date(item.quotationDate);
+
+        row.innerHTML = `
+          <td>${item.RFQNo}</td>
+          <td>${item.totalBudget}</td>
+          <td>${quotationDate.toLocaleDateString()}</td>
+          <td>${item.quotationNo}</td>
+          <td>${item.totalValue}</td>
+          <td>
+            <div class="text-center d-flex justify-content-center align-content-center gap-2">
+              <a href="/view-quotation?requestID=${item.requestID}">
+                <i class="bi bi-eye me-1 text-primary" data-bs-toggle="tooltip" title="View"></i>
+              </a>
+              <div data-bs-toggle="tooltip" title="Approve">
+                <i class="bi bi-check-circle text-success pointer approve-icon" data-bs-toggle="modal" data-bs-target="#approveConfirmationModal"></i>
+              </div>
+              <div data-bs-toggle="tooltip" title="Decline">
+                <i class="bi bi-x-circle text-danger pointer decline-icon" data-bs-toggle="modal" data-bs-target="#declineTableModal"></i>
+              </div>
+            </div>
+          </td>
+          <td class="remarks-cell">${item.quotationStatus || ''}</td>
+          <td id="quotationCell">
+            ${item.quotationFile ? `<a href="/uploads/${item.quotationFile}" target="_blank">Download</a>` : ''}
+          </td>
+          <td id="purchaseOrderCell">
+            ${item.purchaseOrderFile ? `<a href="/uploads/${item.purchaseOrderFile}" target="_blank">Download</a>` : ''}
+          </td>
+          <td id="signedPOCell">
+            ${item.signedPOFile ? `<a href="/uploads/${item.signedPOFile}" target="_blank">Download</a>` : ''}
+          </td>
+        `;
+
+        tableBody.appendChild(row);
+      });
+    })
+    .catch(err => {
+      console.error("Failed to load responded requests:", err.message || err);
+    });
+}
 
 
 
@@ -2308,9 +2601,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
 
-  const signatureModal = new bootstrap.Modal(signatureModalElement);
-  signatureModal.show();
-});
+    const signatureModal = new bootstrap.Modal(signatureModalElement);
+    signatureModal.show();
+  });
 
   //Send to Supplier
   const sendSupplierBtn = document.getElementById('sendSupplierBtn');
@@ -2438,6 +2731,17 @@ document.addEventListener("DOMContentLoaded", function () {
       formData.append("existingAttachment", currentRequest.attachment);
     }
 
+    const quotationStatus = {
+      status: "",
+      remarks: ""
+    };
+    formData.append("quotationStatus", JSON.stringify(quotationStatus));
+
+    const purchaseOrder = {
+      client: "",
+      supplier: ""
+    };
+    formData.append("purchaseOrder", JSON.stringify(purchaseOrder));
 
     const canvas = document.getElementById('signature-pad');
     if (!uploadedSignatureFile && canvas && !isCanvasBlank(canvas)) {
@@ -2454,21 +2758,22 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       submitRFQForm(formData);
     }
+
   }
 
-function submitRFQForm(formData) {
-  fetch("/save-rfq", {
-    method: "POST",
-    body: formData
-  }).then(res => res.json())
-    .then(data => {
-      alert(data.message);
-      if (data.success) {
-        window.location.href = "/request-quotation";
-      }
-    }).catch(err => {
-      console.error("RFQ save error:", err.message || err);
-      alert("An error occurred.");
-    });
-}
+  function submitRFQForm(formData) {
+    fetch("/save-rfq", {
+      method: "POST",
+      body: formData
+    }).then(res => res.json())
+      .then(data => {
+        alert(data.message);
+        if (data.success) {
+          window.location.href = "/request-quotation";
+        }
+      }).catch(err => {
+        console.error("RFQ save error:", err.message || err);
+        alert("An error occurred.");
+      });
+  }
 });
