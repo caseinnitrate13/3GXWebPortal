@@ -23,8 +23,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/get-request', (req, res) => {
-    const requestID = req.query.id; // changed from rfq to id
-    console.log("Backend received requestID:", requestID); // Log received requestID
+    const requestID = req.query.id; 
+    console.log("Backend received requestID:", requestID);
 
     dbService.getRequestByID(requestID)
         .then(data => {
@@ -41,14 +41,9 @@ app.get('/get-request', (req, res) => {
 });
 
 
-
-
-
 // Serve static files from the "public" folder
 app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
@@ -224,6 +219,53 @@ app.get('/responded-requests', async (req, res) => {
     } catch (error) {
         console.error('Error fetching responded requests:', error);
         res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+app.post('/quotation-action', upload.single('poFile'), async (req, res) => {
+    const { userID, requestID, action, remarks } = req.body;
+
+    if (!userID || !requestID || !action) {
+        return res.status(400).json({ success: false, message: "Missing required fields" });
+    }
+
+    const basePath = path.join(__dirname, 'uploads', 'requests', userID, requestID);
+
+    fs.mkdirSync(basePath, { recursive: true });
+
+    let poFilePath = null;
+    let remarksText = remarks || '';
+
+    try {
+        if (action === 'Approved' && req.file) {
+            const poFile = req.file;
+            const filename = `${Date.now()}-${poFile.originalname}`;
+            poFilePath = path.join(basePath, filename);
+
+            await fs.promises.writeFile(poFilePath, poFile.buffer);
+            poFilePath = `uploads/requests/${userID}/${requestID}/${filename}`;
+            console.log('PO file saved:', poFilePath);
+        }
+
+        let updateData = { status: action };
+        if (action === 'Approved' && poFilePath) {
+            updateData.poFile = poFilePath;
+        }
+
+        if (action === 'Declined' && remarksText) {
+            updateData.remarks = remarksText;
+        }
+
+        const result = await dbService.updateQuotationRequest(requestID, updateData);
+
+        if (result.success) {
+            res.json({ success: true, message: `Quotation ${action}d successfully!` });
+        } else {
+            res.status(400).json({ success: false, message: 'Failed to update quotation status in the database.' });
+        }
+    } catch (error) {
+        console.error("[Quotation Action Error]:", error);
+        res.status(500).json({ success: false, message: "Error processing quotation action", error: error.message });
     }
 });
 

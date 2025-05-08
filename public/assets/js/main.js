@@ -1581,14 +1581,11 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-
-//QUOTATION
 document.addEventListener("DOMContentLoaded", function () {
   const quotationTable = document.querySelector('#quotationTable');
-  if (!quotationTable) return;
-
   const storedUser = JSON.parse(localStorage.getItem("user"));
   const userID = storedUser?.userID;
+
   if (!userID) {
     console.error("User ID not found");
     return;
@@ -1596,7 +1593,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   fetchRespondedRequests(userID);
 
-  // VIEW QUOTATION
   const purchaseOrderPreview = document.getElementById("purchaseOrderPreview");
   const purchaseOrderUpload = document.getElementById("purchaseOrderUpload");
   const purchaseOrderBtn = document.getElementById("purchaseOrderBtn");
@@ -1605,14 +1601,23 @@ document.addEventListener("DOMContentLoaded", function () {
   const approveBtn = document.getElementById("approveBtn");
   const declineBtn = document.getElementById("declineBtn");
 
-  let poFileName = null;
   let selectedRow = null;
+  let poFileName = null;
+  let poFile = null;
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlRequestID = urlParams.get('requestID');
 
   if (quotationTable) {
     quotationTable.addEventListener('click', function (event) {
       if (event.target.classList.contains('approve-icon') || event.target.classList.contains('decline-icon')) {
         selectedRow = event.target.closest('tr');
+        const requestID = selectedRow?.dataset.requestId || null;
+        if (requestID) {
+          console.log("Clicked Request ID:", requestID);
+        } else {
+          console.error("Clicked row does not have requestID");
+        }
       }
     });
   }
@@ -1648,6 +1653,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function handleFile(file) {
       if (file) {
         poFileName = file.name;
+        poFile = file;
         purchaseOrderPreview.innerHTML = `
           <div class="file-preview">
             <i class="bi bi-file-earmark-text"></i>
@@ -1657,8 +1663,8 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
-    // approve save 
     const validIdError = document.getElementById('validIdError');
+
     approveSaveBtn.addEventListener("click", function () {
       if (poFileName) {
         validIdError.classList.remove('d-block');
@@ -1666,6 +1672,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const approveQuotationModal = document.getElementById('approveQuotationModal');
         const approveConfirmationModal = document.getElementById('approveConfirmationModal');
+
+        const requestID = selectedRow?.dataset.requestId || urlRequestID;
+
+        if (requestID) {
+          submitQuotationAction(userID, requestID, 'Approved', poFile);
+        } else {
+          console.error("Request ID is not found.");
+        }
 
         if (approveQuotationModal) {
           approveBtn.textContent = 'Approved';
@@ -1677,31 +1691,10 @@ document.addEventListener("DOMContentLoaded", function () {
           approveQuotationModal.addEventListener('hidden.bs.modal', () => {
             document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
             document.body.style.overflow = 'auto';
-            validIdError.classList.remove('d-block');
-            validIdError.classList.add('d-none');
           }, { once: true });
+
           approveBtn.disabled = true;
           window.location.href = '/quotations';
-        } else if (approveConfirmationModal) {
-          if (selectedRow) {
-            const remarksCell = selectedRow.querySelector('.remarks-cell');
-            if (remarksCell) {
-              remarksCell.textContent = 'Approved';
-            }
-          }
-
-          const approveConfirmation = bootstrap.Modal.getInstance(approveConfirmationModal);
-          if (approveConfirmation) {
-            approveConfirmation.hide();
-          }
-
-          approveConfirmationModal.addEventListener('hidden.bs.modal', () => {
-            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-            document.body.style.overflow = 'auto';
-            validIdError.classList.remove('d-block');
-            validIdError.classList.add('d-none');
-          }, { once: true });
-
         }
       } else {
         validIdError.classList.remove('d-none');
@@ -1709,67 +1702,43 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
 
-
-    // decline PO modal save
     const remarks = document.getElementById('remarks');
     const noRemarksMessage = document.getElementById('noRemarks');
 
     declineSaveBtn.addEventListener('click', function () {
-      if (remarks.value.trim() !== "") {
-        noRemarksMessage.classList.remove('d-block');
-        noRemarksMessage.classList.add('d-none');
-
-        if (declineQuotationModal) {
-          declineBtn.textContent = 'Declined';
-          approveBtn.style.display = 'none';
-
-          const declineModal = bootstrap.Modal.getInstance(declineQuotationModal);
-          if (declineModal) {
-            declineModal.hide();
-          }
-
-          declineQuotationModal.addEventListener('hidden.bs.modal', () => {
-            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-            document.body.style.overflow = 'auto';
-
-            noRemarksMessage.classList.remove('d-block');
-            noRemarksMessage.classList.add('d-none');
-
-          }, { once: true });
-          declineBtn.disabled = true;
-          window.location.href = '/quotations';
-
-
-        } else if (declineTableModal) {
-          if (selectedRow) {
-            const remarksCell = selectedRow.querySelector('.remarks-cell');
-            if (remarksCell) {
-              remarksCell.textContent = 'Declined';
-            }
-          }
-
-          const declineModal = bootstrap.Modal.getInstance(declineTableModal);
-          if (declineModal) {
-            declineModal.hide();
-          }
-
-          declineModal.addEventListener('hidden.bs.modal', () => {
-            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-            document.body.style.overflow = 'auto';
-
-            noRemarksMessage.classList.remove('d-block');
-            noRemarksMessage.classList.add('d-none');
-          }, { once: true });
-        }
-
-      } else {
+      const remarksText = remarks.value.trim();
+      if (!remarksText) {
         noRemarksMessage.classList.remove('d-none');
         noRemarksMessage.classList.add('d-block');
+        return;
       }
 
+      const requestID = selectedRow?.dataset.requestId || urlRequestID;
+
+      if (requestID) {
+        submitQuotationAction(userID, requestID, 'Declined', null, remarksText);
+      } else {
+        console.error("Request ID is not found.");
+      }
+
+      if (declineQuotationModal) {
+        declineBtn.textContent = 'Declined';
+        approveBtn.style.display = 'none';
+        const declineModal = bootstrap.Modal.getInstance(declineQuotationModal);
+        if (declineModal) {
+          declineModal.hide();
+        }
+
+        declineQuotationModal.addEventListener('hidden.bs.modal', () => {
+          document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+          document.body.style.overflow = 'auto';
+        }, { once: true });
+
+        declineBtn.disabled = true;
+        window.location.href = '/quotations';
+      }
     });
 
-    // Reset modal content when closed
     const approveQuotationModal = document.getElementById("approveQuotationModal");
     if (approveQuotationModal) {
       approveQuotationModal.addEventListener("hidden.bs.modal", function () {
@@ -1777,7 +1746,6 @@ document.addEventListener("DOMContentLoaded", function () {
         document.body.style.paddingRight = "0px";
         purchaseOrderPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
         poFileName = null;
-
         validIdError.classList.remove('d-block');
         validIdError.classList.add('d-none');
       });
@@ -1790,7 +1758,6 @@ document.addEventListener("DOMContentLoaded", function () {
         document.body.style.paddingRight = "0px";
         purchaseOrderPreview.innerHTML = `<span class="addIcon"><i class="bi bi-plus"></i></span><h4 class="mb-4 w400">Drag File</h4>`;
         poFileName = null;
-
         validIdError.classList.remove('d-block');
         validIdError.classList.add('d-none');
       });
@@ -1801,7 +1768,6 @@ document.addEventListener("DOMContentLoaded", function () {
       declineQuotationModal.addEventListener("hidden.bs.modal", function () {
         document.body.style.overflow = "auto";
         document.body.style.paddingRight = "0px";
-
         noRemarksMessage.classList.remove('d-block');
         noRemarksMessage.classList.add('d-none');
       });
@@ -1812,14 +1778,45 @@ document.addEventListener("DOMContentLoaded", function () {
       declineTableModal.addEventListener("hidden.bs.modal", function () {
         document.body.style.overflow = "auto";
         document.body.style.paddingRight = "0px";
-
         noRemarksMessage.classList.remove('d-block');
         noRemarksMessage.classList.add('d-none');
       });
     }
   }
-
 });
+
+
+function submitQuotationAction(userID, requestID, actionType, poFile = null, remarksText = '') {
+  const formData = new FormData();
+  formData.append('userID', userID);
+  formData.append('requestID', requestID);
+  formData.append('action', actionType);
+
+  if (actionType === 'Approved' && poFile) {
+    formData.append('poFile', poFile);
+  }
+
+  if (actionType === 'Declined') {
+    formData.append('remarks', remarksText);
+  }
+
+  fetch('/quotation-action', { 
+    method: 'POST',
+    body: formData
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) {
+        throw new Error(data.message || 'Something went wrong');
+      }
+      console.log(data.message || 'Action successfully processed!');
+      window.location.href = '/quotations';
+    })
+    .catch(err => {
+      console.error('Error:', err.message || err);
+    });
+}
+
 
 function fetchRespondedRequests(userID) {
   fetch(`/responded-requests?userID=${userID}`)
@@ -1833,6 +1830,7 @@ function fetchRespondedRequests(userID) {
       const tableBody = document.querySelector('#quotationTable tbody');
       tableBody.innerHTML = '';
 
+      console.log("Responded Request", requests);
       requests.forEach(item => {
         const row = document.createElement('tr');
 
@@ -1841,7 +1839,6 @@ function fetchRespondedRequests(userID) {
           return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
         };
         const quotationDate = new Date(item.quotationDate);
-
         row.innerHTML = `
           <td>${item.RFQNo}</td>
           <td>${item.totalBudget}</td>
@@ -1854,25 +1851,25 @@ function fetchRespondedRequests(userID) {
                 <i class="bi bi-eye me-1 text-primary" data-bs-toggle="tooltip" title="View"></i>
               </a>
               <div data-bs-toggle="tooltip" title="Approve">
-                <i class="bi bi-check-circle text-success pointer approve-icon" data-bs-toggle="modal" data-bs-target="#approveConfirmationModal"></i>
+                <i class="bi bi-check-circle text-success pointer approve-icon" data-bs-toggle="modal" data-request-id="${item.requestID}" data-bs-target="#approveConfirmationModal"></i>
               </div>
               <div data-bs-toggle="tooltip" title="Decline">
-                <i class="bi bi-x-circle text-danger pointer decline-icon" data-bs-toggle="modal" data-bs-target="#declineTableModal"></i>
+                <i class="bi bi-x-circle text-danger pointer decline-icon" data-bs-toggle="modal" data-request-id="${item.requestID}" data-bs-target="#declineTableModal"></i>
               </div>
             </div>
           </td>
           <td class="remarks-cell">${item.quotationStatus || ''}</td>
           <td id="quotationCell">
-            ${item.quotationFile ? `<a href="/uploads/${item.quotationFile}" target="_blank">Download</a>` : ''}
+            ${item.attachment ? `<a href="${item.attachment}" target="_blank">Download</a>` : ''}
           </td>
           <td id="purchaseOrderCell">
-            ${item.purchaseOrderFile ? `<a href="/uploads/${item.purchaseOrderFile}" target="_blank">Download</a>` : ''}
+            ${item.purchaseOrderFile ? `<a href="/uploads/${item.purchaseOrder}" target="_blank">Download</a>` : ''}
           </td>
           <td id="signedPOCell">
             ${item.signedPOFile ? `<a href="/uploads/${item.signedPOFile}" target="_blank">Download</a>` : ''}
           </td>
         `;
-
+        row.dataset.requestId = item.requestID;
         tableBody.appendChild(row);
       });
     })
@@ -2044,8 +2041,6 @@ document.addEventListener("DOMContentLoaded", function () {
     noUploadedFile.classList.remove('d-block');
     noUploadedFile.classList.add('d-none');
   });
-
-
 });
 
 // Add file signature

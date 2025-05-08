@@ -437,12 +437,37 @@ function getRespondedRequests(userID) {
     });
 }
 
+function updateQuotationRequest(requestID, updateData) {
+    return new Promise((resolve, reject) => {
+        const { status, poFile, remarks } = updateData;
 
+        // Assuming purchaseOrder is stored as a JSON object and contains the 'client' field
+        const query = `
+            UPDATE requests
+            SET 
+                quotationStatus = JSON_SET(quotationStatus, '$.status', ? , '$.remarks', ?),
+                purchaseOrder = JSON_SET(purchaseOrder, '$.client', ?)
+            WHERE requestID = ?
+        `;
 
+        // Execute the query with values for status, remarks, poFile, and requestID
+        connection.query(query, [status, remarks || '', poFile || null, requestID], (err, results) => {
+            if (err) {
+                reject(err); // If there's an error, reject the promise
+            } else {
+                if (results.affectedRows > 0) {
+                    resolve({ success: true }); // Successfully updated, resolve the promise
+                } else {
+                    reject(new Error('Quotation not found or update failed')); // If no rows are affected
+                }
+            }
+        });
+    });
+}
 
 module.exports = {
     registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames,
     addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateUserProfile, deleteUserProfilePic,
     updateUserPassword, saveRFQRequest, getRequestCountsByUser, getRequestsByStatus, getRequestByID, updateRFQRequest, deleteRequest,
-    getRespondedRequests
+    getRespondedRequests, updateQuotationRequest
 };
