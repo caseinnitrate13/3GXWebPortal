@@ -1842,6 +1842,8 @@ function fetchRespondedRequests(userID) {
           if (!date || isNaN(date.getTime())) return "";
           return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
         };
+        const quotationStatus = JSON.parse(item.quotationStatus);
+        const po = JSON.parse(item.purchaseOrder);
         const quotationDate = new Date(item.quotationDate);
         row.innerHTML = `
           <td>${item.RFQNo}</td>
@@ -1862,15 +1864,22 @@ function fetchRespondedRequests(userID) {
               </div>
             </div>
           </td>
-          <td class="remarks-cell">${item.quotationStatus || ''}</td>
+         <td class="remarks-cell">
+            ${quotationStatus.status === 'Declined'
+            ? `Declined: ${quotationStatus.remarks || ''}`
+            : (quotationStatus.status || '')}
+         </td>
+
           <td id="quotationCell">
-            ${item.attachment ? `<a href="${item.attachment}" target="_blank">Download</a>` : ''}
+            ${item.attachment ? `<a href="${item.attachment}" target="_blank">Download File</a>` : ''}
           </td>
           <td id="purchaseOrderCell">
-            ${item.purchaseOrderFile ? `<a href="/uploads/${item.purchaseOrder}" target="_blank">Download</a>` : ''}
+            ${po.client
+            ? `<a href="${po.client}" target="_blank">Purchase Oder</a>`
+            : ''}
           </td>
           <td id="signedPOCell">
-            ${item.signedPOFile ? `<a href="/uploads/${item.signedPOFile}" target="_blank">Download</a>` : ''}
+            ${po.supplier ? `<a href="${po.supplier}" target="_blank">Signed PO</a>` : ''}
           </td>
         `;
         row.dataset.requestId = item.requestID;
