@@ -181,19 +181,11 @@ document.addEventListener('DOMContentLoaded', function () {
       confirmPassword.classList.remove('is-invalid');
     }
 
-    // Company name validation (letters, numbers, and spaces)
+    // validation (letters, numbers, spaces other characters)
     validateField(regCompanyName, /^[A-Za-z0-9\s]+$/);
-
-    // Representative name validation (only letters and spaces)
     validateField(regRepName, /^[A-Za-z\s]+$/);
-
-    // Company address validation (alphanumeric and common punctuation)
     validateField(regCompanyAddress, /^[A-Za-z0-9\s,.-]+$/);
-
-    // Email validation
     validateField(regCompanyEmail, /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/);
-
-    // Phone number validation (only digits)
     validateField(regPhoneNum, /^\d+$/);
 
     // Business permit validation
@@ -1186,7 +1178,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // VIEW QUOTATION
+  // QUOTATION
   const purchaseOrderPreview = document.getElementById("purchaseOrderPreview");
   const purchaseOrderUpload = document.getElementById("purchaseOrderUpload");
   const quotationTable = document.getElementById("quotationTable")
@@ -1412,6 +1404,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
+
+// REQUEST FOR QUOTATION
 document.addEventListener("DOMContentLoaded", () => {
   const storedUser = JSON.parse(localStorage.getItem("user"));
   const userID = storedUser?.userID;
@@ -1483,6 +1477,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     modalTableBody.innerHTML = '';
     mainTableBody.innerHTML = '';
+
+    if (requests.length === 0) {
+      const noDataRow = `<tr><td colspan="4" class="text-center text-muted">No data to show</td></tr>`;
+      modalTableBody.innerHTML = noDataRow;
+      mainTableBody.innerHTML = noDataRow;
+      return;
+    }
 
     requests.forEach(request => {
       const actionHTML =
