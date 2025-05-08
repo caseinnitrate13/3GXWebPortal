@@ -13,35 +13,35 @@
         <div class="row justify-content-between m-4">
             <div class="col-md-4">
                 <div class="d-flex mb-2">
-                    <div>RFQ No. :</div> &ensp; <span>98876541</span>
+                    <div>RFQ No. :</div> &ensp; <span id="rfqNoSpan"></span>
                 </div>
                 <div class="d-flex mb-2">
-                    <div>RFQ Date :</div> &ensp; <span>12/03/2025</span>
+                    <div>RFQ Date :</div> &ensp; <span id="rfqDateSpan"></span>
                 </div>
                 <div class="d-flex mb-2">
-                    <div>Valid Until :</div> &ensp; <span>12/03/2026</span>
+                    <div>Valid Until :</div> &ensp; <span id="validUntilSpan"></span>
                 </div>
                 <div class="d-flex mb-2">
-                    <div>ABC :</div> &ensp; <span>100,000</span>
+                    <div>ABC :</div> &ensp; <span id="abcSpan"></span>
                 </div>
             </div>
-        
+
             <div class="col-md-5">
                 <div class="d-flex mb-2">
-                    <div>Quotation No. :</div> &ensp; 
-                    <span>98878878871234541</span>
+                    <div>Quotation No. :</div> &ensp;
+                    <span id="quotationNoSpan"></span>
                 </div>
                 <div class="d-flex mb-2">
-                    <div>Quotation Date :</div> &ensp; 
-                    <span>12/03/2025</span>
+                    <div>Quotation Date :</div> &ensp;
+                    <span id="quotationDateSpan"></span>
                 </div>
                 <div class="d-flex">
-                    <div>Total Value :</div> &ensp; 
-                    <span>100,000</span>
+                    <div>Total Value :</div> &ensp;
+                    <span id="totalValueSpan"></span>
                 </div>
             </div>
         </div>
-        
+
 
         <!-- item table -->
         <div class="table-responsive mt-5">
@@ -65,54 +65,12 @@
                         <td>Pre-installed Windows 11</td>
                         <td>20,000.00</td>
                     </tr>
-
-                    <tr>
-                        <td>Printer</td>
-                        <td>Print, Copy, Scan, Wireless</td>
-                        <td>Piece</td>
-                        <td>2</td>
-                        <td>Compatible with Windows 10,</td>
-                        <td>20,000.00</td>
-                    </tr>
-                    <tr>
-                        <td>LapTop</td>
-                        <td>Intel c5, 1 Terabyte</td>
-                        <td>Piece</td>
-                        <td>2</td>
-                        <td>Pre-installed Windows 11</td>
-                        <td>20,000.00</td>
-                    </tr>
-                    <tr>
-                        <td>LapTop</td>
-                        <td>Intel c5, 1 Terabyte</td>
-                        <td>Piece</td>
-                        <td>2</td>
-                        <td>Pre-installed Windows 11</td>
-                        <td>20,000.00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Printer</td>
-                        <td>Print, Copy, Scan, Wireless</td>
-                        <td>Piece</td>
-                        <td>2</td>
-                        <td>Compatible with Windows 10,</td>
-                        <td>20,000.00</td>
-                    </tr>
-                    <tr>
-                        <td>LapTop</td>
-                        <td>Intel c5, 1 Terabyte</td>
-                        <td>Piece</td>
-                        <td>2</td>
-                        <td>Pre-installed Windows 11</td>
-                        <td>20,000.00</td>
-                    </tr>
                 </tbody>
             </table>
         </div>
 
         <!-- download attachments -->
-        <div class="d-flex justify-content-center align-content-center mt-5 mb-5">
+        <div id="supattachment" class="d-flex justify-content-center align-content-center mt-5 mb-5">
             <a href="assets/img/3GX LOGO HD.png" download class="btn btn-dashed outlined-btn">
                 <i class="bi bi-download me-2"></i>Download Attachments
             </a>
@@ -122,7 +80,23 @@
 
 
             <div class="mt-2">
-                 <!-- client signature Preview -->
+                <!-- client signature Preview -->
+                <div class="d-flex justify-content-end align-content-end">
+                    <div id="adminSignContainer">
+                        <div id="clientSignature" class="d-flex justify-content-center align-content-center">
+                            <img src="assets/img/signature.jpg" alt="Admin Signature">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="repName-container" id="clientRepNameContainer">
+                    <p class="border-bottom-custom text-center fw-bold">Representative Name</p>
+                    <p class="text-center">Representative Company</p>
+                </div>
+            </div>
+
+            <div class="mt-2">
+                <!-- signature Preview -->
                 <div class="d-flex justify-content-end align-content-end">
                     <div id="adminSignContainer">
                         <div id="adminSignature" class="d-flex justify-content-center align-content-center">
@@ -130,37 +104,22 @@
                         </div>
                     </div>
                 </div>
-                
-                <div class="repName-container">
-                    <p class="border-bottom-custom text-center fw-bold"> Representative Name</p>
-                    <p class="text-center">Representative Company</p>
+
+                <div class="repName-container" id="adminRepNameContainer">
+                    <p class="border-bottom-custom text-center fw-bold">Admin Name</p>
+                    <p class="text-center">3GX Solutions</p>
                 </div>
             </div>
 
-            <div class="mt-2">
-                <!-- signature Preview -->
-               <div class="d-flex justify-content-end align-content-end">
-                   <div id="adminSignContainer">
-                       <div id="adminSignature" class="d-flex justify-content-center align-content-center">
-                           <img src="assets/img/signature.jpg" alt="Admin Signature">
-                       </div>
-                   </div>
-               </div>
-               
-               <div class="repName-container">
-                   <p class="border-bottom-custom text-center fw-bold"> Admin Name</p>
-                   <p class="text-center">3GX Solutions</p>
-               </div>
-           </div>
-           
         </div>
-        
 
         <div class="d-flex flex-column flex-md-row justify-content-center align-items-center mt-5 pt-3 mb-3 gap-5">
-            <button id="declineBtn" type="button" class="btn blue rounded-pill ps-5 pe-5" data-bs-toggle="modal" data-bs-target="#declineQuotationModal">
+            <button id="declineBtn" type="button" class="btn blue rounded-pill ps-5 pe-5" data-bs-toggle="modal"
+                data-bs-target="#declineQuotationModal">
                 Decline
             </button>
-            <button id="approveBtn" type="button" class="btn blue rounded-pill ps-5 pe-5" data-bs-toggle="modal" data-bs-target="#approveQuotationModal">
+            <button id="approveBtn" type="button" class="btn blue rounded-pill ps-5 pe-5" data-bs-toggle="modal"
+                data-bs-target="#approveQuotationModal">
                 Approve
             </button>
         </div>
@@ -209,25 +168,25 @@
 
                     <div id="purchaseOrderPreview" class="file-preview">
                         <span><i class="bi bi-plus "></i></span>
-                         <h4>Drag File</h4>
-                     </div>
-                     <input type="file" id="purchaseOrderUpload" accept=".pdf,.doc,.docx" hidden>
+                        <h4>Drag File</h4>
+                    </div>
+                    <input type="file" id="purchaseOrderUpload" accept=".pdf,.doc,.docx" hidden>
 
-                     <div class="text-center mt-3">
-                         <button id="purchaseOrderBtn" class="btn outlined-btn border-dark rounded-pill ps-4 pe-4"> <i class="bi bi-upload me-2"></i>Upload File</button>
-                     </div>
-                     <div class="invalid-feedback d-none text-center mt-3" id="validIdError">
+                    <div class="text-center mt-3">
+                        <button id="purchaseOrderBtn" class="btn outlined-btn border-dark rounded-pill ps-4 pe-4"> <i
+                                class="bi bi-upload me-2"></i>Upload File</button>
+                    </div>
+                    <div class="invalid-feedback d-none text-center mt-3" id="validIdError">
                         * Please upload file before saving.
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
-                    <button id="approveSaveBtn" type="button" class="btn blue rounded-pill">Save</button>
+                <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                <button id="approveSaveBtn" type="button" class="btn blue rounded-pill">Save</button>
             </div>
-            
-            
+
+
         </div>
     </div>
 </div>
-

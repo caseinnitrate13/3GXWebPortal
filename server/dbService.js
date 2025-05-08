@@ -413,15 +413,8 @@ function getRespondedRequests(userID) {
     return new Promise((resolve, reject) => {
         const query = `
             SELECT 
-                r.requestID,
-                r.RFQNo,
-                r.totalBudget,
-                r.attachment,
-                r.quotationStatus,
-                r.purchaseOrder,
-                res.quotationNo,
-                res.quotationDate,
-                res.totalValue
+                r.*, 
+                res.* 
             FROM requests r
             JOIN response res ON r.requestID = res.requestID
             WHERE r.requestStatus = 'Responded' AND r.userID = ?
@@ -437,11 +430,30 @@ function getRespondedRequests(userID) {
     });
 }
 
+function getRespondedRequestById(requestID) {
+    return new Promise((resolve, reject) => {
+        const query = `
+      SELECT 
+        r.*, 
+        res.* 
+      FROM requests r
+      JOIN response res ON r.requestID = res.requestID
+      WHERE r.requestID = ?
+    `;
+
+        connection.query(query, [requestID], (err, results) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(results);
+            }
+        });
+    });
+}
+
 function updateQuotationRequest(requestID, updateData) {
     return new Promise((resolve, reject) => {
         const { status, poFile, remarks } = updateData;
-
-        // Assuming purchaseOrder is stored as a JSON object and contains the 'client' field
         const query = `
             UPDATE requests
             SET 
@@ -450,24 +462,24 @@ function updateQuotationRequest(requestID, updateData) {
             WHERE requestID = ?
         `;
 
-        // Execute the query with values for status, remarks, poFile, and requestID
         connection.query(query, [status, remarks || '', poFile || null, requestID], (err, results) => {
             if (err) {
-                reject(err); // If there's an error, reject the promise
+                reject(err);
             } else {
                 if (results.affectedRows > 0) {
-                    resolve({ success: true }); // Successfully updated, resolve the promise
+                    resolve({ success: true });
                 } else {
-                    reject(new Error('Quotation not found or update failed')); // If no rows are affected
+                    reject(new Error('Quotation not found or update failed'));
                 }
             }
         });
     });
 }
 
+
 module.exports = {
     registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames,
     addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateUserProfile, deleteUserProfilePic,
     updateUserPassword, saveRFQRequest, getRequestCountsByUser, getRequestsByStatus, getRequestByID, updateRFQRequest, deleteRequest,
-    getRespondedRequests, updateQuotationRequest
+    getRespondedRequests, updateQuotationRequest, getRespondedRequestById
 };

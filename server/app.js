@@ -23,7 +23,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/get-request', (req, res) => {
-    const requestID = req.query.id; 
+    const requestID = req.query.id;
     console.log("Backend received requestID:", requestID);
 
     dbService.getRequestByID(requestID)
@@ -268,6 +268,20 @@ app.post('/quotation-action', upload.single('poFile'), async (req, res) => {
         res.status(500).json({ success: false, message: "Error processing quotation action", error: error.message });
     }
 });
+
+app.get('/responded-request', async (req, res) => {
+    const { requestID } = req.query;
+    if (!requestID) return res.json({ success: false, message: "Missing requestID" });
+
+    try {
+        const result = await dbService.getRespondedRequestById(requestID);
+        res.json({ success: true, request: result[0] });
+    } catch (error) {
+        console.error("Error fetching single responded request:", error);
+        res.json({ success: false, message: "Server error" });
+    }
+});
+
 
 
 

@@ -1175,7 +1175,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  
+
   // QUOTATION
   const purchaseOrderPreview = document.getElementById("purchaseOrderPreview");
   const purchaseOrderUpload = document.getElementById("purchaseOrderUpload");
@@ -1319,8 +1319,8 @@ document.addEventListener("DOMContentLoaded", () => {
           }, { once: true });
           declineBtn.disabled = true;
           window.location.href = '/quotations';
-        
-          
+
+
         } else if (declineTableModal) {
           if (selectedRow) {
             const remarksCell = selectedRow.querySelector('.remarks-cell');
@@ -1810,8 +1810,10 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
+// QUOTATION
 document.addEventListener("DOMContentLoaded", function () {
   const quotationTable = document.querySelector('#quotationTable');
+  if (!quotationTable) return;
   const storedUser = JSON.parse(localStorage.getItem("user"));
   const userID = storedUser?.userID;
 
@@ -1902,7 +1904,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const approveQuotationModal = document.getElementById('approveQuotationModal');
         const approveConfirmationModal = document.getElementById('approveConfirmationModal');
 
-        const requestID = selectedRow?.dataset.requestId || urlRequestID;
+        const requestID = urlRequestID || selectedRow?.dataset.requestId;
 
         if (requestID) {
           submitQuotationAction(userID, requestID, 'Approved', poFile);
@@ -2029,7 +2031,7 @@ function submitQuotationAction(userID, requestID, actionType, poFile = null, rem
     formData.append('remarks', remarksText);
   }
 
-  fetch('/quotation-action', { 
+  fetch('/quotation-action', {
     method: 'POST',
     body: formData
   })
@@ -2076,7 +2078,7 @@ function fetchRespondedRequests(userID) {
           <td>${item.totalValue}</td>
           <td>
             <div class="text-center d-flex justify-content-center align-content-center gap-2">
-              <a href="/view-quotation?requestID=${item.requestID}">
+              <a href="/view-quotation?requestID=${item.requestID}" class="view-quotation-link">
                 <i class="bi bi-eye me-1 text-primary" data-bs-toggle="tooltip" title="View"></i>
               </a>
               <div data-bs-toggle="tooltip" title="Approve">
@@ -2107,6 +2109,165 @@ function fetchRespondedRequests(userID) {
     });
 }
 
+
+document.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const requestID = urlParams.get('requestID');
+
+  if (requestID) {
+    fetch(`/responded-request?requestID=${requestID}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success) throw new Error(data.message);
+
+        populateQuotationDisplay(data.request);
+      })
+      .catch(err => {
+        console.error("Error loading quotation details:", err.message);
+      });
+  }
+});
+
+function populateQuotationDisplay(item) {
+  const localDateStr = (date) => {
+    if (!date || isNaN(new Date(date).getTime())) return "";
+    const d = new Date(date);
+    return `${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}/${d.getFullYear()}`;
+  };
+
+  const rfqDate = new Date(item.requestDate);
+  const validity = new Date(item.validity);
+
+  document.querySelector('#rfqNoSpan').textContent = item.RFQNo || '';
+  document.querySelector('#rfqDateSpan').textContent = localDateStr(item.requestDate);
+  document.querySelector('#validUntilSpan').textContent = localDateStr(item.validity);
+  document.querySelector('#abcSpan').textContent = item.totalBudget || '';
+
+  document.querySelector('#quotationNoSpan').textContent = item.quotationNo || '';
+  document.querySelector('#quotationDateSpan').textContent = localDateStr(item.quotationDate);
+  document.querySelector('#totalValueSpan').textContent = item.totalValue || '';
+
+  // Populate item table
+  const tbody = document.querySelector('#tableBody');
+  tbody.innerHTML = ''; // clear previous rows
+
+  if (item.items) {
+    let itemsArray;
+    try {
+      // Parse the JSON string of items
+      itemsArray = JSON.parse(item.items);
+    } catch (e) {
+      console.error("Failed to parse items JSON:", e);
+      return;
+    }
+
+    if (Array.isArray(itemsArray)) {
+      const tableBody = document.querySelector("#tableBody");
+      if (tableBody) {
+        tableBody.innerHTML = ""; // Clear previous rows
+
+        itemsArray.forEach(item => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${item.itemname || ''}</td>
+            <td>${item.description || ''}</td>
+            <td>${item.unit || ''}</td>
+            <td>${item.quantity || ''}</td>
+            <td>${item.specialrequest || ''}</td>
+            <td>${item.unitPrice || ''}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } else {
+        console.warn("Element with selector '#tableBody' not found.");
+      }
+    } else {
+      console.error("itemsArray is not an array", itemsArray);
+    }
+  } else {
+    console.error("item.items is not available");
+  }
+
+
+  if (item.supattachment) {
+    document.querySelector('#supattachment').innerHTML = `
+      <div class="d-flex justify-content-center align-content-center mt-5 mb-5">
+        <a href="${item.supattachment}" download class="btn btn-dashed outlined-btn">
+          <i class="bi bi-download me-2"></i>Download Attachment
+        </a>
+      </div>
+    `;
+  }
+
+
+  if (item.details) {
+    let detailsObj;
+    try {
+      detailsObj = JSON.parse(item.details);
+    } catch (e) {
+      console.error("Invalid JSON in 'details':", e);
+      detailsObj = {};
+    }
+
+    // CLIENT signature
+    if (detailsObj.signaturePath) {
+      const clientSignatureImg = document.querySelector("#clientSignature img");
+      if (clientSignatureImg) {
+        clientSignatureImg.src = detailsObj.signaturePath;
+        clientSignatureImg.alt = "Client Signature";
+      } else {
+        console.error("Client signature image not found.");
+      }
+    }
+
+    if (detailsObj.reprename) {
+      const clientRepNameContainer = document.getElementById("clientRepNameContainer");
+      if (clientRepNameContainer) {
+        clientRepNameContainer.innerHTML = `
+      <p class="border-bottom-custom text-center fw-bold">${detailsObj.reprename}</p>
+      <p class="text-center">Representative Company</p>
+    `;
+      } else {
+        console.error("clientRepNameContainer not found.");
+      }
+    }
+
+    // ADMIN signature
+    if (item.supplierDetails) {
+      let supplierdetailsObj;
+      try {
+        supplierdetailsObj = JSON.parse(item.supplierDetails);
+        console.log(supplierdetailsObj);
+      } catch (e) {
+        console.error("Invalid JSON in 'supplierDetails':", e);
+        supplierdetailsObj = {};
+      }
+
+      if (supplierdetailsObj.signaturePath) {
+        const adminSignatureImg = document.querySelector("#adminSignature img");
+        if (adminSignatureImg) {
+          adminSignatureImg.src = supplierdetailsObj.signaturePath;
+          adminSignatureImg.alt = "Admin Signature";
+        } else {
+          console.error("Admin signature image not found.");
+        }
+      }
+
+      if (supplierdetailsObj.repreName) {
+        const adminRepNameContainer = document.getElementById("adminRepNameContainer");
+        if (adminRepNameContainer) {
+          adminRepNameContainer.innerHTML = `
+        <p class="border-bottom-custom text-center fw-bold">${supplierdetailsObj.repreName}</p>
+        <p class="text-center">3GX Solutions</p>
+      `;
+        } else {
+          console.error("adminRepNameContainer not found.");
+        }
+      }
+    }
+  }
+
+}
 
 
 // RFQ FORM
@@ -2273,7 +2434,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // Add file signature
-// Ensure clicking the attach button always reopens the file chooser
 let uploadedSignatureFile = null;
 let uploadedImage = null;
 let imageSaved = false;
@@ -2291,17 +2451,14 @@ document.addEventListener("DOMContentLoaded", function () {
   const signPadBtn = document.getElementById('signPadBtn');
   const previewContainer = document.getElementById('previewContainer');
 
-  // Open modal
   uploadSignBtn.addEventListener("click", function () {
     signatureModal.show();
   });
 
-  // Trigger file input
   uploadImgBtn.addEventListener("click", function () {
     fileInput.click();
   });
 
-  // Handle file selection
   fileInput.addEventListener("change", function (event) {
     const file = event.target.files[0];
     if (file && file.type.startsWith("image/")) {
@@ -2316,7 +2473,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Drag & drop support
   uploadSignPreview.addEventListener("dragover", function (event) {
     event.preventDefault();
     uploadSignPreview.classList.add("drag-over");
@@ -2342,7 +2498,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // save uploaded image to previewContainer
   saveButton.addEventListener("click", function () {
 
     if (uploadedImage) {
@@ -2380,7 +2535,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Reset modal content when closed
   document.getElementById("signatureModal").addEventListener("hidden.bs.modal", function () {
     document.body.style.overflow = "auto";
     document.body.style.paddingRight = "0px";
@@ -2389,7 +2543,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   });
 
-  // Save image and close modal
   saveButton.addEventListener("click", function () {
     if (!uploadedImage || !uploadedSignatureFile) {
       noSignatureUploaded.classList.remove('d-none');
@@ -2430,15 +2583,6 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.style.paddingRight = "0px";
   });
 
-
-  // Ensure modal resets properly when reopening
-  // document.getElementById('uploadSignBtn').addEventListener('click', () => {
-  //   const signatureModalElement = document.getElementById('signatureModal');
-  //   document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-
-  //   const signatureModal = new bootstrap.Modal(signatureModalElement);
-  //   signatureModal.show();
-  // });
 
   // signature pad
   const canvas = document.getElementById('signature-pad');
