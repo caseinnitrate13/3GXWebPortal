@@ -129,7 +129,6 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('account path');
   }
 
-
   // REGISTER ACCOUNT
   document.getElementById('createAccount').addEventListener('click', function (event) {
     event.preventDefault();
