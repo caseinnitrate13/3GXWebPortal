@@ -6,7 +6,7 @@
             <li class="breadcrumb-item active">Request for Quotation Form</li>
         </ol>
     </nav>
-</div><!-- End Page Title -->
+</div>
 
 <div class="card mt-4">
     <div class="card-body">
@@ -59,35 +59,26 @@
                                 <th>Unit</th>
                                 <th>Quantity</th>
                                 <th>Special Request</th>
-                                <!-- <th>Unit Price</th> -->
-                                <!-- <th>Total</th> -->
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody">
                             <tr>
-                                <td><input type="text" class="form-control-plaintext border-bottom-custom"
-                                        name="item_name" id="item_name"></td>
-                                <td><input type="text" class="form-control-plaintext border-bottom-custom"
-                                        name="description"></td>
-                                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="unit">
-                                </td>
-                                <td><input type="number" class="form-control-plaintext border-bottom-custom"
-                                        name="quantity"></td>
-                                <td><input type="text" class="form-control-plaintext border-bottom-custom"
-                                        name="special_request"></td>
-                                <!-- <td><input type="text" class="form-control-plaintext border-bottom-custom" name="unit_price"></td> -->
-                                <!-- <td><input type="text" class="form-control-plaintext border-bottom-custom" name="total" readonly></td> -->
+                                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="item_name" id="item_name"></td>
+                                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="description"></td>
+                                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="unit"></td>
+                                <td><input type="number" class="form-control-plaintext border-bottom-custom" name="quantity"></td>
+                                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="special_request"></td>
                                 <td>
-                                    <button type="button" class="btn btn-danger btn-sm remove-row"><i
-                                            class="bi bi-trash3"></i></button>
+                                    <button type="button" class="btn btn-danger btn-sm remove-row"><i class="bi bi-trash3"></i></button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="d-flex justify-content-center align-content-center">
-                    <button id="addRowBtn" class="btn btn-dashed outlined-btn"><i class="bi bi-plus-circle me-1"></i>
+                    <button id="addRowBtn" class="btn btn-dashed outlined-btn">
+                        <i class="bi bi-plus-circle me-1"></i>
                         Add New Row</button>
                 </div>
             </div>
@@ -142,11 +133,8 @@
                 <button id="sendSupplierBtn" type="button" class="btn blue rounded-pill">
                     Send to Supplier
                 </button>
-
             </div>
-
         </form>
-
     </div>
 </div>
 
