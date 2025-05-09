@@ -61,7 +61,6 @@ app.post('/login', (req, res) => {
             return res.status(401).json({ success: false, message: result.message });
         }
 
-        // Redirect logic
         let redirectUrl = "/request-quotation";
         if (result.accountStatus === "Pending") {
             redirectUrl = "/initial-registration";
@@ -88,8 +87,8 @@ const template = fs.readFileSync(path.join(__dirname, '..', 'public', 'template.
 
 // REGISTER
 
-// Multer Storage for Business Permit & Valid ID
-const storage = multer.memoryStorage(); // Store files in memory first
+// Multer Storage for uploads
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 app.get('/register', (req, res) => {
@@ -131,7 +130,6 @@ app.post('/register', async (req, res, next) => {
                 return res.status(400).json({ success: false, message: "Username or company email already exists" });
             }
 
-            // Continue with registration process
             const basePath = path.join(__dirname, "uploads", "users", userID);
             fs.mkdirSync(basePath, { recursive: true });
 
@@ -334,7 +332,6 @@ app.post('/save-rfq', async (req, res, next) => {
             const sigPath = path.join(basePath, sigFilename);
             await fs.promises.writeFile(sigPath, sig.buffer);
             signaturePath = `uploads/requests/${userID}/${requestID}/${sigFilename}`;
-            console.log("New signature uploaded:", signaturePath);
         } else {
             console.log("No signature uploaded or provided.");
         }
@@ -375,20 +372,16 @@ app.post('/save-rfq', async (req, res, next) => {
 
 app.get('/request-counts', (req, res) => {
     const { userID } = req.query;
-    console.log("📥 Received /request-counts request for userID:", userID); // ✅ Debug log
-
     if (!userID) {
-        console.log("❌ Missing userID in request");
+        console.log("Missing userID in request");
         return res.status(400).json({ success: false, message: "Missing user ID" });
     }
 
     dbService.getRequestCountsByUser(userID, (err, counts) => {
         if (err) {
-            console.error("❌ Database error:", err); // ✅ Log any SQL errors
+            console.error("Database error:", err); 
             return res.status(500).json({ success: false, message: err });
         }
-
-        console.log("✅ Counts fetched:", counts); // ✅ Show result
         res.json({ success: true, counts });
     });
 });
@@ -397,7 +390,6 @@ app.get('/requests-by-status', (req, res) => {
     const { userID, status } = req.query;
 
     if (!userID || !status) {
-        console.log("❌ Missing userID or status in request");
         return res.status(400).json({ success: false, message: "Missing user ID or status" });
     }
 
@@ -429,9 +421,8 @@ app.post("/delete-request", async (req, res) => {
             const folderPath = path.join(__dirname, "uploads", "requests", userID, requestID);
             try {
                 await fs.promises.rm(folderPath, { recursive: true, force: true });
-                console.log("🧹 Folder deleted:", folderPath);
             } catch (fsErr) {
-                console.error("⚠️ Failed to delete folder:", fsErr.message);
+                console.error("Failed to delete folder:", fsErr.message);
             }
 
             res.json({ success: true });
@@ -575,20 +566,18 @@ app.post('/update-profile', upload.fields([
 
         if (req.files && req.files['profilePic'] && req.files['profilePic'][0]) {
             const profilePicFile = req.files['profilePic'][0];
-            const ext = path.extname(profilePicFile.originalname); // preserve extension
-            const profilePicFilename = `profile${ext}`; // always same name
+            const ext = path.extname(profilePicFile.originalname);
+            const profilePicFilename = `profile${ext}`;
 
             const basePath = path.join(__dirname, 'uploads', 'users', userID);
             const profilePicDir = path.join(basePath, 'profile_pic');
             const profileFullPath = path.join(profilePicDir, profilePicFilename);
 
-            // Ensure the directory exists
+
             fs.mkdirSync(profilePicDir, { recursive: true });
 
-            // Overwrite existing file
             await fs.promises.writeFile(profileFullPath, profilePicFile.buffer);
 
-            // Path to save in DB
             profilePicPath = `uploads/users/${userID}/profile_pic/${profilePicFilename}`;
         }
 
@@ -599,7 +588,7 @@ app.post('/update-profile', upload.fields([
             companyAddress,
             email,
             phoneNumber,
-            profilepic: profilePicPath // may be null if not updated
+            profilepic: profilePicPath
         });
 
         if (result.success) {
@@ -677,5 +666,5 @@ app.use((req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server started at http://192.168.86.40:${port}`);
+    console.log(`Server started at http://127.0.0.1:${port}`);
 });
