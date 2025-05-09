@@ -248,7 +248,6 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            // alert(data.message); 
             localStorage.setItem('user', JSON.stringify({ userID: data.userID }));
 
             window.location.href = data.redirect;
@@ -332,7 +331,6 @@ document.addEventListener("DOMContentLoaded", function () {
         input.classList.remove('is-valid');
         isValid = false;
       } else {
-        // input.classList.add('is-valid');
         input.classList.remove('is-invalid');
       }
     }
@@ -678,7 +676,6 @@ document.addEventListener("DOMContentLoaded", function () {
       const addRepModal = bootstrap.Modal.getInstance(addSubRepModal);
 
       if (addRepModal) {
-        // Clear input fields
         subRepName.value = "";
         subRepDept.value = "";
 
@@ -707,7 +704,6 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.style.paddingRight = '0px';
   });
 
-  // ensure proper display
   const addSubRep = document.getElementById('addSubRep');
   addSubRep.addEventListener("click", function () {
     form.classList.remove("was-validated");
@@ -761,7 +757,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
-    // Validate fields
     validateField(newRepInput, /^[A-Za-z\s]+$/);
     validateField(newRepDeptInput, /^[A-Za-z0-9\s]+$/);
 
@@ -972,13 +967,10 @@ document.addEventListener("DOMContentLoaded", function () {
         const userID = storedUser?.userID;
 
         if (!userID) return;
-
-        // Reset image on UI
         profileImage.src = defaultImage;
         profileInput.value = "";
         uploadedImageURL = defaultImage;
 
-        // Call backend to delete file + DB entry
         fetch('/delete-profile-pic', {
           method: 'POST',
           headers: {
@@ -1130,8 +1122,6 @@ document.addEventListener("DOMContentLoaded", function () {
         currentPasswordInput.value = "";
         newPasswordInput.value = "";
         renewPasswordInput.value = "";
-
-        // Show modal without extra function
         document.getElementById("alertModalLabel").textContent = "Success";
         document.getElementById("alertModalBody").textContent = data.message || "Password changed successfully.";
         const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
@@ -1149,8 +1139,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 });
-
-
 
 // REQUEST FOR QUOTATION
 document.addEventListener("DOMContentLoaded", () => {
@@ -1929,14 +1917,12 @@ function populateQuotationDisplay(item) {
   document.querySelector('#quotationDateSpan').textContent = localDateStr(item.quotationDate);
   document.querySelector('#totalValueSpan').textContent = item.totalValue || '';
 
-  // Populate item table
   const tbody = document.querySelector('#tableBody');
-  tbody.innerHTML = ''; // clear previous rows
+  tbody.innerHTML = '';
 
   if (item.items) {
     let itemsArray;
     try {
-      // Parse the JSON string of items
       itemsArray = JSON.parse(item.items);
     } catch (e) {
       console.error("Failed to parse items JSON:", e);
@@ -1946,7 +1932,7 @@ function populateQuotationDisplay(item) {
     if (Array.isArray(itemsArray)) {
       const tableBody = document.querySelector("#tableBody");
       if (tableBody) {
-        tableBody.innerHTML = ""; // Clear previous rows
+        tableBody.innerHTML = "";
 
         itemsArray.forEach(item => {
           const row = document.createElement("tr");
@@ -1956,7 +1942,7 @@ function populateQuotationDisplay(item) {
             <td>${item.unit || ''}</td>
             <td>${item.quantity || ''}</td>
             <td>${item.specialrequest || ''}</td>
-            <td>${item.unitPrice || ''}</td>
+            <td>${item.price || ''}</td>
           `;
           tableBody.appendChild(row);
         });
@@ -2081,7 +2067,7 @@ const quill2 = new Quill('#note', {
 // RFQ table
 $(document).ready(function () {
   $("#addRowBtn").on("click", function (e) {
-    e.preventDefault(); // Prevents page refresh
+    e.preventDefault();
 
     let newRow = `
           <tr>
@@ -2376,8 +2362,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   canvas.width = 420;
   canvas.height = 200;
-
-  // Initialize the drawing context properties
   ctx.lineWidth = 2;
   ctx.lineJoin = ctx.lineCap = 'round';
 
@@ -2438,11 +2422,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const pixelData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 
     for (let i = 0; i < pixelData.length; i += 4) {
-      if (pixelData[i + 3] !== 0) { // Alpha channel is not transparent
-        return false; // Canvas is NOT blank
+      if (pixelData[i + 3] !== 0) {
+        return false; 
       }
     }
-    return true; // Canvas is blank
+    return true;
   }
 
   const emptyCanvas = document.getElementById('emptyCanvas');
@@ -2476,7 +2460,6 @@ document.addEventListener("DOMContentLoaded", function () {
         emptyCanvas.classList.remove('d-block');
         emptyCanvas.classList.add('d-none');
 
-        // canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
       }, { once: true });
 
       // preview image 
@@ -2528,9 +2511,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   //Send to Supplier
   const sendSupplierBtn = document.getElementById('sendSupplierBtn');
-  // const canvas = document.getElementById('signature-pad');
-  // const ctx = canvas.getContext('2d');
-
   function isCanvasBlank(canvas) {
     const ctx = canvas.getContext('2d');
     const pixelBuffer = new Uint32Array(

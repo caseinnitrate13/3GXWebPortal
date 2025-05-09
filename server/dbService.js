@@ -105,8 +105,6 @@ function getUserDetails(userID, callback) {
     });
 }
 
-
-// Function to update representatives
 function updateRepNames(userID, repIndex, repData, callback) {
     userID = userID.trim();
     if (userID.startsWith('"') && userID.endsWith('"')) {
@@ -385,11 +383,11 @@ async function updateRFQRequest(requestID, data) {
     const values = fields.map(field => data[field]);
     const sql = `UPDATE requests SET ${fields.map(f => `${f} = ?`).join(', ')} WHERE requestID = ?`;
 
-    values.push(requestID); // Add the WHERE clause value
+    values.push(requestID);
 
     try {
-        const result = await connection.query(sql, values); // Remove destructuring
-        return result; // Just return whatever it gives
+        const result = await connection.query(sql, values);
+        return result; 
     } catch (err) {
         console.error("DB Update Error:", err);
         throw err;
