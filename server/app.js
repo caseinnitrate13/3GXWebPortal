@@ -62,14 +62,18 @@ app.post('/login', (req, res) => {
         }
 
         let redirectUrl = "/request-quotation";
+
         if (result.accountStatus === "Pending") {
             redirectUrl = "/initial-registration";
         } else if (result.accountStatus === "Declined") {
             redirectUrl = "/";
         } else if (result.accountStatus === "Approved") {
-            redirectUrl = "/request-quotation";
+            if (result.userRole === "Admin") {
+                redirectUrl = "/adminquotations";
+            } else if (result.userRole === "Client"){
+                redirectUrl = "/request-quotation";
+            }
         }
-
 
         res.status(200).json({
             success: true,
@@ -82,6 +86,7 @@ app.post('/login', (req, res) => {
 
 
 const template = fs.readFileSync(path.join(__dirname, '..', 'public', 'template.html'), 'utf-8');
+const admintemplate = fs.readFileSync(path.join(__dirname, '..', 'public', 'admintemplate.html'), 'utf-8');
 
 // route for html pages
 
@@ -379,7 +384,7 @@ app.get('/request-counts', (req, res) => {
 
     dbService.getRequestCountsByUser(userID, (err, counts) => {
         if (err) {
-            console.error("Database error:", err); 
+            console.error("Database error:", err);
             return res.status(500).json({ success: false, message: err });
         }
         res.json({ success: true, counts });
@@ -658,6 +663,29 @@ app.get('/view-quotation', (req, res) => {
 
 app.get('/initial-registration', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'initial-registration.html'));
+});
+
+
+//ADMIN SIDE
+
+app.get('/adminquotations', (req, res) => {
+    const adminquotation = fs.readFileSync(path.join(__dirname, '..', 'public', 'adminquotations.html'), 'utf-8');
+    res.send(admintemplate.replace('{{content}}', adminquotation));
+});
+
+app.get('/purchaseorder', (req, res) => {
+    const purchaseorder = fs.readFileSync(path.join(__dirname, '..', 'public', 'purchaseorder.html'), 'utf-8');
+    res.send(admintemplate.replace('{{content}}', purchaseorder));
+});
+
+app.get('/registeredaccounts', (req, res) => {
+    const registeredaccounts = fs.readFileSync(path.join(__dirname, '..', 'public', 'registeredaccounts.html'), 'utf-8');
+    res.send(admintemplate.replace('{{content}}', registeredaccounts));
+});
+
+app.get('/adminaccount', (req, res) => {
+    const adminaccount = fs.readFileSync(path.join(__dirname, '..', 'public', 'adminaccount.html'), 'utf-8');
+    res.send(admintemplate.replace('{{content}}', adminaccount));
 });
 
 

@@ -394,15 +394,21 @@ document.addEventListener("DOMContentLoaded", () => {
         const isReqQuotationPage = location.pathname === '/request-quotation';
         const isAccountPage = location.pathname === '/account';
         const isRFQFormPage = location.pathname === '/request-for-quotation-form';
-        const isQuoatationsPage = location.pathname === '/quotations';
+        const isQuotationsPage = location.pathname === '/quotations';
         const isViewQuotationPage = location.pathname === '/view-quotation';
 
-        if (isReqQuotationPage || isRFQFormPage || isQuoatationsPage || isViewQuotationPage) {
+        const isAdminAccountPage = location.pathname === '/adminaccount';
+        const isAdminQuotationsPage = location.pathname === '/adminquotations';
+        const isPurchaseOrderPage = location.pathname === '/purchaseorder';
+        const isRegisteredAccounts = location.pathname === '/registeredaccounts';
+
+        if (isReqQuotationPage || isRFQFormPage || isQuotationsPage || isViewQuotationPage || isAdminQuotationsPage
+          || isPurchaseOrderPage || isRegisteredAccounts) {
           document.getElementById("headerCompanyName").textContent = data.user.companyName;
           document.getElementById("toggleCompanyName").textContent = data.user.companyName;
           const profileImg = document.getElementById('headerProfileImg');
           profileImg.src = data.user.profilepic || 'assets/img/account.png';
-        } else if (isAccountPage) {
+        } else if (isAccountPage || isAdminAccountPage) {
           document.getElementById("username").textContent = data.user.username;
           document.getElementById("companyName").textContent = data.user.companyName;
           document.getElementById("companyAddress").textContent = data.user.companyAddress;
@@ -1858,7 +1864,7 @@ function fetchRespondedRequests(userID) {
          </td>
 
           <td id="quotationCell">
-            ${item.attachment ? `<a href="${item.attachment}" target="_blank">Download File</a>` : ''}
+            ${item.supattachment ? `<a href="${item.supattachment}" target="_blank">Download File</a>` : ''}
           </td>
           <td id="purchaseOrderCell">
             ${po.client
