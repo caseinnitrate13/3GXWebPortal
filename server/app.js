@@ -673,6 +673,24 @@ app.get('/adminquotations', (req, res) => {
     res.send(admintemplate.replace('{{content}}', adminquotation));
 });
 
+// Admin - get all requests by status (with company name from users table)
+app.get('/admin/requests-by-status', (req, res) => {
+    const { status } = req.query;
+
+    if (!status) {
+        return res.status(400).json({ success: false, message: "Missing request status" });
+    }
+
+    dbService.getAllRequestsByStatus(status, (err, requests) => {
+        if (err) {
+            return res.status(500).json({ success: false, message: err });
+        }
+
+        res.json({ success: true, requests });
+    });
+});
+
+
 app.get('/purchaseorder', (req, res) => {
     const purchaseorder = fs.readFileSync(path.join(__dirname, '..', 'public', 'purchaseorder.html'), 'utf-8');
     res.send(admintemplate.replace('{{content}}', purchaseorder));
@@ -681,6 +699,15 @@ app.get('/purchaseorder', (req, res) => {
 app.get('/registeredaccounts', (req, res) => {
     const registeredaccounts = fs.readFileSync(path.join(__dirname, '..', 'public', 'registeredaccounts.html'), 'utf-8');
     res.send(admintemplate.replace('{{content}}', registeredaccounts));
+});
+
+app.get("/admin/clients", (req, res) => {
+  dbService.getAllClients((err, clients) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: err });
+    }
+    res.json({ success: true, clients });
+  });
 });
 
 app.get('/adminaccount', (req, res) => {

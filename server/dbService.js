@@ -354,6 +354,7 @@ function getRequestCountsByUser(userID, callback) {
     });
 }
 
+// Client
 function getRequestsByStatus(userID, status, callback) {
     const sql = `
       SELECT requestID, RFQNo, totalBudget, requestDate
@@ -387,7 +388,7 @@ async function updateRFQRequest(requestID, data) {
 
     try {
         const result = await connection.query(sql, values);
-        return result; 
+        return result;
     } catch (err) {
         console.error("DB Update Error:", err);
         throw err;
@@ -474,10 +475,51 @@ function updateQuotationRequest(requestID, updateData) {
     });
 }
 
+//ADMIN SIDE
+
+function getAllRequestsByStatus(status, callback) {
+    const sql = `
+        SELECT r.requestID, r.RFQNo, r.totalBudget, r.validity, r.quotationStatus,
+               u.companyname, r.requestStatus
+        FROM requests r
+        JOIN users u ON r.userID = u.userID
+        WHERE r.requestStatus = ?
+    `;
+    connection.query(sql, [status], (err, results) => {
+        if (err) {
+            return callback("Database error: " + err, null);
+        }
+        const parsedResults = results.map(row => {
+            try {
+                row.quotationStatus = row.quotationStatus ? JSON.parse(row.quotationStatus) : null;
+            } catch (e) {
+                row.quotationStatus = null;
+            }
+            return row;
+        });
+
+        callback(null, parsedResults);
+    });
+}
+
+function getAllClients(callback) {
+  const sql = `
+    SELECT userID, username, companyName, companyAddress, businessPermit, validID
+    FROM users
+    WHERE userRole = 'Client'
+  `;
+  connection.query(sql, (err, results) => {
+    if (err) {
+      return callback("Database error: " + err, null);
+    }
+    callback(null, results);
+  });
+}
+
 
 module.exports = {
     registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames,
     addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateUserProfile, deleteUserProfilePic,
     updateUserPassword, saveRFQRequest, getRequestCountsByUser, getRequestsByStatus, getRequestByID, updateRFQRequest, deleteRequest,
-    getRespondedRequests, updateQuotationRequest, getRespondedRequestById
+    getRespondedRequests, updateQuotationRequest, getRespondedRequestById, getAllRequestsByStatus, getAllClients
 };

@@ -1814,7 +1814,6 @@ function submitQuotationAction(userID, requestID, actionType, poFile = null, rem
     });
 }
 
-
 function fetchRespondedRequests(userID) {
   fetch(`/responded-requests?userID=${userID}`)
     .then(res => res.json())
@@ -2041,6 +2040,162 @@ function populateQuotationDisplay(item) {
   }
 
 }
+
+//ADMIN SIDE
+
+// Request for Quotations
+document.addEventListener("DOMContentLoaded", function () {
+  Promise.all([
+    fetch("/admin/requests-by-status?status=Pending").then(res => res.json()),
+    fetch("/admin/requests-by-status?status=Responded").then(res => res.json())
+  ])
+    .then(([pendingData, respondedData]) => {
+      if (!pendingData.success || !respondedData.success) {
+        console.error("Error fetching requests:", pendingData.message || respondedData.message);
+        return;
+      }
+
+      const allData = [...pendingData.requests, ...respondedData.requests];
+      renderAdminQuotations(allData);
+    })
+    .catch(err => console.error("Error fetching requests:", err));
+
+  loadRegisteredClients();
+});
+
+function renderAdminQuotations(requests) {
+  const tableBody = document.querySelector("#adminquotationTable tbody");
+  tableBody.innerHTML = "";
+
+  const localDateStr = (date) => {
+    if (!date || isNaN(new Date(date).getTime())) return "";
+    const d = new Date(date);
+    return `${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}/${d.getFullYear()}`;
+  };
+
+  requests.forEach(row => {
+    let remarksText = "";
+    if (row.requestStatus === "Pending") {
+      remarksText = "To Respond";
+    } else if (row.requestStatus === "Responded") {
+      if (row.quotationStatus?.status === "Approved") {
+        remarksText = "Approved";
+      } else if (row.quotationStatus?.status === "Declined") {
+        remarksText = `Declined: ${row.quotationStatus?.remarks || ""}`;
+      } else {
+        remarksText = "Responded";
+      }
+    } else {
+      remarksText = row.requestStatus || "";
+    }
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${row.companyname}</td>
+      <td>${row.RFQNo}</td>
+      <td>${row.totalBudget}</td>
+      <td>${localDateStr(row.validity)}</td>
+      <td>
+        <div class="text-center d-flex justify-content-center align-content-center gap-2">
+          <a href="/view-quotation?requestID=${row.requestID}">
+            <i class="bi bi-eye me-1 text-primary" title="View"></i>
+          </a>
+          <i class="bi bi-check-circle text-success pointer approve-icon" 
+             data-requestid="${row.requestID}" 
+             data-bs-toggle="modal" 
+             data-bs-target="#approveConfirmationModal"></i>
+          <i class="bi bi-x-circle text-danger pointer decline-icon" 
+             data-requestid="${row.requestID}" 
+             data-bs-toggle="modal" 
+             data-bs-target="#declineTableModal"></i>
+        </div>
+      </td>
+      <td class="remarks-cell">${remarksText}</td>
+    `;
+    tableBody.appendChild(tr);
+  });
+}
+
+
+// Registered Accounts
+function loadRegisteredClients() {
+  fetch("/admin/clients")
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) {
+        console.error(data.message);
+        return;
+      }
+
+      const tableBody = document.querySelector("#regAccTable tbody");
+      tableBody.innerHTML = "";
+
+      data.clients.forEach(user => {
+        const tr = document.createElement("tr");
+        const permitUrl = user.businessPermit
+          ? `/${user.businessPermit}`
+          : null;
+
+        const permitCell = permitUrl
+          ? `<a href="#" class="permit-link text-primary" 
+                data-bs-toggle="modal" 
+                data-bs-target="#permitModal" 
+                data-img="${permitUrl}">
+                View Permit
+             </a>`
+          : "N/A";
+
+        const validIdUrl = user.validID
+          ? `/${user.validID}`
+          : null;
+
+        const validIdCell = validIdUrl
+          ? `<a href="#" class="validid-link text-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#permitModal"
+                data-img="${validIdUrl}">
+                View ID
+             </a>`
+          : "N/A";
+
+        tr.innerHTML = `
+          <td>${user.username}</td>
+          <td>${user.companyName}</td>
+          <td>${user.companyAddress}</td>
+          <td class="text-center">${permitCell}</td>
+          <td class="text-center">${validIdCell}</td>
+          <td>
+            <div class="text-center d-flex justify-content-center align-content-center gap-2">
+              <div data-bs-toggle="tooltip" data-bs-placement="top" title="Approve">
+                <i class="bi bi-check-circle text-success pointer approve-icon" 
+                   data-userid="${user.userID}" 
+                   data-bs-toggle="modal" 
+                   data-bs-target="#approveConfirmationModal"></i>
+              </div>
+              <div data-bs-toggle="tooltip" data-bs-placement="top" title="Decline">
+                <i class="bi bi-x-circle text-danger pointer decline-icon" 
+                   data-userid="${user.userID}" 
+                   data-bs-toggle="modal" 
+                   data-bs-target="#declineTableModal"></i>
+              </div>
+            </div>
+          </td>
+        `;
+
+        tableBody.appendChild(tr);
+      });
+
+      document.querySelectorAll(".permit-link, .validid-link").forEach(link => {
+        link.addEventListener("click", function () {
+          const imgSrc = this.getAttribute("data-img");
+          document.getElementById("permitImage").src = imgSrc;
+        });
+      });
+    })
+    .catch(err => console.error("Error fetching clients:", err));
+}
+
+
 
 
 // RFQ FORM
@@ -2428,7 +2583,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     for (let i = 0; i < pixelData.length; i += 4) {
       if (pixelData[i + 3] !== 0) {
-        return false; 
+        return false;
       }
     }
     return true;
