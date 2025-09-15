@@ -109,7 +109,7 @@
 
 document.addEventListener('DOMContentLoaded', function () {
 
-  // SIDEBAR
+  // SIDEBAR (Client)
   const requestQuotation = document.getElementById('requestQuotation');
   const quotation = document.getElementById('quotations');
   const account = document.getElementById('account');
@@ -128,6 +128,30 @@ document.addEventListener('DOMContentLoaded', function () {
     account.classList.remove('collapsed');
     console.log('account path');
   }
+
+  // SIDEBAR (Admin)
+  const adminQuotations = document.getElementById('adminquotations');
+  const purchaseOrder = document.getElementById('purchaseorder');
+  const registeredAcc = document.getElementById('registeredaccounts');
+  const adminAccount = document.getElementById('adminaccount');
+
+  if (path.includes('/adminquotations') || path.includes('/view-quotation')) {
+    adminQuotations.classList.remove('collapsed');
+    console.log('admin quotations path');
+
+  } else if (path.includes('/purchaseorder')) {
+    purchaseOrder.classList.remove('collapsed');
+    console.log('purchase order path');
+
+  } else if (path.includes('/registeredaccounts')) {
+    registeredAcc.classList.remove('collapsed');
+    console.log('registered accounts path');
+
+  } else if (path.includes('/adminaccount')) {
+    adminAccount.classList.remove('collapsed');
+    console.log('admin account path');
+  }
+
 
   // REGISTER ACCOUNT
   document.getElementById('createAccount').addEventListener('click', function (event) {
@@ -1297,6 +1321,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+
+//Population the Info to RFQ Form
 let currentRequest = null;
 let currentSignPath = null;
 function loadRequestForQuotation(requestID, mode) {
@@ -1436,7 +1462,6 @@ function loadRequestForQuotation(requestID, mode) {
           }
         }
       }
-
 
       if (mode === "view") {
         document.querySelectorAll("input, textarea, select").forEach(el => {
@@ -2089,6 +2114,14 @@ function renderAdminQuotations(requests) {
       remarksText = row.requestStatus || "";
     }
 
+    // Only add pencil icon if "To Respond"
+    const pencilIcon = remarksText === "To Respond"
+      ? `<i class="bi bi-pencil-square text-primary pointer"
+           data-requestid="${row.requestID}" 
+           data-bs-toggle="modal" 
+           data-bs-target="#approveConfirmationModal"></i>`
+      : "";
+
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${row.companyname}</td>
@@ -2097,25 +2130,33 @@ function renderAdminQuotations(requests) {
       <td>${localDateStr(row.validity)}</td>
       <td>
         <div class="text-center d-flex justify-content-center align-content-center gap-2">
-          <a href="/view-quotation?requestID=${row.requestID}">
+          <a href="/request-for-quotation-form?mode=view&requestID=${row.requestID}">
             <i class="bi bi-eye me-1 text-primary" title="View"></i>
           </a>
-          <i class="bi bi-check-circle text-success pointer approve-icon" 
-             data-requestid="${row.requestID}" 
-             data-bs-toggle="modal" 
-             data-bs-target="#approveConfirmationModal"></i>
-          <i class="bi bi-x-circle text-danger pointer decline-icon" 
-             data-requestid="${row.requestID}" 
-             data-bs-toggle="modal" 
-             data-bs-target="#declineTableModal"></i>
+          ${pencilIcon}
         </div>
       </td>
       <td class="remarks-cell">${remarksText}</td>
     `;
     tableBody.appendChild(tr);
   });
-}
 
+  // Attach filter once (not inside loop)
+  document.getElementById("statusFilter").addEventListener("change", function () {
+    const selected = this.value;
+    const rows = document.querySelectorAll("#adminquotationTable tbody tr");
+    rows.forEach(row => {
+      const statusCell = row.querySelector(".remarks-cell");
+      const statusText = statusCell?.textContent.trim() || "";
+
+      if (!selected || statusText.startsWith(selected)) {
+        row.style.display = "";  // show
+      } else {
+        row.style.display = "none"; // hide
+      }
+    });
+  });
+}
 
 // Registered Accounts
 function loadRegisteredClients() {
@@ -2132,9 +2173,7 @@ function loadRegisteredClients() {
 
       data.clients.forEach(user => {
         const tr = document.createElement("tr");
-        const permitUrl = user.businessPermit
-          ? `/${user.businessPermit}`
-          : null;
+        const permitUrl = user.businessPermit ? `/${user.businessPermit}` : null;
 
         const permitCell = permitUrl
           ? `<a href="#" class="permit-link text-primary" 
@@ -2145,9 +2184,7 @@ function loadRegisteredClients() {
              </a>`
           : "N/A";
 
-        const validIdUrl = user.validID
-          ? `/${user.validID}`
-          : null;
+        const validIdUrl = user.validID ? `/${user.validID}` : null;
 
         const validIdCell = validIdUrl
           ? `<a href="#" class="validid-link text-primary"
@@ -2157,6 +2194,17 @@ function loadRegisteredClients() {
                 View ID
              </a>`
           : "N/A";
+
+        let remarksText = "";
+        if (user.accountStatus?.status === "Pending") {
+          remarksText = "Pending";
+        } else if (user.accountStatus?.status === "Approved") {
+          remarksText = "Approved";
+        } else if (user.accountStatus?.status === "Declined") {
+          remarksText = user.accountStatus?.remarks
+            ? `Declined: ${user.accountStatus.remarks}`
+            : "Declined";
+        }
 
         tr.innerHTML = `
           <td>${user.username}</td>
@@ -2180,10 +2228,28 @@ function loadRegisteredClients() {
               </div>
             </div>
           </td>
+          <td class="text-center">${remarksText}</td>
         `;
 
         tableBody.appendChild(tr);
       });
+
+      document.getElementById("statusFilter").addEventListener("change", function () {
+        const selected = this.value;
+        const rows = document.querySelectorAll("#regAccTable tbody tr");
+
+        rows.forEach(row => {
+          const statusCell = row.querySelector("td:last-child");
+          const statusText = statusCell.textContent.trim();
+
+          if (!selected || statusText.startsWith(selected)) {
+            row.style.display = "";
+          } else {
+            row.style.display = "none";
+          }
+        });
+      });
+
 
       document.querySelectorAll(".permit-link, .validid-link").forEach(link => {
         link.addEventListener("click", function () {
@@ -2191,12 +2257,67 @@ function loadRegisteredClients() {
           document.getElementById("permitImage").src = imgSrc;
         });
       });
+
+      document.querySelectorAll(".approve-icon").forEach(icon => {
+        icon.addEventListener("click", function () {
+          const userID = this.getAttribute("data-userid");
+          document.getElementById("approveAccBtn").setAttribute("data-userid", userID);
+        });
+      });
+
+      document.querySelectorAll(".decline-icon").forEach(icon => {
+        icon.addEventListener("click", function () {
+          const userID = this.getAttribute("data-userid");
+          document.getElementById("declineAccBtn").setAttribute("data-userid", userID);
+        });
+      });
+
+      document.getElementById("approveAccBtn").addEventListener("click", function () {
+        const userID = this.getAttribute("data-userid");
+
+        fetch("/admin/updateStatus", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userID, status: "Approved", remarks: "" })
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              loadRegisteredClients();
+              bootstrap.Modal.getInstance(document.getElementById("approveConfirmationModal")).hide();
+            } else {
+              alert("Error: " + data.message);
+            }
+          });
+      });
+
+      document.getElementById("declineAccBtn").addEventListener("click", function () {
+        const userID = this.getAttribute("data-userid");
+        const remarks = document.getElementById("remarks").value.trim();
+
+        if (!remarks) {
+          document.getElementById("noRemarks").classList.remove("d-none");
+          return;
+        }
+
+        fetch("/admin/updateStatus", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userID, status: "Declined", remarks })
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              loadRegisteredClients();
+              bootstrap.Modal.getInstance(document.getElementById("declineTableModal")).hide();
+            } else {
+              alert("Error: " + data.message);
+            }
+          });
+      });
     })
     .catch(err => console.error("Error fetching clients:", err));
 }
-
-
-
 
 // RFQ FORM
 // T&C textarea

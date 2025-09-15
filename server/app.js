@@ -61,16 +61,17 @@ app.post('/login', (req, res) => {
             return res.status(401).json({ success: false, message: result.message });
         }
 
-        let redirectUrl = "/request-quotation";
+        let redirectUrl = "/";
+        const accStatus = result.accountStatus?.status;
 
-        if (result.accountStatus === "Pending") {
+        if (accStatus === "Pending") {
             redirectUrl = "/initial-registration";
-        } else if (result.accountStatus === "Declined") {
+        } else if (accStatus === "Declined") {
             redirectUrl = "/";
-        } else if (result.accountStatus === "Approved") {
+        } else if (accStatus === "Approved") {
             if (result.userRole === "Admin") {
                 redirectUrl = "/adminquotations";
-            } else if (result.userRole === "Client"){
+            } else if (result.userRole === "Client") {
                 redirectUrl = "/request-quotation";
             }
         }
@@ -82,8 +83,6 @@ app.post('/login', (req, res) => {
         });
     });
 });
-
-
 
 const template = fs.readFileSync(path.join(__dirname, '..', 'public', 'template.html'), 'utf-8');
 const admintemplate = fs.readFileSync(path.join(__dirname, '..', 'public', 'admintemplate.html'), 'utf-8');
@@ -171,11 +170,12 @@ app.post('/register', async (req, res, next) => {
             }
 
             const accCreated = new Date().toLocaleString('en-CA', { hour12: false }).replace(",", "");
+            const accountStatus = { status: "Pending", remarks: "" };
 
             const userData = [
                 userID, regUsername, hashedPassword, req.body.regCompanyName,
                 req.body.regCompanyAddress, regCompanyEmail, JSON.stringify(parsedRepNames),
-                req.body.regPhoneNum, busPermitPath, validIdPath, "Client", "Pending", accCreated
+                req.body.regPhoneNum, busPermitPath, validIdPath, "Client", JSON.stringify(accountStatus), accCreated
             ];
 
             dbService.registerUser(userData, (err, result) => {
@@ -183,13 +183,13 @@ app.post('/register', async (req, res, next) => {
                     console.error("Error inserting user:", err);
                     return res.status(500).json({ success: false, message: "Error registering user" });
                 }
-                const accountStatus = "Pending";
-
-                if (accountStatus === "Pending") {
-                    return res.json({ success: true, message: "Registration successful! Your account is pending approval.", redirect: "/initial-registration", userID });
-                }
-
-                res.json({ success: true, message: "Registration successful!", userID });
+                
+                return res.json({
+                    success: true,
+                    message: "Registration successful! Your account is pending approval.",
+                    redirect: "/initial-registration",
+                    userID
+                });
             });
         });
 
@@ -690,6 +690,22 @@ app.get('/admin/requests-by-status', (req, res) => {
     });
 });
 
+app.post("/admin/updateStatus", (req, res) => {
+    const { userID, status, remarks } = req.body;
+
+    if (!userID || !status) {
+        return res.json({ success: false, message: "Missing required fields" });
+    }
+
+    dbService.updateAccountStatus(userID, status, remarks || "", (err, result) => {
+        if (err) {
+            return res.json({ success: false, message: err });
+        }
+        res.json({ success: true, message: "Account status updated" });
+    });
+});
+
+
 
 app.get('/purchaseorder', (req, res) => {
     const purchaseorder = fs.readFileSync(path.join(__dirname, '..', 'public', 'purchaseorder.html'), 'utf-8');
@@ -702,12 +718,12 @@ app.get('/registeredaccounts', (req, res) => {
 });
 
 app.get("/admin/clients", (req, res) => {
-  dbService.getAllClients((err, clients) => {
-    if (err) {
-      return res.status(500).json({ success: false, message: err });
-    }
-    res.json({ success: true, clients });
-  });
+    dbService.getAllClients((err, clients) => {
+        if (err) {
+            return res.status(500).json({ success: false, message: err });
+        }
+        res.json({ success: true, clients });
+    });
 });
 
 app.get('/adminaccount', (req, res) => {

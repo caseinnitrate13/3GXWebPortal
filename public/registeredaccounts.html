@@ -8,7 +8,7 @@
     <option value="">All</option>
     <option value="Pending">Pending</option>
     <option value="Approved">Approved</option>
-    <option value="Rejected">Rejected</option>
+    <option value="Declined">Declined</option>
   </select>
 </div>
 
@@ -26,6 +26,7 @@
             <th class="text-center">Business Permit</th>
             <th class="text-center">Valid ID</th>
             <th class="text-center">Action</th>
+            <th class="text-center">Remarks</th>
           </tr>
         </thead>
         <tbody>
@@ -48,6 +49,7 @@
                 </div>
               </div>
             </td>
+            <td></td>
           </tr>
         </tbody>
       </table>
@@ -68,7 +70,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
-        <button id="approveSaveBtn" type="button" class="btn blue rounded-pill">Yes</button>
+        <button id="approveAccBtn" type="button" class="btn blue rounded-pill">Yes</button>
       </div>
     </div>
   </div>
@@ -94,7 +96,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
-        <button id="declineSaveBtn" type="button" class="btn blue rounded-pill">Yes</button>
+        <button id="declineAccBtn" type="button" class="btn blue rounded-pill">Yes</button>
       </div>
     </div>
   </div>

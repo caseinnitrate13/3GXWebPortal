@@ -45,11 +45,9 @@ function loginUser({ username, password, userID }, callback) {
     let params;
 
     if (userID) {
-
         query = "SELECT userID, accountStatus FROM users WHERE userID = ? LIMIT 1";
         params = [userID];
     } else if (username && password) {
-
         query = "SELECT userID, username, password, userRole, accountStatus FROM users WHERE username = ? LIMIT 1";
         params = [username];
     } else {
@@ -67,10 +65,21 @@ function loginUser({ username, password, userID }, callback) {
         }
 
         const user = results[0];
+        try {
+            if (typeof user.accountStatus === "string") {
+                user.accountStatus = JSON.parse(user.accountStatus);
+            }
+        } catch (e) {
+            console.warn("Failed to parse accountStatus:", user.accountStatus);
+            user.accountStatus = { status: user.accountStatus, remarks: "" };
+        }
 
         if (userID) {
-
-            return callback(null, { success: true, userID: user.userID, accountStatus: user.accountStatus });
+            return callback(null, {
+                success: true,
+                userID: user.userID,
+                accountStatus: user.accountStatus
+            });
         }
 
         bcrypt.compare(password, user.password, (err, isMatch) => {
@@ -93,6 +102,7 @@ function loginUser({ username, password, userID }, callback) {
         });
     });
 }
+
 
 function getUserDetails(userID, callback) {
     const sql = `SELECT username, companyName, companyAddress, companyEmail, repNames, repNum, profilepic FROM users WHERE userID = ?`;
@@ -503,23 +513,56 @@ function getAllRequestsByStatus(status, callback) {
 }
 
 function getAllClients(callback) {
-  const sql = `
-    SELECT userID, username, companyName, companyAddress, businessPermit, validID
-    FROM users
-    WHERE userRole = 'Client'
-  `;
-  connection.query(sql, (err, results) => {
-    if (err) {
-      return callback("Database error: " + err, null);
-    }
-    callback(null, results);
-  });
+    const sql = `
+        SELECT userID, username, companyName, companyAddress, businessPermit, validID, accountStatus
+        FROM users
+        WHERE userRole = 'Client'
+    `;
+    connection.query(sql, (err, results) => {
+        if (err) {
+            return callback("Database error: " + err, null);
+        }
+
+        const parsedResults = results.map(row => {
+            try {
+                row.accountStatus = row.accountStatus
+                    ? JSON.parse(row.accountStatus)
+                    : null;
+            } catch (e) {
+                row.accountStatus = null;
+            }
+            return row;
+        });
+
+        callback(null, parsedResults);
+    });
 }
+
+function updateAccountStatus(userID, status, remarks, callback) {
+    const accountStatus = JSON.stringify({
+        status: status,
+        remarks: remarks
+    });
+
+    const sql = `
+        UPDATE users 
+        SET accountStatus = ? 
+        WHERE userID = ?
+    `;
+
+    connection.query(sql, [accountStatus, userID], (err, result) => {
+        if (err) {
+            return callback("Database error: " + err, null);
+        }
+        callback(null, result);
+    });
+}
+
 
 
 module.exports = {
     registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames,
     addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateUserProfile, deleteUserProfilePic,
     updateUserPassword, saveRFQRequest, getRequestCountsByUser, getRequestsByStatus, getRequestByID, updateRFQRequest, deleteRequest,
-    getRespondedRequests, updateQuotationRequest, getRespondedRequestById, getAllRequestsByStatus, getAllClients
+    getRespondedRequests, updateQuotationRequest, getRespondedRequestById, getAllRequestsByStatus, getAllClients, updateAccountStatus
 };
