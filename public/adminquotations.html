@@ -1,22 +1,22 @@
 <div class="pagetitle">
-    <h1>Quotations</h1>
-</div>
-
-<div class="d-flex align-items-center justify-content-end mb-3">
-  <label for="statusFilter" class="form-label me-1 mb-0 text-size1">Filter:</label>
-  <select class="form-select form-select-md w-auto text-size1" id="statusFilter">
-    <option value="">All</option>
-    <option value="To Respond">To Respond</option>
-    <option value="Responded">Responded</option>
-    <option value="Approved">Approved</option>
-    <option value="Declined">Declined</option>
-  </select>
+  <h1>Quotations</h1>
 </div>
 
 <!-- quotation table -->
 <div class="card mt-4 small">
   <div class="card-body">
     <h5 class="w700 mt-3">Quotation</h5>
+    <div class="d-flex align-items-center justify-content-end mb-3">
+      <label for="statusFilter" class="form-label me-1 mb-0 text-size1">Filter:</label>
+      <select class="form-select form-select-md w-auto text-size1" id="statusFilter">
+        <option value="">All</option>
+        <option value="To Respond">To Respond</option>
+        <option value="Responded">Responded</option>
+        <option value="Approved">Approved</option>
+        <option value="Declined">Declined</option>
+      </select>
+    </div>
+
     <div class="table-responsive">
       <table id="adminquotationTable" class="table datatable table-striped table-bordered overflow-hidden">
         <thead>
@@ -37,18 +37,21 @@
             <td></td>
             <td>
               <div class="text-center d-flex justify-content-center align-content-center gap-2">
-                  <a href="/view-quotation">
-                    <i class="bi bi-eye me-1 text-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="View"></i>
+                <a href="/view-quotation">
+                  <i class="bi bi-eye me-1 text-primary" data-bs-toggle="tooltip" data-bs-placement="top"
+                    title="View"></i>
 
-                  </a>
+                </a>
 
-                  <div data-bs-toggle="tooltip" data-bs-placement="top" title="Approve">
-                    <i class="bi bi-check-circle text-success pointer approve-icon" data-bs-toggle="modal" data-bs-target="#approveConfirmationModal"></i>
-                  </div>
-                  
-                  <div data-bs-toggle="tooltip" data-bs-placement="top" title="Decline">
-                    <i class="bi bi-x-circle text-danger pointer decline-icon" data-bs-toggle="modal" data-bs-target="#declineTableModal"></i>
-                  </div>
+                <div data-bs-toggle="tooltip" data-bs-placement="top" title="Approve">
+                  <i class="bi bi-check-circle text-success pointer approve-icon" data-bs-toggle="modal"
+                    data-bs-target="#approveConfirmationModal"></i>
+                </div>
+
+                <div data-bs-toggle="tooltip" data-bs-placement="top" title="Decline">
+                  <i class="bi bi-x-circle text-danger pointer decline-icon" data-bs-toggle="modal"
+                    data-bs-target="#declineTableModal"></i>
+                </div>
               </div>
             </td>
             <td class="remarks-cell"></td>
@@ -62,36 +65,37 @@
 <!-- approve quotation -->
 <div id="approveConfirmationModal" class="modal fade" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-md">
-      <div class="modal-content">
-          <div class="modal-header">
-              <h5 class="modal-title">Approve Quotation?</h5>
-              <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-              <p class="fw-bold">Do you want to approve this quotation?</p>
-              <div class="mb-3">
-                    <div for="remarks" class="form-label">Upload you Purchase Order (PO):</div>
-
-                    <div id="purchaseOrderPreview" class="file-preview">
-                        <span><i class="bi bi-plus "></i></span>
-                        <h4>Drag File</h4>
-                    </div>
-                    <input type="file" id="purchaseOrderUpload" accept=".pdf,.doc,.docx" hidden>
-
-                    <div class="text-center mt-3">
-                        <button id="purchaseOrderBtn" class="btn outlined-btn border-dark rounded-pill ps-4 pe-4"> <i class="bi bi-upload me-2"></i>Upload File</button>
-                    </div>
-
-                    <div class="invalid-feedback d-none text-center mt-3" id="validIdError">
-                      * Please upload file before saving.
-                    </div>
-              </div>
-          </div>
-          <div class="modal-footer">
-              <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
-              <button id="approveSaveBtn" type="button" class="btn blue rounded-pill">Save</button>
-          </div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Approve Quotation?</h5>
+        <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
       </div>
+      <div class="modal-body">
+        <p class="fw-bold">Do you want to approve this quotation?</p>
+        <div class="mb-3">
+          <div for="remarks" class="form-label">Upload you Purchase Order (PO):</div>
+
+          <div id="purchaseOrderPreview" class="file-preview">
+            <span><i class="bi bi-plus "></i></span>
+            <h4>Drag File</h4>
+          </div>
+          <input type="file" id="purchaseOrderUpload" accept=".pdf,.doc,.docx" hidden>
+
+          <div class="text-center mt-3">
+            <button id="purchaseOrderBtn" class="btn outlined-btn border-dark rounded-pill ps-4 pe-4"> <i
+                class="bi bi-upload me-2"></i>Upload File</button>
+          </div>
+
+          <div class="invalid-feedback d-none text-center mt-3" id="validIdError">
+            * Please upload file before saving.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+        <button id="approveSaveBtn" type="button" class="btn blue rounded-pill">Save</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -99,25 +103,25 @@
 <!-- decline modal -->
 <div id="declineTableModal" class="modal fade" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-md">
-      <div class="modal-content">
-          <div class="modal-header">
-              <h5 class="modal-title">Decline Quotation?</h5>
-              <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-              <p class="fw-bold">Do you want to decline this quotation?</p>
-              <div class="mb-3">
-                  <label for="remarks" class="form-label">Please leave your remarks</label>
-                  <textarea class="form-control" id="remarks" rows="3"></textarea>
-              </div>
-              <div class="invalid-feedback d-none text-center mt-3" id="noRemarks">
-                * Please add some remarks.
-              </div>
-          </div>
-          <div class="modal-footer">
-              <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
-              <button id="declineSaveBtn" type="button" class="btn blue rounded-pill">Save</button>
-          </div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Decline Quotation?</h5>
+        <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
       </div>
+      <div class="modal-body">
+        <p class="fw-bold">Do you want to decline this quotation?</p>
+        <div class="mb-3">
+          <label for="remarks" class="form-label">Please leave your remarks</label>
+          <textarea class="form-control" id="remarks" rows="3"></textarea>
+        </div>
+        <div class="invalid-feedback d-none text-center mt-3" id="noRemarks">
+          * Please add some remarks.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+        <button id="declineSaveBtn" type="button" class="btn blue rounded-pill">Save</button>
+      </div>
+    </div>
   </div>
 </div>

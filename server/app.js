@@ -286,8 +286,6 @@ app.get('/responded-request', async (req, res) => {
 });
 
 
-
-
 app.get('/request-for-quotation-form', (req, res) => {
     const requestForm = fs.readFileSync(path.join(__dirname, '..', 'public', 'rfq-form.html'), 'utf-8');
     res.send(template.replace('{{content}}', requestForm));
@@ -673,7 +671,6 @@ app.get('/adminquotations', (req, res) => {
     res.send(admintemplate.replace('{{content}}', adminquotation));
 });
 
-// Admin - get all requests by status (with company name from users table)
 app.get('/admin/requests-by-status', (req, res) => {
     const { status } = req.query;
 
@@ -690,6 +687,22 @@ app.get('/admin/requests-by-status', (req, res) => {
     });
 });
 
+app.get('/admin-request-for-quotation', (req, res) => {
+    const requestForm = fs.readFileSync(path.join(__dirname, '..', 'public', 'rfq-form.html'), 'utf-8');
+    res.send(admintemplate.replace('{{content}}', requestForm));
+});
+
+app.get('/admin-view-quotation', (req, res) => {
+    const viewQuotation = fs.readFileSync(path.join(__dirname, '..', 'public', 'view-quotation.html'), 'utf-8');
+    res.send(admintemplate.replace('{{content}}', viewQuotation));
+});
+
+app.get('/input-quotation', (req, res) => {
+    const inputQuotation = fs.readFileSync(path.join(__dirname, '..', 'public', 'input-quotation.html'), 'utf-8');
+    res.send(admintemplate.replace('{{content}}', inputQuotation));
+});
+
+
 app.post("/admin/updateStatus", (req, res) => {
     const { userID, status, remarks } = req.body;
 
@@ -705,7 +718,10 @@ app.post("/admin/updateStatus", (req, res) => {
     });
 });
 
-
+app.get('/admin-request-for-qu', (req, res) => {
+    const requestForm = fs.readFileSync(path.join(__dirname, '..', 'public', 'rfq-form.html'), 'utf-8');
+    res.send(admintemplate.replace('{{content}}', requestForm));
+});
 
 app.get('/purchaseorder', (req, res) => {
     const purchaseorder = fs.readFileSync(path.join(__dirname, '..', 'public', 'purchaseorder.html'), 'utf-8');

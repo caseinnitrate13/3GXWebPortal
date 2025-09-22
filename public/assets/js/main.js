@@ -135,7 +135,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const registeredAcc = document.getElementById('registeredaccounts');
   const adminAccount = document.getElementById('adminaccount');
 
-  if (path.includes('/adminquotations') || path.includes('/view-quotation')) {
+  if (path.includes('/adminquotations') || path.includes('/admin-request-for-quotation')
+    || path.includes('/admin-view-quotation') || path.includes('/input-quotation')) {
     adminQuotations.classList.remove('collapsed');
     console.log('admin quotations path');
 
@@ -423,11 +424,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const isAdminAccountPage = location.pathname === '/adminaccount';
         const isAdminQuotationsPage = location.pathname === '/adminquotations';
+        const isAdminRFQFormPage = location.pathname === '/admin-request-for-quotation';
         const isPurchaseOrderPage = location.pathname === '/purchaseorder';
         const isRegisteredAccounts = location.pathname === '/registeredaccounts';
+        const isAdminViewQuotationPage = location.pathname === '/admin-view-quotation';
+        const isAdminInputQuotationPage = location.pathname === '/input-quotation';
 
         if (isReqQuotationPage || isRFQFormPage || isQuotationsPage || isViewQuotationPage || isAdminQuotationsPage
-          || isPurchaseOrderPage || isRegisteredAccounts) {
+          || isAdminRFQFormPage || isAdminViewQuotationPage || isAdminInputQuotationPage || isPurchaseOrderPage || isRegisteredAccounts) {
           document.getElementById("headerCompanyName").textContent = data.user.companyName;
           document.getElementById("toggleCompanyName").textContent = data.user.companyName;
           const profileImg = document.getElementById('headerProfileImg');
@@ -1322,7 +1326,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-//Population the Info to RFQ Form
+//Population of the Info to RFQ Form
 let currentRequest = null;
 let currentSignPath = null;
 function loadRequestForQuotation(requestID, mode) {
@@ -1807,7 +1811,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-
 function submitQuotationAction(userID, requestID, actionType, poFile = null, remarksText = '') {
   const formData = new FormData();
   formData.append('userID', userID);
@@ -1908,24 +1911,43 @@ function fetchRespondedRequests(userID) {
     });
 }
 
-
 document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const requestID = urlParams.get('requestID');
 
   if (requestID) {
-    fetch(`/responded-request?requestID=${requestID}`)
-      .then(res => res.json())
-      .then(data => {
-        if (!data.success) throw new Error(data.message);
+    // detect which page we're on
+    const path = window.location.pathname;
 
-        populateQuotationDisplay(data.request);
-      })
-      .catch(err => {
-        console.error("Error loading quotation details:", err.message);
-      });
+    let endpoint = "";
+    if (path.includes("view-quotation")) {
+      endpoint = `/responded-request?requestID=${requestID}`;
+    } else if (path.includes("input-quotation")) {
+      endpoint = `/get-request?id=${requestID}`; // <-- use RFQ request details for pending
+    }
+
+    if (endpoint) {
+      fetch(endpoint)
+        .then(res => res.json())
+        .then(data => {
+          if (!data.success) throw new Error(data.message);
+
+          const request = data.request;
+
+          if (path.includes("view-quotation")) {
+            populateQuotationDisplay(request);
+          } else if (path.includes("input-quotation")) {
+            populateQuotationForm(request);  // <-- new function to fill inputs
+          }
+        })
+        .catch(err => {
+          console.error("Error loading quotation details:", err.message);
+        });
+    }
   }
 });
+
+
 
 function populateQuotationDisplay(item) {
   const localDateStr = (date) => {
@@ -1933,9 +1955,7 @@ function populateQuotationDisplay(item) {
     const d = new Date(date);
     return `${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}/${d.getFullYear()}`;
   };
-
-  const rfqDate = new Date(item.requestDate);
-  const validity = new Date(item.validity);
+  console.log("Quotation item:", item);
 
   document.querySelector('#rfqNoSpan').textContent = item.RFQNo || '';
   document.querySelector('#rfqDateSpan').textContent = localDateStr(item.requestDate);
@@ -2114,34 +2134,43 @@ function renderAdminQuotations(requests) {
       remarksText = row.requestStatus || "";
     }
 
-    // Only add pencil icon if "To Respond"
-    const pencilIcon = remarksText === "To Respond"
-      ? `<i class="bi bi-pencil-square text-primary pointer"
-           data-requestid="${row.requestID}" 
-           data-bs-toggle="modal" 
-           data-bs-target="#approveConfirmationModal"></i>`
-      : "";
+    const eyeForPending = `<a href="/admin-request-for-quotation?mode=view&requestID=${row.requestID}">
+      <i class="bi bi-eye me-1 text-primary" title="View"></i>
+    </a>`;
+
+    const eyeForResponded = `<a href="/admin-view-quotation?requestID=${row.requestID}" class="view-quotation-link">
+      <i class="bi bi-eye me-1 text-primary" data-bs-toggle="tooltip" title="View"></i>
+    </a>`;
+
+    const pencilIcon = `<a href="/input-quotation?requestID=${row.requestID}" class="view-quotation-link">
+      <i class="bi bi-pencil-square text-primary pointer" title="Add Quotation"></i>
+    </a>`;
+
+    let actionIcons = "";
+
+    if (remarksText === "To Respond") {
+      actionIcons = eyeForPending + pencilIcon;
+    } else if (remarksText === "Responded" || remarksText === "Approved" || remarksText.startsWith("Declined")) {
+      actionIcons = eyeForResponded;
+    }
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${row.companyname}</td>
-      <td>${row.RFQNo}</td>
-      <td>${row.totalBudget}</td>
-      <td>${localDateStr(row.validity)}</td>
-      <td>
-        <div class="text-center d-flex justify-content-center align-content-center gap-2">
-          <a href="/request-for-quotation-form?mode=view&requestID=${row.requestID}">
-            <i class="bi bi-eye me-1 text-primary" title="View"></i>
-          </a>
-          ${pencilIcon}
-        </div>
-      </td>
-      <td class="remarks-cell">${remarksText}</td>
-    `;
+    <td>${row.companyname}</td>
+    <td>${row.RFQNo}</td>
+    <td>₱${row.totalBudget}</td>
+    <td>${localDateStr(row.validity)}</td>
+    <td>
+      <div class="text-center d-flex justify-content-center align-content-center gap-2">
+        ${actionIcons}
+      </div>
+    </td>
+    <td class="remarks-cell">${remarksText}</td>
+  `;
     tableBody.appendChild(tr);
   });
 
-  // Attach filter once (not inside loop)
+
   document.getElementById("statusFilter").addEventListener("change", function () {
     const selected = this.value;
     const rows = document.querySelectorAll("#adminquotationTable tbody tr");
@@ -2150,9 +2179,9 @@ function renderAdminQuotations(requests) {
       const statusText = statusCell?.textContent.trim() || "";
 
       if (!selected || statusText.startsWith(selected)) {
-        row.style.display = "";  // show
+        row.style.display = "";
       } else {
-        row.style.display = "none"; // hide
+        row.style.display = "none";
       }
     });
   });
@@ -2318,6 +2347,158 @@ function loadRegisteredClients() {
     })
     .catch(err => console.error("Error fetching clients:", err));
 }
+
+
+function populateQuotationForm(request) {
+  console.log("Quotation item (form):", request);
+
+
+  const localDateStr = (date) => {
+    if (!date || isNaN(new Date(date).getTime())) return "";
+    const d = new Date(date);
+    return `${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}/${d.getFullYear()}`;
+  };
+
+  document.querySelector("#rfqNoSpan").textContent = request.RFQNo || "";
+  document.querySelector("#rfqDateSpan").textContent = localDateStr(request.requestDate);
+  document.querySelector("#validUntilSpan").textContent = localDateStr(request.validity);
+  document.querySelector("#abcSpan").textContent = request.totalBudget || "";
+  document.querySelector("#quotationNoInput").value = request.quotationNo || "";
+  document.querySelector("#quotationDateInput").value = request.quotationDate;
+  document.querySelector("#totalValueInput").value = request.totalValue || "";
+
+  if (request.details) {
+    let detailsObj = {};
+    try {
+      detailsObj = JSON.parse(request.details);
+    } catch (e) {
+      console.error("Invalid JSON in details:", e);
+    }
+
+    quill.root.innerHTML = detailsObj.conditions || "";
+    quill2.root.innerHTML = detailsObj.note || "";
+
+    quill.root.style.fontSize = "16px";
+    quill2.root.style.fontSize = "16px";
+
+    if (detailsObj.reprename) {
+      const clientRepNameContainer = document.querySelector("#clientRepNameContainer");
+      clientRepNameContainer.innerHTML = `
+        <p class="border-bottom-custom text-center fw-bold">${detailsObj.reprename}</p>
+        <p class="text-center">Representative Company</p>
+      `;
+    }
+
+    if (detailsObj.signaturePath) {
+      const clientSignatureImg = document.querySelector("#clientSignature img");
+      if (clientSignatureImg) {
+        clientSignatureImg.src = detailsObj.signaturePath;
+        clientSignatureImg.alt = "Client Signature";
+      }
+    }
+  }
+
+  if (request.supplierDetails) {
+    let supplierObj = {};
+    try {
+      supplierObj = JSON.parse(request.supplierDetails);
+    } catch (e) {
+      console.error("Invalid JSON in supplierDetails:", e);
+    }
+
+    if (supplierObj.signaturePath) {
+      document.getElementById("uploadSignBtn")?.classList.add("d-none");
+      document.getElementById("signPadBtn")?.classList.add("d-none");
+
+      const adminSignContainer = document.querySelector("#adminRepNameContainer");
+      adminSignContainer.insertAdjacentHTML(
+        "beforebegin",
+        `
+          <div class="d-flex justify-content-center align-content-center">
+            <div id="adminSignature">
+              <img src="${supplierObj.signaturePath}" alt="Admin Signature" />
+            </div>
+          </div>
+        `
+      );
+    }
+
+    if (supplierObj.repreName) {
+      document.querySelector("#adminRepNameContainer").innerHTML = `
+        <p class="border-bottom-custom text-center fw-bold">${supplierObj.repreName}</p>
+        <p class="text-center">3GX Solutions</p>
+      `;
+    }
+  }
+
+  const tbody = document.querySelector("#tableBody");
+  tbody.innerHTML = "";
+  if (request.items) {
+    let itemsArray = [];
+    try {
+      itemsArray = JSON.parse(request.items);
+    } catch (e) {
+      console.error("Failed to parse items:", e);
+    }
+
+    if (Array.isArray(itemsArray)) {
+      itemsArray.forEach(it => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td class="text-center">${it.itemname || ""}</td>
+          <td>${it.description || ""}</td>
+          <td class="text-center">${it.unit || ""}</td>
+          <td class="text-center">${it.quantity || ""}</td>
+          <td>${it.specialrequest || ""}</td>
+          <td class="text-center"> 
+          <input 
+            type="text"
+            id="itemprice" 
+            class=" text-center form-control form-control-sm border-3 border-bottom" 
+            name="price" 
+            value="₱ ${it.price || ""}"
+          />
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+  }
+
+  if (request.attachment) {
+    document.querySelector("#supattachment").innerHTML = `
+      <a href="${request.attachment}" download class="btn btn-dashed outlined-btn">
+        <i class="bi bi-download me-2"></i>Download Attachment
+      </a>
+    `;
+  }
+
+  document.querySelectorAll("input, textarea, select").forEach(el => {
+    if (
+      el.id !== "quotationNoInput" &&
+      el.id !== "quotationDateInput" &&
+      el.id !== "totalValueInput" &&
+      el.id !== "itemprice" &&
+      el.id !==  "adminrepreName"
+    ) {
+      el.setAttribute("disabled", true);
+    }
+  });
+
+  quill.enable(false);
+  quill2.enable(false);
+  quill.getModule('toolbar').container.style.display = 'none';
+  quill2.getModule('toolbar').container.style.display = 'none';
+  quill.root.style.border = "none";
+  quill2.root.style.border = "none";
+  quill.container.style.border = "none";
+  quill2.container.style.border = "none";
+
+  document.querySelector("#saveDraftBtn")?.classList.add("d-none");
+  document.querySelector("#sendSupplierBtn")?.classList.add("d-none");
+}
+
+
 
 // RFQ FORM
 // T&C textarea
