@@ -558,11 +558,51 @@ function updateAccountStatus(userID, status, remarks, callback) {
     });
 }
 
+function saveResponse(data) {
+    return new Promise((resolve, reject) => {
+        const query = `
+      INSERT INTO RESPONSE
+      (responseID, requestID, quotationNo, quotationDate, totalValue, supplierDetails, supattachment)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+        const values = [
+            data.responseID,
+            data.requestID,
+            data.quotationNo,
+            data.quotationDate,
+            data.totalValue,
+            data.supplierDetails,
+            data.attachment
+        ];
+        connection.query(query, values, (err, result) => {
+            if (err) return reject(err);
+            resolve(result);
+        });
+    });
+}
+
+async function updateRequestItems(requestID, itemsJSON) {
+    try {
+        const sql = `
+      UPDATE REQUESTS 
+      SET items = ?, requestStatus = ? 
+      WHERE requestID = ?
+    `;
+        const values = [itemsJSON, "Responded", requestID];
+
+        const result = await connection.query(sql, values);
+        return result;
+    } catch (err) {
+        console.error("DB Update Items Error:", err);
+        throw err;
+    }
+}
 
 
 module.exports = {
     registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames,
     addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateUserProfile, deleteUserProfilePic,
     updateUserPassword, saveRFQRequest, getRequestCountsByUser, getRequestsByStatus, getRequestByID, updateRFQRequest, deleteRequest,
-    getRespondedRequests, updateQuotationRequest, getRespondedRequestById, getAllRequestsByStatus, getAllClients, updateAccountStatus
+    getRespondedRequests, updateQuotationRequest, getRespondedRequestById, getAllRequestsByStatus, getAllClients, updateAccountStatus,
+    saveResponse, updateRequestItems
 };

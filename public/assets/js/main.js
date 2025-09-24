@@ -2352,7 +2352,6 @@ function loadRegisteredClients() {
 function populateQuotationForm(request) {
   console.log("Quotation item (form):", request);
 
-
   const localDateStr = (date) => {
     if (!date || isNaN(new Date(date).getTime())) return "";
     const d = new Date(date);
@@ -2363,9 +2362,18 @@ function populateQuotationForm(request) {
   document.querySelector("#rfqDateSpan").textContent = localDateStr(request.requestDate);
   document.querySelector("#validUntilSpan").textContent = localDateStr(request.validity);
   document.querySelector("#abcSpan").textContent = request.totalBudget || "";
+
   document.querySelector("#quotationNoInput").value = request.quotationNo || "";
-  document.querySelector("#quotationDateInput").value = request.quotationDate;
   document.querySelector("#totalValueInput").value = request.totalValue || "";
+
+  const updateGrandTotal = () => {
+    let grandTotal = 0;
+    document.querySelectorAll(".total-price").forEach(cell => {
+      const value = cell.textContent.replace(/[₱,]/g, "").trim();
+      grandTotal += parseFloat(value) || 0;
+    });
+    document.querySelector("#totalValueInput").value = `₱ ${grandTotal.toLocaleString()}`;
+  };
 
   if (request.details) {
     let detailsObj = {};
@@ -2398,39 +2406,6 @@ function populateQuotationForm(request) {
     }
   }
 
-  if (request.supplierDetails) {
-    let supplierObj = {};
-    try {
-      supplierObj = JSON.parse(request.supplierDetails);
-    } catch (e) {
-      console.error("Invalid JSON in supplierDetails:", e);
-    }
-
-    if (supplierObj.signaturePath) {
-      document.getElementById("uploadSignBtn")?.classList.add("d-none");
-      document.getElementById("signPadBtn")?.classList.add("d-none");
-
-      const adminSignContainer = document.querySelector("#adminRepNameContainer");
-      adminSignContainer.insertAdjacentHTML(
-        "beforebegin",
-        `
-          <div class="d-flex justify-content-center align-content-center">
-            <div id="adminSignature">
-              <img src="${supplierObj.signaturePath}" alt="Admin Signature" />
-            </div>
-          </div>
-        `
-      );
-    }
-
-    if (supplierObj.repreName) {
-      document.querySelector("#adminRepNameContainer").innerHTML = `
-        <p class="border-bottom-custom text-center fw-bold">${supplierObj.repreName}</p>
-        <p class="text-center">3GX Solutions</p>
-      `;
-    }
-  }
-
   const tbody = document.querySelector("#tableBody");
   tbody.innerHTML = "";
   if (request.items) {
@@ -2443,30 +2418,51 @@ function populateQuotationForm(request) {
 
     if (Array.isArray(itemsArray)) {
       itemsArray.forEach(it => {
+        const qty = parseFloat(it.quantity) || 0;
+        const price = parseFloat(it.price) || 0;
+        const total = qty * price;
+
         const row = document.createElement("tr");
         row.innerHTML = `
           <td class="text-center">${it.itemname || ""}</td>
           <td>${it.description || ""}</td>
           <td class="text-center">${it.unit || ""}</td>
-          <td class="text-center">${it.quantity || ""}</td>
+          <td class="text-center">${qty}</td>
           <td>${it.specialrequest || ""}</td>
           <td class="text-center"> 
-          <input 
-            type="text"
-            id="itemprice" 
-            class=" text-center form-control form-control-sm border-3 border-bottom" 
-            name="price" 
-            value="₱ ${it.price || ""}"
-          />
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">₱</span>
+              <input 
+                name="price"
+                type="number"
+                step="0.01"
+                class="form-control text-center border-3 border-bottom price-input"
+                value="${price || ""}"
+                data-qty="${qty}"
+              />
+            </div>
           </td>
+          <td class="text-center fw-bold total-price">₱ ${total.toLocaleString()}</td>
         `;
         tbody.appendChild(row);
       });
+
+      tbody.querySelectorAll(".price-input").forEach(input => {
+        input.addEventListener("input", e => {
+          const qty = parseFloat(e.target.dataset.qty) || 0;
+          const price = parseFloat(e.target.value) || 0;
+          const totalCell = e.target.closest("tr").querySelector(".total-price");
+          totalCell.textContent = `₱ ${(qty * price).toLocaleString()}`;
+          updateGrandTotal();
+        });
+      });
+
+      updateGrandTotal();
     }
   }
 
   if (request.attachment) {
-    document.querySelector("#supattachment").innerHTML = `
+    document.querySelector("#clientattachment").innerHTML = `
       <a href="${request.attachment}" download class="btn btn-dashed outlined-btn">
         <i class="bi bi-download me-2"></i>Download Attachment
       </a>
@@ -2478,8 +2474,10 @@ function populateQuotationForm(request) {
       el.id !== "quotationNoInput" &&
       el.id !== "quotationDateInput" &&
       el.id !== "totalValueInput" &&
-      el.id !== "itemprice" &&
-      el.id !==  "adminrepreName"
+      el.classList.contains("price-input") === false &&
+      el.id !== "adminrepreName" &&
+      el.id != "fileUpload" &&
+      el.id != "fileInput"
     ) {
       el.setAttribute("disabled", true);
     }
@@ -2496,8 +2494,143 @@ function populateQuotationForm(request) {
 
   document.querySelector("#saveDraftBtn")?.classList.add("d-none");
   document.querySelector("#sendSupplierBtn")?.classList.add("d-none");
-}
 
+  // Send to Client
+  const sendtoClientBtn = document.getElementById('sendtoClientBtn');
+
+  sendtoClientBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+
+    const errorContainer = document.getElementById('error-container');
+    errorContainer.classList.add('d-none');
+    errorContainer.innerHTML = '';
+
+    const quotationNo = document.getElementById('quotationNoInput')?.value.trim();
+    const quotationDate = document.getElementById('quotationDateInput')?.value.trim();
+    const repreName = document.getElementById('adminrepreName')?.value.trim();
+    const supAttachmentUploaded = uploadedFile;
+    const adminSignatureUploaded = previewContainer.style.display === 'block' &&
+      previewContainer.querySelector('img, canvas') || uploadedSignatureFile;
+
+
+    const rows = document.querySelectorAll('#tableBody tr');
+    let itemsValid = true;
+    rows.forEach(row => {
+      const price = row.querySelector('input[name="price"]')?.value.trim();
+      if (!price) itemsValid = false;
+    });
+
+    const errors = [];
+    if (!quotationNo) errors.push("<li>Quotation No. is required.</li>");
+    if (!quotationDate) errors.push("<li>Quotation Date is required.</li>");
+    if (!itemsValid) errors.push("<li>All items must have a price.</li>");
+    if (!supAttachmentUploaded) errors.push("<li>Please upload a supplier attachment.</li>");
+    if (!adminSignatureUploaded) errors.push("<li>Please provide an Admin Signature.</li>");
+    if (!repreName) errors.push("<li>Representative Name is required.</li>");
+
+    if (errors.length > 0) {
+      errorContainer.classList.remove('d-none');
+      errorContainer.innerHTML = `<ul>${errors.join('')}</ul>`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    const sendClientModal = new bootstrap.Modal(document.getElementById('sendClientModal'));
+    sendClientModal.show();
+  });
+
+  document.getElementById('sendClientBtn').addEventListener('click', () => {
+    const formData = new FormData();
+
+    const requestID = new URLSearchParams(window.location.search).get("requestID");
+    const quotationNo = document.getElementById('quotationNoInput')?.value.trim();
+    const quotationDate = document.getElementById('quotationDateInput')?.value.trim();
+    const repreName = document.getElementById('adminrepreName')?.value.trim();
+
+    const items = [];
+    let totalValue = 0;
+
+    function isCanvasBlank(canvas) {
+      const ctx = canvas.getContext('2d');
+      const pixelBuffer = new Uint32Array(
+        ctx.getImageData(0, 0, canvas.width, canvas.height).data.buffer
+      );
+
+      return !pixelBuffer.some(color => color !== 0);
+    }
+
+    document.querySelectorAll('#tableBody tr').forEach((row, index) => {
+      const itemname = row.cells[0]?.textContent.trim() || "";
+      const description = row.cells[1]?.textContent.trim() || "";
+      const unit = row.cells[2]?.textContent.trim() || "";
+      const quantity = parseFloat(row.cells[3]?.textContent.trim()) || 0;
+      const specialrequest = row.cells[4]?.textContent.trim() || "";
+
+      const price = parseFloat(row.querySelector('input[name="price"]')?.value || 0);
+      const totalprice = quantity * price;
+
+      totalValue += totalprice;
+
+      items.push({
+        itemno: `ITEM${(index + 1).toString().padStart(3, '0')}`,
+        itemname,
+        description,
+        unit,
+        quantity,
+        specialrequest,
+        price,
+        totalprice
+      });
+    });
+
+    formData.append("requestID", requestID);
+    formData.append("quotationNo", quotationNo);
+    formData.append("quotationDate", quotationDate);
+    formData.append("totalValue", totalValue);
+    formData.append("reprename", repreName);
+    formData.append("items", JSON.stringify(items));
+
+    if (uploadedFile) {
+      formData.append("attachment", uploadedFile);
+    }
+
+    const canvas = document.getElementById('signature-pad');
+
+    const sendForm = (fd) => {
+      fetch("/save-response", {
+        method: "POST",
+        body: fd
+      })
+        .then(res => res.json())
+        .then(data => {
+          alert(data.message);
+          if (data.success) {
+            window.location.href = "/adminquotations";
+          }
+        })
+        .catch(err => {
+          console.error("Save response error:", err);
+          alert("An error occurred while saving quotation.");
+        });
+    };
+
+    if (uploadedSignatureFile) {
+      formData.append("signature", uploadedSignatureFile);
+      sendForm(formData);
+    } else if (canvas && !isCanvasBlank(canvas)) {
+      canvas.toBlob(function (blob) {
+        if (blob) {
+          const filename = `signature_${Date.now()}.png`;
+          formData.append("signature", blob, filename);
+        }
+        sendForm(formData);
+      }, 'image/png');
+    } else {
+      sendForm(formData);
+    }
+  });
+
+}
 
 
 // RFQ FORM
@@ -2567,6 +2700,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
   fileUploadBtn.addEventListener("click", function () {
+    console.log('I am clicked!');
     fileUpload.click();
   });
 
@@ -3082,7 +3216,8 @@ document.addEventListener("DOMContentLoaded", function () {
         unit: row.querySelector('input[name="unit"]')?.value || "",
         quantity: row.querySelector('input[name="quantity"]')?.value || "",
         specialrequest: row.querySelector('input[name="special_request"]')?.value || "",
-        price: ""
+        price: "",
+        totalprice: ""
       };
       items.push(item);
     });

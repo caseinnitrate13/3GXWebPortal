@@ -183,7 +183,7 @@ app.post('/register', async (req, res, next) => {
                     console.error("Error inserting user:", err);
                     return res.status(500).json({ success: false, message: "Error registering user" });
                 }
-                
+
                 return res.json({
                     success: true,
                     message: "Registration successful! Your account is pending approval.",
@@ -687,6 +687,7 @@ app.get('/admin/requests-by-status', (req, res) => {
     });
 });
 
+
 app.get('/admin-request-for-quotation', (req, res) => {
     const requestForm = fs.readFileSync(path.join(__dirname, '..', 'public', 'rfq-form.html'), 'utf-8');
     res.send(admintemplate.replace('{{content}}', requestForm));
@@ -701,6 +702,70 @@ app.get('/input-quotation', (req, res) => {
     const inputQuotation = fs.readFileSync(path.join(__dirname, '..', 'public', 'input-quotation.html'), 'utf-8');
     res.send(admintemplate.replace('{{content}}', inputQuotation));
 });
+
+app.post('/save-response', async (req, res, next) => {
+    try {
+        res.locals.responseID = await nanoid();
+        next();
+    } catch (err) {
+        return res.status(500).json({ success: false, message: "Server error" });
+    }
+}, upload.fields([
+    { name: 'attachment', maxCount: 1 },
+    { name: 'signature', maxCount: 1 }
+]), async (req, res) => {
+    const responseID = res.locals.responseID;
+    const { requestID, quotationNo, quotationDate, totalValue, reprename, items } = req.body;
+
+    const basePath = path.join(__dirname, "uploads", "responses", requestID, responseID);
+    fs.mkdirSync(basePath, { recursive: true });
+
+    let attachmentPath = null;
+    let signaturePath = null;
+
+    try {
+        // Attachment
+        if (req.files?.attachment?.[0]) {
+            const file = req.files.attachment[0];
+            const filename = `${Date.now()}-${file.originalname}`;
+            const filePath = path.join(basePath, filename);
+            await fs.promises.writeFile(filePath, file.buffer);
+            attachmentPath = `uploads/responses/${requestID}/${responseID}/${filename}`;
+        }
+
+        // Signature
+        if (req.files?.signature?.[0]) {
+            const sig = req.files.signature[0];
+            const sigFilename = `signature_${Date.now()}.png`;
+            const sigPath = path.join(basePath, sigFilename);
+            await fs.promises.writeFile(sigPath, sig.buffer);
+            signaturePath = `uploads/responses/${requestID}/${responseID}/${sigFilename}`;
+        }
+
+        const supplierDetails = JSON.stringify({
+            signaturePath: signaturePath || "",
+            repreName: reprename || ""
+        });
+
+        const responseData = {
+            responseID,
+            requestID,
+            quotationNo,
+            quotationDate,
+            totalValue,
+            supplierDetails,
+            attachment: attachmentPath
+        };
+        await dbService.saveResponse(responseData);
+        await dbService.updateRequestItems(requestID, items);
+
+        res.json({ success: true, message: "Response saved successfully!" });
+    } catch (error) {
+        console.error("[Save Response error]:", error);
+        res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+});
+
 
 
 app.post("/admin/updateStatus", (req, res) => {
@@ -718,10 +783,6 @@ app.post("/admin/updateStatus", (req, res) => {
     });
 });
 
-app.get('/admin-request-for-qu', (req, res) => {
-    const requestForm = fs.readFileSync(path.join(__dirname, '..', 'public', 'rfq-form.html'), 'utf-8');
-    res.send(admintemplate.replace('{{content}}', requestForm));
-});
 
 app.get('/purchaseorder', (req, res) => {
     const purchaseorder = fs.readFileSync(path.join(__dirname, '..', 'public', 'purchaseorder.html'), 'utf-8');
