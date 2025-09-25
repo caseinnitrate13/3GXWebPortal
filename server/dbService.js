@@ -598,11 +598,37 @@ async function updateRequestItems(requestID, itemsJSON) {
     }
 }
 
+function getRequestsWithPurchaseOrder() {
+    return new Promise((resolve, reject) => {
+        const query = `
+      SELECT 
+        r.*, 
+        res.*, 
+        u.companyName
+      FROM requests r
+      JOIN response res ON r.requestID = res.requestID
+      JOIN users u ON r.userID = u.userID
+      WHERE r.purchaseOrder IS NOT NULL
+        AND r.purchaseOrder != '{}'
+        AND JSON_UNQUOTE(JSON_EXTRACT(r.purchaseOrder, '$.client')) IS NOT NULL
+        AND JSON_UNQUOTE(JSON_EXTRACT(r.purchaseOrder, '$.client')) != ''
+    `;
+
+        connection.query(query, (err, results) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(results);
+            }
+        });
+    });
+}
+
 
 module.exports = {
     registerUser, checkDuplicateUser, loginUser, getUserDetails, updateRepNames,
     addSubRepresentative, getSubRepresentatives, deleteSubRepresentative, updateUserProfile, deleteUserProfilePic,
     updateUserPassword, saveRFQRequest, getRequestCountsByUser, getRequestsByStatus, getRequestByID, updateRFQRequest, deleteRequest,
     getRespondedRequests, updateQuotationRequest, getRespondedRequestById, getAllRequestsByStatus, getAllClients, updateAccountStatus,
-    saveResponse, updateRequestItems
+    saveResponse, updateRequestItems, getRequestsWithPurchaseOrder
 };

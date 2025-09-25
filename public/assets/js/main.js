@@ -2632,6 +2632,64 @@ function populateQuotationForm(request) {
 
 }
 
+function fetchRequestsWithPO() {
+  fetch('/requests-with-po')
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) throw new Error(data.message);
+
+      const requests = data.requests || [];
+      const tableBody = document.querySelector('#purchaseOrderTable tbody');
+      tableBody.innerHTML = '';
+
+      requests.forEach(item => {
+        const row = document.createElement('tr');
+
+        const po = JSON.parse(item.purchaseOrder || "{}");
+
+        const localDateStr = (date) => {
+          if (!date || isNaN(new Date(date).getTime())) return "";
+          const d = new Date(date);
+          return `${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}/${d.getFullYear()}`;
+        };
+
+        row.innerHTML = `
+          <td>${item.companyName || ""}</td>
+          <td>${item.RFQNo || ""}</td>
+          <td>${item.totalBudget || ""}</td>
+          <td>${item.validity ? localDateStr(item.validity) : ""}</td>
+          <td>
+            ${item.supattachment ? `<a href="${item.supattachment}" target="_blank">Download Quotation</a>` : ''}
+          </td>
+          <td>
+            ${po.client ? `<a href="${po.client}" target="_blank">Purchase Order</a>` : ''}
+          </td>
+          <td>
+            ${po.supplier
+            ? `<a href="${po.supplier}" target="_blank">Signed PO</a>`
+            : `
+        <div class="text-center mt-3">
+          <i class="bi bi-upload text-primary pointer upload-signed-po-icon"
+             data-bs-toggle="modal"
+             data-bs-target="#uploadPOModal"
+             title="Upload Signed PO"
+             data-requestid="${item.requestID}"></i>
+        </div>
+      `}
+          </td>
+        `;
+
+        tableBody.appendChild(row);
+      });
+    })
+    .catch(err => {
+      console.error("Failed to load requests with POs:", err.message || err);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  fetchRequestsWithPO();
+});
 
 // RFQ FORM
 // T&C textarea

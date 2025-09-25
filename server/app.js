@@ -789,6 +789,16 @@ app.get('/purchaseorder', (req, res) => {
     res.send(admintemplate.replace('{{content}}', purchaseorder));
 });
 
+app.get('/requests-with-po', async (req, res) => {
+    try {
+        const requests = await dbService.getRequestsWithPurchaseOrder();
+        res.json({ success: true, requests });
+    } catch (err) {
+        console.error("Error fetching requests with purchase orders:", err);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
 app.get('/registeredaccounts', (req, res) => {
     const registeredaccounts = fs.readFileSync(path.join(__dirname, '..', 'public', 'registeredaccounts.html'), 'utf-8');
     res.send(admintemplate.replace('{{content}}', registeredaccounts));

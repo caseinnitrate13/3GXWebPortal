@@ -2,21 +2,18 @@
     <h1>Quotations</h1>
 </div>
 
-<!-- quotation table -->
+<!-- purchase order table -->
 <div class="card mt-4 small">
   <div class="card-body">
     <h5 class="w700 mt-3">Admin Quotation</h5>
     <div class="table-responsive">
-      <table id="quotationTable" class="table datatable table-striped table-bordered overflow-hidden">
+      <table id="purchaseOrderTable" class="table datatable table-striped table-bordered overflow-hidden">
         <thead>
           <tr>
+            <th>Company Name</th>
             <th>RFQ Number</th>
             <th>Approved Budget (ABC)</th>
-            <th data-type="date" data-format="YYYY/MM/DD">Quotation Date</th>
-            <th>Quotation Number</th>
-            <th>Total Amount</th>
-            <th>Action</th>
-            <th>Remarks</th>
+            <th data-type="date" data-format="YYYY/MM/DD">Valid Until</th>
             <th>Quotation</th>
             <th>Purchase Order</th>
             <th>Signed PO</th>
@@ -24,28 +21,10 @@
         </thead>
         <tbody>
           <tr>
+            <td>Company</td>
             <td>Unity Pugh</td>
             <td>9958</td>
             <td>2006/03/08</td>
-            <td>Elliott Snyder</td>
-            <td>3925</td>
-            <td>
-              <div class="text-center d-flex justify-content-center align-content-center gap-2">
-                  <a href="/view-quotation">
-                    <i class="bi bi-eye me-1 text-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="View"></i>
-
-                  </a>
-
-                  <div data-bs-toggle="tooltip" data-bs-placement="top" title="Approve">
-                    <i class="bi bi-check-circle text-success pointer approve-icon" data-bs-toggle="modal" data-bs-target="#approveConfirmationModal"></i>
-                  </div>
-                  
-                  <div data-bs-toggle="tooltip" data-bs-placement="top" title="Decline">
-                    <i class="bi bi-x-circle text-danger pointer decline-icon" data-bs-toggle="modal" data-bs-target="#declineTableModal"></i>
-                  </div>
-              </div>
-            </td>
-            <td class="remarks-cell"></td>
             <td id="quotationCell"> </td>
             <td id="purchaseOrderCell"> </td>
             <td id="signedPOCell"></td>
@@ -57,17 +36,16 @@
 </div>
 
 <!-- approve quotation -->
-<div id="approveConfirmationModal" class="modal fade" tabindex="-1">
+<div id="uploadPOModal" class="modal fade" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-md">
       <div class="modal-content">
           <div class="modal-header">
-              <h5 class="modal-title">Approve Quotation?</h5>
+              <h5 class="modal-title">Signed Purchase Order</h5>
               <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
-              <p class="fw-bold">Do you want to approve this quotation?</p>
               <div class="mb-3">
-                    <div for="remarks" class="form-label">Upload you Purchase Order (PO):</div>
+                    <div for="remarks" class="form-label">Upload your Signed Purchase Order (PO):</div>
 
                     <div id="purchaseOrderPreview" class="file-preview">
                         <span><i class="bi bi-plus "></i></span>
@@ -86,12 +64,11 @@
           </div>
           <div class="modal-footer">
               <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
-              <button id="approveSaveBtn" type="button" class="btn blue rounded-pill">Save</button>
+              <button id="upploadPOBtn" type="button" class="btn blue rounded-pill">Upload</button>
           </div>
       </div>
   </div>
 </div>
-
 
 <!-- decline modal -->
 <div id="declineTableModal" class="modal fade" tabindex="-1">
