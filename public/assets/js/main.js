@@ -1690,7 +1690,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const validIdError = document.getElementById('validIdError');
 
     approveSaveBtn.addEventListener("click", function () {
-      console.log("I am clicked! ")
 
       const requestID = urlRequestID || selectedRow?.dataset.requestId;
 
@@ -2142,7 +2141,7 @@ function renderAdminQuotations(requests) {
       <i class="bi bi-eye me-1 text-primary" data-bs-toggle="tooltip" title="View"></i>
     </a>`;
 
-    const pencilIcon = `<a href="/input-quotation?requestID=${row.requestID}" class="view-quotation-link">
+    const pencilIcon = `<a href="/input-quotation?mode=edit&requestID=${row.requestID}" class="view-quotation-link">
       <i class="bi bi-pencil-square text-primary pointer" title="Add Quotation"></i>
     </a>`;
 
@@ -2668,13 +2667,14 @@ function fetchRequestsWithPO() {
             ${po.supplier
             ? `<a href="${po.supplier}" target="_blank">Signed PO</a>`
             : `
-        <div class="text-center mt-3">
-          <i class="bi bi-upload text-primary pointer upload-signed-po-icon"
-             data-bs-toggle="modal"
-             data-bs-target="#uploadPOModal"
-             title="Upload Signed PO"
-             data-requestid="${item.requestID}"></i>
-        </div>
+            <div class="text-center mt-3">
+            <i class="bi bi-upload text-primary pointer upload-signed-po-icon"
+            data-bs-toggle="modal"
+            data-bs-target="#uploadPOModal"
+            title="Upload Signed PO"
+            data-requestid="${item.requestID}"
+            data-userid="${item.userID}"></i> <!-- 👈 Added userID -->
+          </div>
       `}
           </td>
         `;
@@ -2685,11 +2685,75 @@ function fetchRequestsWithPO() {
     .catch(err => {
       console.error("Failed to load requests with POs:", err.message || err);
     });
+
+
+  const uploadPOModal = document.getElementById('uploadPOModal');
+
+  uploadPOModal.addEventListener('hidden.bs.modal', () => {
+    document.getElementById('purchaseOrderUpload').value = "";
+    const preview = document.getElementById('purchaseOrderPreview');
+    preview.innerHTML = `
+    <span><i class="bi bi-plus"></i></span>
+    <h4>Drag File</h4>
+  `;
+    document.getElementById('validIdError').classList.add('d-none');
+  });
+
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   fetchRequestsWithPO();
+
+  let currentRequestId = null;
+  let currentUserId = null;
+  document.addEventListener("click", (e) => {
+    const icon = e.target.closest(".upload-signed-po-icon");
+    if (icon) {
+      currentRequestId = icon.dataset.requestid;
+      currentUserId = icon.dataset.userid;
+    }
+  });
+
+  const uploadPOBtn = document.getElementById("uploadPOBtn");
+  const fileInput = document.getElementById("purchaseOrderUpload");
+  const errorDiv = document.getElementById("validIdError");
+
+  uploadPOBtn.addEventListener("click", () => {
+    if (!fileInput.files.length) {
+      errorDiv.classList.remove("d-none");
+      errorDiv.style.display = "block";  
+      return;
+    } else {
+      errorDiv.classList.add("d-none");
+      errorDiv.style.display = "none";
+    }
+
+    const formData = new FormData();
+    formData.append("signedPO", fileInput.files[0]);
+    formData.append("requestID", currentRequestId);
+    formData.append("userID", currentUserId);
+
+    fetch("/upload-signed-po", {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.success) throw new Error(data.message);
+        const modal = bootstrap.Modal.getInstance(document.getElementById("uploadPOModal"));
+        modal.hide();
+        fetchRequestsWithPO();
+      })
+      .catch((err) => {
+        console.error("Upload failed:", err);
+        alert("Failed to upload signed PO.");
+      });
+  });
 });
+
+
+
+
 
 // RFQ FORM
 // T&C textarea

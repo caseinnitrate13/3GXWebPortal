@@ -45,7 +45,7 @@
           </div>
           <div class="modal-body">
               <div class="mb-3">
-                    <div for="remarks" class="form-label">Upload your Signed Purchase Order (PO):</div>
+                    <div for="remarks" class="form-label">Upload Signed Purchase Order (PO):</div>
 
                     <div id="purchaseOrderPreview" class="file-preview">
                         <span><i class="bi bi-plus "></i></span>
@@ -64,33 +64,7 @@
           </div>
           <div class="modal-footer">
               <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
-              <button id="upploadPOBtn" type="button" class="btn blue rounded-pill">Upload</button>
-          </div>
-      </div>
-  </div>
-</div>
-
-<!-- decline modal -->
-<div id="declineTableModal" class="modal fade" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered modal-md">
-      <div class="modal-content">
-          <div class="modal-header">
-              <h5 class="modal-title">Decline Quotation?</h5>
-              <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-              <p class="fw-bold">Do you want to decline this quotation?</p>
-              <div class="mb-3">
-                  <label for="remarks" class="form-label">Please leave your remarks</label>
-                  <textarea class="form-control" id="remarks" rows="3"></textarea>
-              </div>
-              <div class="invalid-feedback d-none text-center mt-3" id="noRemarks">
-                * Please add some remarks.
-              </div>
-          </div>
-          <div class="modal-footer">
-              <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
-              <button id="declineSaveBtn" type="button" class="btn blue rounded-pill">Save</button>
+              <button id="uploadPOBtn" type="button" class="btn blue rounded-pill">Upload</button>
           </div>
       </div>
   </div>

@@ -766,8 +766,6 @@ app.post('/save-response', async (req, res, next) => {
     }
 });
 
-
-
 app.post("/admin/updateStatus", (req, res) => {
     const { userID, status, remarks } = req.body;
 
@@ -798,6 +796,37 @@ app.get('/requests-with-po', async (req, res) => {
         res.status(500).json({ success: false, message: "Server error" });
     }
 });
+
+app.post("/upload-signed-po", upload.single("signedPO"), async (req, res) => {
+    try {
+        const { requestID, userID } = req.body;
+
+        if (!userID || !requestID) {
+            return res.status(400).json({ success: false, message: "Missing userID or requestID" });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: "No file uploaded" });
+        }
+
+        const poFile = req.file;
+        const filename = `${Date.now()}-${poFile.originalname}`;
+        const dirPath = path.join(__dirname, "uploads", "requests", userID, requestID);
+        await fs.promises.mkdir(dirPath, { recursive: true });
+        const absPath = path.join(dirPath, filename);
+        await fs.promises.writeFile(absPath, poFile.buffer);
+
+        const poFilePath = `uploads/requests/${userID}/${requestID}/${filename}`;
+        await dbService.saveSignedPO(requestID, poFilePath);
+
+        res.json({ success: true, path: poFilePath });
+    } catch (err) {
+        console.error("Upload failed:", err);
+        res.status(500).json({ success: false, message: "Upload failed" });
+    }
+});
+
+
 
 app.get('/registeredaccounts', (req, res) => {
     const registeredaccounts = fs.readFileSync(path.join(__dirname, '..', 'public', 'registeredaccounts.html'), 'utf-8');
