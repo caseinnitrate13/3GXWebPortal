@@ -23,17 +23,20 @@
 
             <div class="col-md-5">
                 <div class="row">
-                    <label for="QuotationNo" class="col-sm-4 col-form-label ">Quotation No. :</label>
+                    <label for="QuotationNo" class="col-sm-4 col-form-label">Quotation No. :</label>
                     <div class="col-sm-4">
                         <input type="text" class="form-control-plaintext border-bottom-custom" id="quotationNoInput"
                             required>
+                        <span id="quotationNoSpan" class="form-control-plaintext d-none"></span>
                     </div>
                 </div>
+
                 <div class="row">
                     <label for="QuotationDate" class="col-sm-4 col-form-label ">Quotation Date :</label>
                     <div class="col-sm-4">
                         <input type="date" class="form-control-plaintext border-bottom-custom" id="quotationDateInput"
                             required>
+                        <span id="quotationDateSpan" class="form-control-plaintext d-none"></span>
                     </div>
                 </div>
                 <div class="row">
@@ -41,6 +44,7 @@
                     <div class="col-sm-4">
                         <input type="text" class="form-control-plaintext border-bottom-custom" id="totalValueInput"
                             required>
+                        <span id="totalValueSpan" class="form-control-plaintext d-none"></span>
                     </div>
                 </div>
             </div>
@@ -101,7 +105,7 @@
             </div>
 
             <!-- add attachments -->
-            <div>
+            <div id="supattachment">
                 <button type="button" id="attachBtn" class="btn btn-dashed outlined-btn" data-bs-toggle="modal"
                     data-bs-target="#attachmentModal">
                     <i class="bi bi-paperclip me-1"></i>Add Attachments
@@ -115,7 +119,7 @@
                 <div class="d-flex justify-content-end align-content-end">
                     <div id="adminSignContainer">
                         <div id="clientSignature" class="d-flex justify-content-center align-content-center">
-                            <img src="assets/img/signature.jpg" alt="Admin Signature">
+                            <img src="assets/img/signature.jpg" alt="Client Signature">
                         </div>
                     </div>
                 </div>
@@ -148,17 +152,27 @@
                     </div>
                 </div>
 
-                <div class="repName-container">
+                <div id="adminSign" class="d-flex justify-content-end align-content-end d-none">
+                    <div id="adminSignContainer">
+                        <div id="adminSignature" class="d-flex justify-content-center align-content-center">
+                            <img src="assets/img/signature.jpg" alt="Admin Signature">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="repName-container" id="adminrepNamecontainer">
+                    <span id="adminrepreNameSpan" class="border-bottom-custom text-center d-none"></span>
                     <input id="adminrepreName" type="text"
                         class="form-control-plaintext border-bottom-custom text-center" name="representative-name"
                         placeholder="Enter Your Name" required>
                     <p class="text-center">3GX Solutions</p>
                 </div>
+
             </div>
         </div>
 
         <div class="d-flex flex-column flex-md-row justify-content-center align-items-center mt-5 pt-3 mb-3 gap-5">
-            <button id="declineBtn" type="button" class="btn blue rounded-pill ps-5 pe-5" ddata-bs-dismiss="modal">
+            <button id="cancelBtn" type="button" class="btn blue rounded-pill ps-5 pe-5" ddata-bs-dismiss="modal">
                 Cancel
             </button>
             <button id="sendtoClientBtn" type="button" class="btn blue rounded-pill ps-5 pe-5">

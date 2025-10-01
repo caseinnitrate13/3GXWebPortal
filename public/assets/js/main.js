@@ -1912,18 +1912,25 @@ function fetchRespondedRequests(userID) {
 
 document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
+  const params = new URLSearchParams(window.location.search);
+  const mode = params.get("mode");
   const requestID = urlParams.get('requestID');
 
   if (requestID) {
-    // detect which page we're on
     const path = window.location.pathname;
 
     let endpoint = "";
+
     if (path.includes("view-quotation")) {
       endpoint = `/responded-request?requestID=${requestID}`;
     } else if (path.includes("input-quotation")) {
-      endpoint = `/get-request?id=${requestID}`; // <-- use RFQ request details for pending
+      if (mode === "view") {
+        endpoint = `/responded-request?requestID=${requestID}`;
+      } else if (mode === "edit" || mode === "input") {
+        endpoint = `/get-request?id=${requestID}`;
+      }
     }
+
 
     if (endpoint) {
       fetch(endpoint)
@@ -1936,7 +1943,9 @@ document.addEventListener('DOMContentLoaded', () => {
           if (path.includes("view-quotation")) {
             populateQuotationDisplay(request);
           } else if (path.includes("input-quotation")) {
-            populateQuotationForm(request);  // <-- new function to fill inputs
+            if ((mode === "view" || mode === "edit") && requestID) {
+              populateQuotationForm(request, mode);
+            }
           }
         })
         .catch(err => {
@@ -2137,11 +2146,11 @@ function renderAdminQuotations(requests) {
       <i class="bi bi-eye me-1 text-primary" title="View"></i>
     </a>`;
 
-    const eyeForResponded = `<a href="/admin-view-quotation?requestID=${row.requestID}" class="view-quotation-link">
+    const eyeForResponded = `<a href="/input-quotation?mode=view&requestID=${row.requestID}">
       <i class="bi bi-eye me-1 text-primary" data-bs-toggle="tooltip" title="View"></i>
     </a>`;
 
-    const pencilIcon = `<a href="/input-quotation?mode=edit&requestID=${row.requestID}" class="view-quotation-link">
+    const pencilIcon = `<a href="/input-quotation?mode=edit&requestID=${row.requestID}">
       <i class="bi bi-pencil-square text-primary pointer" title="Add Quotation"></i>
     </a>`;
 
@@ -2348,7 +2357,7 @@ function loadRegisteredClients() {
 }
 
 
-function populateQuotationForm(request) {
+function populateQuotationForm(request, mode) {
   console.log("Quotation item (form):", request);
 
   const localDateStr = (date) => {
@@ -2362,8 +2371,6 @@ function populateQuotationForm(request) {
   document.querySelector("#validUntilSpan").textContent = localDateStr(request.validity);
   document.querySelector("#abcSpan").textContent = request.totalBudget || "";
 
-  document.querySelector("#quotationNoInput").value = request.quotationNo || "";
-  document.querySelector("#totalValueInput").value = request.totalValue || "";
 
   const updateGrandTotal = () => {
     let grandTotal = 0;
@@ -2388,6 +2395,7 @@ function populateQuotationForm(request) {
     quill.root.style.fontSize = "16px";
     quill2.root.style.fontSize = "16px";
 
+    // Client Representative
     if (detailsObj.reprename) {
       const clientRepNameContainer = document.querySelector("#clientRepNameContainer");
       clientRepNameContainer.innerHTML = `
@@ -2396,15 +2404,112 @@ function populateQuotationForm(request) {
       `;
     }
 
-    if (detailsObj.signaturePath) {
-      const clientSignatureImg = document.querySelector("#clientSignature img");
-      if (clientSignatureImg) {
-        clientSignatureImg.src = detailsObj.signaturePath;
-        clientSignatureImg.alt = "Client Signature";
+    // --- Signatures ---
+    if (mode === "view") {
+
+      document.querySelector("#quotationNoSpan").textContent = request.quotationNo || "";
+      document.querySelector("#quotationNoSpan").classList.remove("d-none");
+      document.querySelector("#quotationNoInput").classList.add("d-none");
+
+      document.querySelector("#quotationDateSpan").textContent = localDateStr(request.quotationDate);
+      document.querySelector("#quotationDateSpan").classList.remove("d-none");
+      document.querySelector("#quotationDateInput").classList.add("d-none");
+
+      let totalValueNum = parseFloat(request.totalValue);
+      if (isNaN(totalValueNum)) totalValueNum = 0;
+      document.querySelector("#totalValueSpan").textContent =
+        `₱ ${totalValueNum.toLocaleString()}`;
+      document.querySelector("#totalValueSpan").classList.remove("d-none");
+      document.querySelector("#totalValueInput").classList.add("d-none");
+
+      if (detailsObj.signaturePath) {
+        const clientSignatureImg = document.querySelector("#clientSignature img");
+        if (clientSignatureImg) {
+          clientSignatureImg.src = detailsObj.signaturePath;
+          clientSignatureImg.alt = "Client Signature";
+        }
       }
+      if (detailsObj.adminSignaturePath) {
+        const adminSignatureImg = document.querySelector("#adminSignature img");
+        if (adminSignatureImg) {
+          adminSignatureImg.src = detailsObj.adminSignaturePath;
+          adminSignatureImg.alt = "Admin Signature";
+        }
+      }
+
+      if (request.supplierDetails) {
+        let supplierdetailsObj;
+        try {
+          supplierdetailsObj = JSON.parse(request.supplierDetails);
+          console.log(supplierdetailsObj);
+        } catch (e) {
+          console.error("Invalid JSON in 'supplierDetails':", e);
+          supplierdetailsObj = {};
+        }
+
+        if (supplierdetailsObj.signaturePath) {
+          const adminSignatureImg = document.querySelector("#adminSignature img");
+          if (adminSignatureImg) {
+            adminSignatureImg.src = supplierdetailsObj.signaturePath;
+            adminSignatureImg.alt = "Admin Signature";
+            document.querySelector("#adminSign").classList.remove("d-none");
+          } else {
+            console.error("Admin signature image not found.");
+          }
+        }
+
+        if (supplierdetailsObj.repreName) {
+          const adminRepNameContainer = document.querySelector("#adminrepNamecontainer");
+          if (adminRepNameContainer) {
+            adminRepNameContainer.innerHTML = `
+          <p class="border-bottom-custom text-center fw-bold">
+        ${supplierdetailsObj.repreName || ""}
+          </p>
+          <p class="text-center">3GX Solutions</p>
+          `;
+          } else {
+            console.error("adminRepNameContainer not found.");
+          }
+        }
+      }
+
+      const filePath = request.supattachment;
+      const attachBtnContainer = document.getElementById("supattachment");
+
+      if (filePath && attachBtnContainer) {
+        const fileNameWithExtension = filePath.split("/").pop();
+
+        // Extract the part after the last dash (-)
+        const fileName = fileNameWithExtension.substring(fileNameWithExtension.lastIndexOf("-") + 1);
+
+        attachBtnContainer.innerHTML = `
+    <a href="${filePath}" download class="btn btn-outline-primary">
+      <i class="bi bi-download me-2"></i>${fileName}
+    </a>`;
+      }
+
+
+
+      // Hide signature controls
+      document.getElementById("uploadSignBtn")?.classList.add("d-none");
+      document.getElementById("signPadBtn")?.classList.add("d-none");
+      document.getElementById("previewContainer")?.classList.add("d-none");
+
+    } else if (mode === "edit") {
+      // Only client signature is pre-filled
+      if (detailsObj.signaturePath) {
+        const clientSignatureImg = document.querySelector("#clientSignature img");
+        if (clientSignatureImg) {
+          clientSignatureImg.src = detailsObj.signaturePath;
+          clientSignatureImg.alt = "Client Signature";
+        }
+      }
+      updateGrandTotal();
+      // Admin signature stays editable via controls
     }
   }
 
+  // --- Items ---
   const tbody = document.querySelector("#tableBody");
   tbody.innerHTML = "";
   if (request.items) {
@@ -2428,73 +2533,107 @@ function populateQuotationForm(request) {
           <td class="text-center">${it.unit || ""}</td>
           <td class="text-center">${qty}</td>
           <td>${it.specialrequest || ""}</td>
-          <td class="text-center"> 
-            <div class="input-group input-group-sm">
-              <span class="input-group-text">₱</span>
-              <input 
-                name="price"
-                type="number"
-                step="0.01"
-                class="form-control text-center border-3 border-bottom price-input"
-                value="${price || ""}"
-                data-qty="${qty}"
-              />
-            </div>
-          </td>
+          <td class="text-center">
+            ${mode === "view"
+            ? `<span>₱ ${price.toLocaleString()}</span>`
+            : `
+          <div class="input-group input-group-sm">
+            <span class="input-group-text">₱</span>
+            <input 
+              name="price"
+              type="number"
+              step="0.01"
+              class="form-control text-center border-3 border-bottom price-input"
+              value="${price || ""}"
+              data-qty="${qty}"
+            />
+          </div>
+        `
+          }
+         </td>
           <td class="text-center fw-bold total-price">₱ ${total.toLocaleString()}</td>
         `;
         tbody.appendChild(row);
       });
 
-      tbody.querySelectorAll(".price-input").forEach(input => {
-        input.addEventListener("input", e => {
-          const qty = parseFloat(e.target.dataset.qty) || 0;
-          const price = parseFloat(e.target.value) || 0;
-          const totalCell = e.target.closest("tr").querySelector(".total-price");
-          totalCell.textContent = `₱ ${(qty * price).toLocaleString()}`;
-          updateGrandTotal();
+      // Add listeners for recalculating total (only in edit)
+      if (mode === "edit") {
+        tbody.querySelectorAll(".price-input").forEach(input => {
+          input.addEventListener("input", e => {
+            const qty = parseFloat(e.target.dataset.qty) || 0;
+            const price = parseFloat(e.target.value) || 0;
+            const totalCell = e.target.closest("tr").querySelector(".total-price");
+            totalCell.textContent = `₱ ${(qty * price).toLocaleString()}`;
+            updateGrandTotal();
+          });
         });
-      });
+      }
 
-      updateGrandTotal();
     }
   }
+
+  // --- Attachment ---
 
   if (request.attachment) {
-    document.querySelector("#clientattachment").innerHTML = `
-      <a href="${request.attachment}" download class="btn btn-dashed outlined-btn">
-        <i class="bi bi-download me-2"></i>Download Attachment
-      </a>
-    `;
+    const filePath = request.attachment;
+    const attachBtnContainer = document.getElementById("clientattachment");
+
+    if (filePath && attachBtnContainer) {
+      const fileNameWithExtension = filePath.split("/").pop();
+
+      // Extract the part after the last dash (-)
+      const fileName = fileNameWithExtension.substring(fileNameWithExtension.lastIndexOf("-") + 1);
+
+      attachBtnContainer.innerHTML = `
+    <a href="${filePath}" download class="btn btn-outline-primary">
+      <i class="bi bi-download me-2"></i>${fileName}
+    </a>`;
+    }
   }
 
-  document.querySelectorAll("input, textarea, select").forEach(el => {
-    if (
-      el.id !== "quotationNoInput" &&
-      el.id !== "quotationDateInput" &&
-      el.id !== "totalValueInput" &&
-      el.classList.contains("price-input") === false &&
-      el.id !== "adminrepreName" &&
-      el.id != "fileUpload" &&
-      el.id != "fileInput"
-    ) {
+  if (mode === "view") {
+    // Disable everything
+    document.querySelectorAll("input, textarea, select").forEach(el => {
       el.setAttribute("disabled", true);
-    }
-  });
+    });
 
-  quill.enable(false);
-  quill2.enable(false);
-  quill.getModule('toolbar').container.style.display = 'none';
-  quill2.getModule('toolbar').container.style.display = 'none';
+    quill.enable(false);
+    quill2.enable(false);
+    quill.getModule('toolbar').container.style.display = 'none';
+    quill2.getModule('toolbar').container.style.display = 'none';
+
+    document.querySelector("#cancelBtn")?.classList.add("d-none");
+    document.querySelector("#sendtoClientBtn")?.classList.add("d-none");
+  } else if (mode === "edit") {
+    document.querySelectorAll("input, textarea, select").forEach(el => {
+      if (
+        el.id !== "quotationNoInput" &&
+        el.id !== "quotationDateInput" &&
+        el.id !== "totalValueInput" &&
+        el.classList.contains("price-input") === false &&
+        el.id !== "adminrepreName" &&
+        el.id != "fileUpload" &&
+        el.id != "fileInput"
+      ) {
+        el.setAttribute("disabled", true);
+      }
+    });
+
+    quill.enable(false);
+    quill2.enable(false);
+    quill.getModule('toolbar').container.style.display = 'none';
+    quill2.getModule('toolbar').container.style.display = 'none';
+    quill.root.style.border = "none";
+    quill2.root.style.border = "none";
+    quill.container.style.border = "none";
+    quill2.container.style.border = "none";
+  }
+
   quill.root.style.border = "none";
   quill2.root.style.border = "none";
   quill.container.style.border = "none";
   quill2.container.style.border = "none";
 
-  document.querySelector("#saveDraftBtn")?.classList.add("d-none");
-  document.querySelector("#sendSupplierBtn")?.classList.add("d-none");
-
-  // Send to Client
   const sendtoClientBtn = document.getElementById('sendtoClientBtn');
 
   sendtoClientBtn.addEventListener('click', (e) => {
@@ -2721,7 +2860,7 @@ document.addEventListener("DOMContentLoaded", () => {
   uploadPOBtn.addEventListener("click", () => {
     if (!fileInput.files.length) {
       errorDiv.classList.remove("d-none");
-      errorDiv.style.display = "block";  
+      errorDiv.style.display = "block";
       return;
     } else {
       errorDiv.classList.add("d-none");
