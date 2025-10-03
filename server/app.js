@@ -300,7 +300,8 @@ app.post('/save-rfq', async (req, res, next) => {
     }
 }, upload.fields([
     { name: 'attachment', maxCount: 1 },
-    { name: 'signature', maxCount: 1 }
+    { name: 'signature', maxCount: 1 },
+    { name: 'item_attachment', maxCount: 20 }
 ]), async (req, res) => {
     const isUpdate = !!req.body.requestID;
     const requestID = isUpdate ? req.body.requestID : await nanoid();
@@ -324,6 +325,23 @@ app.post('/save-rfq', async (req, res, next) => {
         } else {
             console.log("No attachment uploaded.");
         }
+
+        let itemAttachments = [];
+
+        if (req.files?.item_attachment) {
+            for (const file of req.files.item_attachment) {
+                const sigFilename = `${Date.now()}-${file.originalname}`;
+                const itemAttachDir = path.join(basePath, "itemattachment");
+                fs.mkdirSync(itemAttachDir, { recursive: true });
+
+                const sigPath = path.join(itemAttachDir, sigFilename);
+                await fs.promises.writeFile(sigPath, file.buffer);
+
+                const savedPath = `uploads/requests/${userID}/${requestID}/itemattachment/${sigFilename}`;
+                itemAttachments.push(savedPath);
+            }
+        }
+
 
         // Signature
         if (req.body.currentsignPath && req.body.currentsignPath !== "null" && req.body.currentsignPath !== "") {
@@ -351,7 +369,10 @@ app.post('/save-rfq', async (req, res, next) => {
                 ...JSON.parse(req.body.details),
                 signaturePath: signaturePath || JSON.parse(req.body.details)?.signaturePath || ""
             }),
-            items: JSON.stringify(JSON.parse(req.body.items)),
+            items: JSON.stringify(JSON.parse(req.body.items).map((item, idx) => ({
+                ...item,
+                itemAttachment: itemAttachments[idx] || item.itemAttachment || ""
+            }))),
             requestStatus: req.body.requestStatus,
             attachment: attachmentPath,
             quotationStatus: JSON.stringify(JSON.parse(req.body.quotationStatus)),

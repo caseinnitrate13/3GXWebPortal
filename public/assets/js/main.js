@@ -1452,11 +1452,20 @@ function loadRequestForQuotation(requestID, mode) {
             itemsArray.forEach(item => {
               const row = document.createElement("tr");
               row.innerHTML = `
-                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="item_name" value="${item.itemname || ''}"></td>
-                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="description" value="${item.description || ''}"></td>
-                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="unit" value="${item.unit || ''}"></td>
-                <td><input type="number" class="form-control-plaintext border-bottom-custom" name="quantity" value="${item.quantity || ''}"></td>
-                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="special_request" value="${item.specialrequest || ''}"></td>
+                <td style="width: 150px;"><input type="text" class="form-control-plaintext border-bottom-custom" name="item_name" value="${item.itemname || ''}"></td>
+                <td style="width: 230px;"><input type="text" class="form-control-plaintext border-bottom-custom" name="description" value="${item.description || ''}"></td>
+                <td style="width: 70px;"><input type="text" class="form-control-plaintext border-bottom-custom" name="unit" value="${item.unit || ''}"></td>
+                <td style="width: 90px;"><input type="number" class="form-control-plaintext border-bottom-custom" name="quantity" value="${item.quantity || ''}"></td>
+                <td style="width: 110px;"><input type="text" class="form-control-plaintext border-bottom-custom" name="item_abc" value="${item.itemabc || ''}" ></td>
+                <td style="width: 230px;"><input type="text" class="form-control-plaintext border-bottom-custom" name="special_request" value="${item.specialrequest || ''}"></td>
+                <td style="width: 120px;">
+                  <div class="text-center mt-3">
+                      <i class="bi bi-upload text-primary pointer item-attach--icon d-flex justify-content-center align-content-center"
+                        data-bs-toggle="modal" data-bs-target="#itemAttachModal"
+                        title="Upload Signed PO" data-requestid="${item.requestID}"
+                        data-userid="${item.userID}"></i>
+                  </div>
+                </td>
                 <td><button type="button" class="btn btn-danger btn-sm remove-row"><i class="bi bi-trash3"></i></button></td>
               `;
               tableBody.appendChild(row);
@@ -2395,7 +2404,6 @@ function populateQuotationForm(request, mode) {
     quill.root.style.fontSize = "16px";
     quill2.root.style.fontSize = "16px";
 
-    // Client Representative
     if (detailsObj.reprename) {
       const clientRepNameContainer = document.querySelector("#clientRepNameContainer");
       clientRepNameContainer.innerHTML = `
@@ -2404,7 +2412,6 @@ function populateQuotationForm(request, mode) {
       `;
     }
 
-    // --- Signatures ---
     if (mode === "view") {
 
       document.querySelector("#quotationNoSpan").textContent = request.quotationNo || "";
@@ -2479,7 +2486,6 @@ function populateQuotationForm(request, mode) {
       if (filePath && attachBtnContainer) {
         const fileNameWithExtension = filePath.split("/").pop();
 
-        // Extract the part after the last dash (-)
         const fileName = fileNameWithExtension.substring(fileNameWithExtension.lastIndexOf("-") + 1);
 
         attachBtnContainer.innerHTML = `
@@ -2487,16 +2493,11 @@ function populateQuotationForm(request, mode) {
       <i class="bi bi-download me-2"></i>${fileName}
     </a>`;
       }
-
-
-
-      // Hide signature controls
       document.getElementById("uploadSignBtn")?.classList.add("d-none");
       document.getElementById("signPadBtn")?.classList.add("d-none");
       document.getElementById("previewContainer")?.classList.add("d-none");
 
     } else if (mode === "edit") {
-      // Only client signature is pre-filled
       if (detailsObj.signaturePath) {
         const clientSignatureImg = document.querySelector("#clientSignature img");
         if (clientSignatureImg) {
@@ -2505,11 +2506,9 @@ function populateQuotationForm(request, mode) {
         }
       }
       updateGrandTotal();
-      // Admin signature stays editable via controls
     }
   }
 
-  // --- Items ---
   const tbody = document.querySelector("#tableBody");
   tbody.innerHTML = "";
   if (request.items) {
@@ -2556,7 +2555,6 @@ function populateQuotationForm(request, mode) {
         tbody.appendChild(row);
       });
 
-      // Add listeners for recalculating total (only in edit)
       if (mode === "edit") {
         tbody.querySelectorAll(".price-input").forEach(input => {
           input.addEventListener("input", e => {
@@ -2573,7 +2571,6 @@ function populateQuotationForm(request, mode) {
   }
 
   // --- Attachment ---
-
   if (request.attachment) {
     const filePath = request.attachment;
     const attachBtnContainer = document.getElementById("clientattachment");
@@ -2592,7 +2589,6 @@ function populateQuotationForm(request, mode) {
   }
 
   if (mode === "view") {
-    // Disable everything
     document.querySelectorAll("input, textarea, select").forEach(el => {
       el.setAttribute("disabled", true);
     });
@@ -2891,9 +2887,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-
-
-
 // RFQ FORM
 // T&C textarea
 const quill = new Quill('#conditions', {
@@ -2927,14 +2920,25 @@ $(document).ready(function () {
 
     let newRow = `
           <tr>
-            <td><input type="text" class="form-control-plaintext border-bottom-custom" id="item_name" name="item_name"></td>
-            <td><input type="text" class="form-control-plaintext border-bottom-custom" name="description"></td>
-            <td><input type="text" class="form-control-plaintext border-bottom-custom" name="unit"></td>
-            <td><input type="number" class="form-control-plaintext border-bottom-custom" name="quantity"></td>
-            <td><input type="text" class="form-control-plaintext border-bottom-custom" name="special_request"></td>
-            <td>
-                <button type="button" class="btn btn-danger btn-sm remove-row"><i class="bi bi-trash3"></i></button>
-            </td>
+          <td style="width: 150px;"><input type="text" class="form-control-plaintext border-bottom-custom" name="item_name" id="item_name"></td>
+          <td style="width: 230px;"><input type="text" class="form-control-plaintext border-bottom-custom" name="description"></td>
+          <td style="width: 70px;"><input type="text" class="form-control-plaintext border-bottom-custom" name="unit"></td>
+          <td style="width: 90px;"><input type="number" class="form-control-plaintext border-bottom-custom" name="quantity"></td>
+          <td style="width: 110px;"><input type="text" class="form-control-plaintext border-bottom-custom" name="item_abc"></td>
+          <td style="width: 230px;"><input type="text" class="form-control-plaintext border-bottom-custom" name="special_request"></td>
+          <td style="width: 120px;">
+              <div class="text-center mt-3">
+                <i class="bi bi-upload text-primary pointer item-attach-icon d-flex justify-content-center align-content-center"
+                  data-bs-toggle="modal" data-bs-target="#itemAttachModal"
+                  title="Upload Signed PO" data-requestid=""
+                  data-userid=""></i>
+                  <span class="attachment-display ms-2 text-muted"></span>
+              </div>
+              <input type="file" name="itemattachments" class="d-none" />
+          </td>
+          <td>
+              <button type="button" class="btn btn-danger btn-sm remove-row"><i class="bi bi-trash3"></i></button>
+          </td>
         </tr>
       `;
 
@@ -2958,7 +2962,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const fileUploadBtn = document.getElementById("fileUploadBtn");
   const uploadSaveBtn = document.getElementById("uploadSaveBtn");
   const attachBtn = document.getElementById("attachBtn");
-
 
   fileUploadBtn.addEventListener("click", function () {
     console.log('I am clicked!');
@@ -3027,8 +3030,6 @@ document.addEventListener("DOMContentLoaded", function () {
         noUploadedFile.classList.add('d-none');
       }, { once: true });
 
-
-      // Truncate long file names for the button
       let displayFileName = uploadedFileName.length > 20
         ? uploadedFileName.substring(0, 17) + "..."
         : uploadedFileName;
@@ -3058,6 +3059,82 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
+document.getElementById("rfqDate").addEventListener("change", function () {
+  const rfqDate = new Date(this.value);
+
+  if (!isNaN(rfqDate)) {
+    const validUntil = new Date(rfqDate);
+    validUntil.setDate(validUntil.getDate() + 30);
+
+    const yyyy = validUntil.getFullYear();
+    const mm = String(validUntil.getMonth() + 1).padStart(2, "0");
+    const dd = String(validUntil.getDate()).padStart(2, "0");
+
+    document.getElementById("validUntil").value = `${yyyy}-${mm}-${dd}`;
+  }
+});
+
+
+let currentRow = null;
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("item-attach-icon")) {
+    currentRow = e.target.closest("tr");
+  }
+});
+
+document.getElementById("itemattachBtn").addEventListener("click", () => {
+  const fileInput = document.getElementById("purchaseOrderUpload");
+  const errorDiv = document.getElementById("validIdError");
+  if (!fileInput.files.length) {
+    errorDiv.classList.remove("d-none");
+    errorDiv.style.display = "block";
+    return;
+  } else {
+    errorDiv.classList.add("d-none");
+    errorDiv.style.display = "none";
+  }
+
+  if (currentRow) {
+    let hiddenInput = currentRow.querySelector('input[name="item_attachment"]');
+    if (!hiddenInput) {
+      hiddenInput = document.createElement("input");
+      hiddenInput.type = "file";
+      hiddenInput.name = "item_attachment";
+      hiddenInput.hidden = true;
+      currentRow.appendChild(hiddenInput);
+    }
+    const dt = new DataTransfer();
+    dt.items.add(fileInput.files[0]);
+    hiddenInput.files = dt.files;
+
+    const fileName = fileInput.files[0].name;
+    let displaySpan = currentRow.querySelector(".attachment-display");
+    if (displaySpan) {
+      displaySpan.textContent = fileName;
+      displaySpan.classList.remove("text-muted");
+      displaySpan.classList.add("fw-bold");
+    }
+  }
+
+  bootstrap.Modal.getInstance(document.getElementById("itemAttachModal")).hide();
+});
+
+const purchaseOrderModal = document.getElementById("itemAttachModal");
+purchaseOrderModal.addEventListener("hidden.bs.modal", () => {
+  const fileInput = document.getElementById("purchaseOrderUpload");
+  fileInput.value = "";
+
+  const preview = document.getElementById("purchaseOrderPreview");
+  preview.innerHTML = `
+    <span><i class="bi bi-plus"></i></span>
+    <h4>Drag File</h4>
+  `;
+
+  const errorDiv = document.getElementById("validIdError");
+  errorDiv.classList.add("d-none");
+  errorDiv.style.display = "none";
+});
+
 // Add file signature
 let uploadedSignatureFile = null;
 let uploadedImage = null;
@@ -3075,6 +3152,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const uploadSignBtn = document.getElementById('uploadSignBtn');
   const signPadBtn = document.getElementById('signPadBtn');
   const previewContainer = document.getElementById('previewContainer');
+
+
 
   uploadSignBtn.addEventListener("click", function () {
     signatureModal.show();
@@ -3352,7 +3431,6 @@ document.addEventListener("DOMContentLoaded", function () {
     signPadBtn.style.display = 'block';
   });
 
-  // Ensure modal resets properly when reopening
   document.getElementById('signPadBtn').addEventListener('click', () => {
     const signatureModalElement = document.getElementById('signaturePadModal');
     document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
@@ -3476,13 +3554,20 @@ document.addEventListener("DOMContentLoaded", function () {
         description: row.querySelector('input[name="description"]')?.value || "",
         unit: row.querySelector('input[name="unit"]')?.value || "",
         quantity: row.querySelector('input[name="quantity"]')?.value || "",
+        itemabc: row.querySelector('input[name="item_abc"]')?.value || "",
         specialrequest: row.querySelector('input[name="special_request"]')?.value || "",
         price: "",
         totalprice: ""
       };
       items.push(item);
+
+      const fileInput = row.querySelector('input[name="itemattachments"]');
+      if (fileInput && fileInput.files.length > 0) {
+        formData.append("itemattachments", fileInput.files[0]);
+      }
     });
     formData.append("items", JSON.stringify(items));
+
 
     if (uploadedFile) {
       formData.append("attachment", uploadedFile);

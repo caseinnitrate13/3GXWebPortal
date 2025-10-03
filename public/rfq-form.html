@@ -52,25 +52,47 @@
             <div class="table-container mt-4">
                 <div class="table-responsive ">
                     <table class="table overflow-hidden">
-                        <thead class="table-secondary">
+                        <thead class="table-secondary text-center">
                             <tr>
                                 <th>Item</th>
                                 <th>Description</th>
                                 <th>Unit</th>
                                 <th>Quantity</th>
+                                <th>Item ABC</th>
                                 <th>Special Request</th>
+                                <th>Attachment</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody">
                             <tr>
-                                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="item_name" id="item_name"></td>
-                                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="description"></td>
-                                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="unit"></td>
-                                <td><input type="number" class="form-control-plaintext border-bottom-custom" name="quantity"></td>
-                                <td><input type="text" class="form-control-plaintext border-bottom-custom" name="special_request"></td>
+                                <td style="width: 150px;"><input type="text"
+                                        class="form-control-plaintext border-bottom-custom" name="item_name"
+                                        id="item_name"></td>
+                                <td style="width: 230px;"><input type="text"
+                                        class="form-control-plaintext border-bottom-custom" name="description"></td>
+                                <td style="width: 70px;"><input type="text"
+                                        class="form-control-plaintext border-bottom-custom" name="unit"></td>
+                                <td style="width: 90px;"><input type="number"
+                                        class="form-control-plaintext border-bottom-custom" name="quantity"></td>
+                                <td style="width: 110px;"><input type="text"
+                                        class="form-control-plaintext border-bottom-custom" name="item_abc"></td>
+                                <td style="width: 230px;"><input type="text"
+                                        class="form-control-plaintext border-bottom-custom" name="special_request"></td>
+                                <td style="width: 120px;">
+                                    <div class="text-center mt-3">
+                                        <i class="bi bi-upload text-primary pointer item-attach-icon d-flex justify-content-center align-content-center"
+                                            data-bs-toggle="modal" data-bs-target="#itemAttachModal"
+                                            title="Upload Signed PO" data-requestid="${item.requestID}"
+                                            data-userid="${item.userID}"></i>
+                                        <span class="attachment-display ms-2 text-muted"></span>
+                                    </div>
+                                    <!-- Hidden field to store uploaded attachment path -->
+                                    <input type="file" name="itemattachments" class="d-none" />
+                                </td>
                                 <td>
-                                    <button type="button" class="btn btn-danger btn-sm remove-row"><i class="bi bi-trash3"></i></button>
+                                    <button type="button" class="btn btn-danger btn-sm remove-row"><i
+                                            class="bi bi-trash3"></i></button>
                                 </td>
                             </tr>
                         </tbody>
@@ -247,6 +269,41 @@
                 <button type="button" class="btn btn-secondary rounded-pill btn-sm"
                     data-bs-dismiss="modal">Cancel</button>
                 <button id="sendBtn" type="button" class="btn blue rounded-pill btn-sm">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="itemAttachModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Item Attachment</h5>
+                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <div for="remarks" class="form-label">Upload image/document:</div>
+
+                    <div id="purchaseOrderPreview" class="file-preview">
+                        <span><i class="bi bi-plus "></i></span>
+                        <h4>Drag File</h4>
+                    </div>
+                    <input type="file" id="purchaseOrderUpload" accept=".pdf,.doc,.docx" hidden>
+
+                    <div class="text-center mt-3">
+                        <button id="purchaseOrderBtn" class="btn outlined-btn border-dark rounded-pill ps-4 pe-4"> <i
+                                class="bi bi-upload me-2"></i>Upload Attachment</button>
+                    </div>
+
+                    <div class="invalid-feedback d-none text-center mt-3" id="validIdError">
+                        * Please upload an attachment before saving.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                <button id="itemattachBtn" type="button" class="btn blue rounded-pill">Upload</button>
             </div>
         </div>
     </div>
