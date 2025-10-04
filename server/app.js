@@ -301,7 +301,7 @@ app.post('/save-rfq', async (req, res, next) => {
 }, upload.fields([
     { name: 'attachment', maxCount: 1 },
     { name: 'signature', maxCount: 1 },
-    { name: 'item_attachment', maxCount: 20 }
+    { name: 'itemattachments', maxCount: 20 }
 ]), async (req, res) => {
     const isUpdate = !!req.body.requestID;
     const requestID = isUpdate ? req.body.requestID : await nanoid();
@@ -328,8 +328,8 @@ app.post('/save-rfq', async (req, res, next) => {
 
         let itemAttachments = [];
 
-        if (req.files?.item_attachment) {
-            for (const file of req.files.item_attachment) {
+        if (req.files?.itemattachments) {
+            for (const file of req.files.itemattachments) {
                 const sigFilename = `${Date.now()}-${file.originalname}`;
                 const itemAttachDir = path.join(basePath, "itemattachment");
                 fs.mkdirSync(itemAttachDir, { recursive: true });
@@ -341,7 +341,6 @@ app.post('/save-rfq', async (req, res, next) => {
                 itemAttachments.push(savedPath);
             }
         }
-
 
         // Signature
         if (req.body.currentsignPath && req.body.currentsignPath !== "null" && req.body.currentsignPath !== "") {
@@ -357,6 +356,17 @@ app.post('/save-rfq', async (req, res, next) => {
             console.log("No signature uploaded or provided.");
         }
 
+        const now = new Date();
+
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+
+        const hours = String(now.getHours()).padStart(2, '0'); 
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+
+        const savedAt = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 
         const rfqData = {
             requestID,
@@ -369,14 +379,18 @@ app.post('/save-rfq', async (req, res, next) => {
                 ...JSON.parse(req.body.details),
                 signaturePath: signaturePath || JSON.parse(req.body.details)?.signaturePath || ""
             }),
-            items: JSON.stringify(JSON.parse(req.body.items).map((item, idx) => ({
-                ...item,
-                itemAttachment: itemAttachments[idx] || item.itemAttachment || ""
-            }))),
+            items: JSON.stringify(JSON.parse(req.body.items).map(item => {
+                if (!item.itemAttachment) {
+                    // backend assigns the next uploaded file
+                    item.itemAttachment = itemAttachments.shift() || "";
+                }
+                return item;
+            })),
             requestStatus: req.body.requestStatus,
             attachment: attachmentPath,
             quotationStatus: JSON.stringify(JSON.parse(req.body.quotationStatus)),
-            purchaseOrder: JSON.stringify(JSON.parse(req.body.purchaseOrder))
+            purchaseOrder: JSON.stringify(JSON.parse(req.body.purchaseOrder)),
+            savedAt
         };
 
         console.log(isUpdate ? "[Updating RFQ]:" : "[Creating new RFQ]:", rfqData);

@@ -314,8 +314,8 @@ function saveRFQRequest(data) {
     return new Promise((resolve, reject) => {
         const query = `
         INSERT INTO REQUESTS 
-        (requestID, userID, RFQNo, requestDate, validity, totalBudget, details, items, requestStatus, attachment, quotationStatus, purchaseOrder)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (requestID, userID, RFQNo, requestDate, validity, totalBudget, details, items, requestStatus, attachment, quotationStatus, purchaseOrder, savedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
         const values = [
@@ -330,7 +330,8 @@ function saveRFQRequest(data) {
             data.requestStatus,
             data.attachment,
             data.quotationStatus,
-            data.purchaseOrder
+            data.purchaseOrder,
+            data.savedAt
 
         ];
 

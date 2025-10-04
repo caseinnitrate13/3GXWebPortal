@@ -11,6 +11,14 @@
 <div class="card mt-4">
     <div class="card-body">
         <form id="rfqForm" class="m-4">
+
+            <div id="quoteNote" class="alert alert-info mb-3" role="alert">
+                <strong>Note:</strong> You may either fill in the details of the quotation request below,
+                or simply upload your prepared quotation document as an attachment.
+                <br>
+                📎 The attachment upload section is located below.
+            </div>
+
             <div id="error-container" class="alert alert-danger d-none"></div>
             <div class="row ">
                 <div class="row">
@@ -289,7 +297,7 @@
                         <span><i class="bi bi-plus "></i></span>
                         <h4>Drag File</h4>
                     </div>
-                    <input type="file" id="purchaseOrderUpload" accept=".pdf,.doc,.docx" hidden>
+                    <input type="file" id="purchaseOrderUpload" accept=".pdf,.doc,.docx,image/*" hidden>
 
                     <div class="text-center mt-3">
                         <button id="purchaseOrderBtn" class="btn outlined-btn border-dark rounded-pill ps-4 pe-4"> <i

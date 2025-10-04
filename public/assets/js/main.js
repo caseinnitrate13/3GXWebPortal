@@ -1300,12 +1300,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const rowHTML = `
         <tr>
-          <td>${request.RFQNo}</td>
-          <td>${request.totalBudget}</td>
-          <td>${isNaN(new Date(request.requestDate))
-          ? ''
+          <td>${request.RFQNo || "--- --- ----"}</td>
+          <td>${request.totalBudget || "--- --- ----"}</td>
+          <td>${!request.requestDate || isNaN(new Date(request.requestDate))
+          ? "--- --- ----"
           : new Date(request.requestDate).toLocaleDateString()
         }</td>
+
           <td>${actionHTML}</td>
         </tr>`;
 
@@ -1346,22 +1347,13 @@ function loadRequestForQuotation(requestID, mode) {
       const requestDate = new Date(request.requestDate);
       const validUntilDate = new Date(request.validity);
 
-      document.querySelector("#rfqNo").value = request.RFQNo || "";
-      document.querySelector("#abc").value = request.totalBudget || "";
+      console.log(requestDate)
+
+      document.querySelector("#rfqNo").value = request.RFQNo || "--- -- ----";
+      document.querySelector("#abc").value = request.totalBudget || "--- -- ----";
       document.querySelector("#rfqDate").value = localDateStr(requestDate) || "";
       document.querySelector("#validUntil").value = localDateStr(validUntilDate) || "";
 
-
-      const filePath = request.attachment;
-      if (filePath) {
-        fileSaved = true;
-        const fileNameWithExtension = filePath.split("/").pop();
-        const fileName = fileNameWithExtension.split("-").slice(1).join("-");
-        const attachBtn = document.getElementById("attachBtn");
-        if (attachBtn) {
-          attachBtn.innerHTML = `<i class="bi bi-paperclip me-1"></i>${fileName}`;
-        }
-      }
 
       if (request.details) {
         let detailsObj;
@@ -1395,7 +1387,7 @@ function loadRequestForQuotation(requestID, mode) {
             adminSignWrapper.innerHTML = `
               <div id="adminSignContainer">
                 <div id="adminSignature" class="d-flex justify-content-center align-content-center">
-                  <img src="${detailsObj.signaturePath}" alt="Admin Signature" />
+                  <img src="${detailsObj.signaturePath}" alt="Signature" />
                 </div>
               </div>
             `;
@@ -1451,6 +1443,59 @@ function loadRequestForQuotation(requestID, mode) {
 
             itemsArray.forEach(item => {
               const row = document.createElement("tr");
+
+              // Build attachment cell depending on mode
+              let attachCellContent = "";
+
+              if (mode === "view") {
+                if (item.itemAttachment) {
+                  const fileNameWithExtension = item.itemAttachment.split("/").pop();
+                  const fileName = fileNameWithExtension.substring(fileNameWithExtension.lastIndexOf("-") + 1);
+
+                  attachCellContent = `
+    <a href="${item.itemattachment}" download 
+       class="btn btn-sm btn-outline-primary d-block text-truncate" 
+       style="max-width: 180px;">
+      <i class="bi bi-download me-1"></i>${fileName}
+    </a>`;
+                } else {
+                  attachCellContent = `<span class="text-muted fst-italic">No file</span>`;
+                }
+
+              }
+
+              if (mode === 'edit') {
+                if (item.itemAttachment) {
+                  const fileNameWithExtension = item.itemAttachment.split("/").pop();
+                  const fileName = fileNameWithExtension.substring(fileNameWithExtension.lastIndexOf("-") + 1);
+
+                  attachCellContent = `
+                    <div class="text-center mt-3">
+                      <i class="bi bi-upload text-primary pointer item-attach-icon d-flex justify-content-center align-content-center"
+                        data-bs-toggle="modal" data-bs-target="#itemAttachModal"
+                        title="Upload Signed PO" data-requestid="${item.requestID}"
+                        data-userid="${item.userID}"></i>
+                      <span class="attachment-display ms-2 fw-bold">${fileName}</span>
+                    </div>
+                    <input type="file" name="itemattachments" class="d-none" />
+                    <input type="hidden" name="existing_itemattachments" value="${item.itemAttachment}" />
+                  `;
+                } else {
+                  attachCellContent = `
+                    <div class="text-center mt-3">
+                      <i class="bi bi-upload text-primary pointer item-attach-icon d-flex justify-content-center align-content-center"
+                        data-bs-toggle="modal" data-bs-target="#itemAttachModal"
+                        title="Upload Signed PO" data-requestid="${item.requestID}"
+                        data-userid="${item.userID}"></i>
+                      <span class="attachment-display ms-2 text-muted"></span>
+                    </div>
+                    <input type="file" name="itemattachments" class="d-none" />
+                    <input type="hidden" name="existing_itemattachments" value="" />
+                  `;
+                }
+
+              }
+
               row.innerHTML = `
                 <td style="width: 150px;"><input type="text" class="form-control-plaintext border-bottom-custom" name="item_name" value="${item.itemname || ''}"></td>
                 <td style="width: 230px;"><input type="text" class="form-control-plaintext border-bottom-custom" name="description" value="${item.description || ''}"></td>
@@ -1458,18 +1503,13 @@ function loadRequestForQuotation(requestID, mode) {
                 <td style="width: 90px;"><input type="number" class="form-control-plaintext border-bottom-custom" name="quantity" value="${item.quantity || ''}"></td>
                 <td style="width: 110px;"><input type="text" class="form-control-plaintext border-bottom-custom" name="item_abc" value="${item.itemabc || ''}" ></td>
                 <td style="width: 230px;"><input type="text" class="form-control-plaintext border-bottom-custom" name="special_request" value="${item.specialrequest || ''}"></td>
-                <td style="width: 120px;">
-                  <div class="text-center mt-3">
-                      <i class="bi bi-upload text-primary pointer item-attach--icon d-flex justify-content-center align-content-center"
-                        data-bs-toggle="modal" data-bs-target="#itemAttachModal"
-                        title="Upload Signed PO" data-requestid="${item.requestID}"
-                        data-userid="${item.userID}"></i>
-                  </div>
-                </td>
+                <td style="width: 120px;">${attachCellContent}</td>
                 <td><button type="button" class="btn btn-danger btn-sm remove-row"><i class="bi bi-trash3"></i></button></td>
               `;
+
               tableBody.appendChild(row);
             });
+
           } else {
             console.warn("Element with selector '#itemtableBody' not found.");
           }
@@ -1480,6 +1520,8 @@ function loadRequestForQuotation(requestID, mode) {
         document.querySelectorAll("input, textarea, select").forEach(el => {
           el.setAttribute("disabled", true);
         });
+
+        document.getElementById("quoteNote")?.classList.add("d-none");
 
         quill.enable(false);
         quill2.enable(false);
@@ -1511,18 +1553,31 @@ function loadRequestForQuotation(requestID, mode) {
           }
         });
 
+        const filePath = request.attachment;
+        if (filePath) {
+          const fileNameWithExtension = filePath.split("/").pop();
+          const fileName = fileNameWithExtension.substring(fileNameWithExtension.lastIndexOf("-") + 1);
+
+          const attachBtnContainer = document.getElementById("attachBtn");
+          if (attachBtnContainer) {
+            const parent = attachBtnContainer.closest("div");
+            if (parent) {
+              parent.removeAttribute("data-bs-toggle");
+              parent.removeAttribute("data-bs-target");
+            }
+
+            attachBtnContainer.outerHTML = `
+              <a href="${filePath}" download class="btn btn-outline-primary">
+                <i class="bi bi-download me-2"></i>${fileName}
+              </a>`;
+          }
+        }
+
         ["#uploadSignBtn", "#signPadBtn"].forEach(selector => {
           const btn = document.querySelector(selector);
           if (btn) btn.style.display = "none";
         });
 
-        const attachBtn = document.querySelector("#attachBtn");
-        if (attachBtn) {
-          attachBtn.setAttribute("disabled", true);
-          attachBtn.classList.add("disabled");
-          attachBtn.removeAttribute("data-bs-toggle");
-          attachBtn.removeAttribute("data-bs-target");
-        }
 
         document.querySelector("#saveDraftBtn")?.classList.add("d-none");
         document.querySelector("#sendSupplierBtn")?.classList.add("d-none");
@@ -1533,6 +1588,17 @@ function loadRequestForQuotation(requestID, mode) {
         document.querySelectorAll("input, textarea, select").forEach(el => {
           el.removeAttribute("disabled");
         });
+
+        const filePath = request.attachment;
+        if (filePath) {
+          fileSaved = true;
+          const fileNameWithExtension = filePath.split("/").pop();
+          const fileName = fileNameWithExtension.split("-").slice(1).join("-");
+          const attachBtn = document.getElementById("attachBtn");
+          if (attachBtn) {
+            attachBtn.innerHTML = `<i class="bi bi-paperclip me-1"></i>${fileName}`;
+          }
+        }
 
         quill.enable(true);
         quill2.enable(true);
@@ -3095,11 +3161,11 @@ document.getElementById("itemattachBtn").addEventListener("click", () => {
   }
 
   if (currentRow) {
-    let hiddenInput = currentRow.querySelector('input[name="item_attachment"]');
+    let hiddenInput = currentRow.querySelector('input[name="itemattachments"]');
     if (!hiddenInput) {
       hiddenInput = document.createElement("input");
       hiddenInput.type = "file";
-      hiddenInput.name = "item_attachment";
+      hiddenInput.name = "itemattachments";
       hiddenInput.hidden = true;
       currentRow.appendChild(hiddenInput);
     }
@@ -3487,21 +3553,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const repreNameValid = repreName !== '';
 
     if (
-      !conditionsValid || !itemsValid || !documentUploaded || !signatureUploaded ||
-      !rfqNoValid || !rfqDateValid || !validUntilValid || !abcValid || !repreNameValid
+      !documentUploaded || !signatureUploaded
     ) {
       errorContainer.classList.remove('d-none');
       errorContainer.innerHTML = `
         <ul>
-        ${!rfqNoValid ? '<li>RFQ No. is required.</li>' : ''}
-          ${!rfqDateValid ? '<li>RFQ Date is required.</li>' : ''}
-          ${!validUntilValid ? '<li>Valid Until date is required.</li>' : ''}
-          ${!abcValid ? '<li>ABC is required.</li>' : ''}
-          ${!conditionsValid ? '<li>Please fill in the Terms and Conditions.</li>' : ''}
-          ${!itemsValid ? '<li>Please add at least one item.</li>' : ''}
-          ${!documentUploaded ? '<li>Please upload an attachment or provide a file.</li>' : ''}
+          ${!documentUploaded ? '<li>Please provide a file or you may fill in the quotation form input fields.</li>' : ''}
           ${!signatureUploaded ? '<li>Please provide a signature.</li>' : ''}
-          ${!repreNameValid ? '<li>Representative Name is required.</li>' : ''}
         </ul>
       `;
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3557,15 +3615,20 @@ document.addEventListener("DOMContentLoaded", function () {
         itemabc: row.querySelector('input[name="item_abc"]')?.value || "",
         specialrequest: row.querySelector('input[name="special_request"]')?.value || "",
         price: "",
-        totalprice: ""
+        totalprice: "",
+        // get old file if no new one uploaded
+        itemAttachment: row.querySelector('input[name="existing_itemattachments"]')?.value || ""
       };
-      items.push(item);
 
       const fileInput = row.querySelector('input[name="itemattachments"]');
       if (fileInput && fileInput.files.length > 0) {
-        formData.append("itemattachments", fileInput.files[0]);
+        formData.append("itemattachments", fileInput.files[0]); // <-- SAME FIELD NAME
+        item.itemAttachment = ""; // backend will replace
       }
+
+      items.push(item);
     });
+
     formData.append("items", JSON.stringify(items));
 
 
